@@ -9,6 +9,12 @@ type Props = {
 }
 
 export async function generateStaticParams() {
+  // Skip static generation during build if backend is not available
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://')) {
+    console.log('Skipping static params generation - backend not deployed yet')
+    return []
+  }
+
   try {
     const countryCodes = await listRegions().then((regions) =>
       regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
