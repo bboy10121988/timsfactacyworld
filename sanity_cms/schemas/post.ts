@@ -1,0 +1,56 @@
+export default {
+  name: 'post',
+  title: '文章',
+  type: 'document',
+  fields: [
+    { name: 'title', title: '標題', type: 'string' },
+    {
+      name: 'publishedAt',
+      title: '發布日期',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+    },
+    {
+      name: 'status',
+      title: '狀態',
+      type: 'string',
+      options: {
+        list: [
+          { title: '草稿', value: 'draft' },
+          { title: '已發布', value: 'published' },
+        ],
+      },
+      initialValue: 'draft',
+    },
+    {
+      name: 'slug',
+      title: '網址代稱',
+      type: 'slug',
+      options: { source: 'title', maxLength: 96 },
+    },
+    {
+      name: 'author',
+      title: '作者',
+      type: 'reference',
+      to: [{ type: 'author' }],
+    },
+    {
+      name: 'mainImage',
+      title: '封面圖片',
+      type: 'image',
+      options: { hotspot: true },
+    },
+    {
+      name: 'categories',
+      title: '分類',
+      type: 'array',
+      of: [{ type: 'reference', to: { type: 'category' } }],
+    },
+    {
+      name: 'body',
+      title: '內文',
+      type: 'array',
+      of: [{ type: 'block' }],
+    },
+  ],
+}
