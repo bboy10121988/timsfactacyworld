@@ -1,0 +1,39 @@
+主題設定樣式 (_theme-setting.scss)：
+
+1. 捲動條樣式
+::-webkit-scrollbar {
+    width: 4px;
+    height: 7px;
+}
+::-webkit-scrollbar-track {
+    background: #dddddd;
+}
+::-webkit-scrollbar-thumb {
+    background: #555555;
+    border-radius: 5px;
+}
+
+2. 響應式計算公式
+文字大小：calc(13px + (16 - 13) * ((100vw - 320px) / (1920 - 320)))
+內距：calc(15px + (20 - 15) * ((100vw - 320px) / (1920 - 320)))
+
+3. 暗色主題
+.dark-demo {
+    background-color: #2b2b2b;
+    color: #cfd4da;
+    
+    header背景：#232323
+    連結顏色：#cbcbcb
+    選單背景：#2b2b2b
+}
+
+4. 主題切換效果
+transition: all 0.3s ease;
+
+5. 陰影效果
+box-shadow: 0 15px 5px 0 rgba(77, 77, 77, 0.28);
+
+6. 版面配置
+固定定位：position: fixed;
+滿版高度：height: 100vh;
+Z軸層級：z-index: 999;

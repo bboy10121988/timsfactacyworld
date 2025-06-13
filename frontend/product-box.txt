@@ -1,0 +1,41 @@
+產品卡片樣式設定 (_product-box.scss)：
+
+1. 卡片容器
+padding: calc(15px + (20 - 15) * ((100vw - 320px) / (1920 - 320)));
+margin: 20px 0;
+border: 1px solid #eeeeee;
+border-radius: 5px;
+
+2. 圖片容器
+.layout-container {
+    height: 100%;
+    width: 100%;
+    display: inline-flex;
+    background-size: cover;
+    object-fit: cover;
+    object-position: top;
+}
+
+3. 產品資訊
+標題：
+    font-size: calc(13px + (16 - 13) * ((100vw - 320px) / (1920 - 320)));
+    font-weight: 500;
+    margin-top: 10px;
+
+價格：
+    color: var(--theme-color);
+    font-weight: 600;
+
+4. 互動效果
+hover效果：box-shadow: 0px 0px 5px 0px rgb(146, 146, 146);
+滑鼠移過放大效果：transform: scale(1.02);
+
+5. 標籤樣式
+.badge {
+    background-color: var(--theme-color);
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
