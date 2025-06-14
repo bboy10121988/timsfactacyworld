@@ -9,12 +9,12 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  // Skip static generation during build if backend is not available
-  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://')) {
-    console.log('Skipping static params generation - backend not deployed yet')
-    return []
-  }
-
+  // 為了解決在Vercel上無法連接到本地Medusa API的問題
+  // 返回一個空數組，讓頁面在訪問時按需生成
+  return []
+  
+  // 以下是原始代碼，在本地開發或配置好API後可以取消注釋
+  /*
   try {
     const countryCodes = await listRegions().then((regions) =>
       regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
@@ -46,6 +46,7 @@ export async function generateStaticParams() {
         }))
       )
       .filter((param) => param.handle)
+  */
   } catch (error) {
     console.error(
       `Failed to generate static paths for product pages: ${

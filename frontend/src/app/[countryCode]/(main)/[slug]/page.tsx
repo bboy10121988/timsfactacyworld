@@ -23,40 +23,38 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  try {
-    // Skip static generation during build if backend is not available
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://')) {
-      console.log('Skipping static params generation for pages - backend not deployed yet')
-      return []
-    }
+  // 為了解決在Vercel上無法連接到Medusa API的問題
+  // 返回一個簡單的靜態路徑集合
+  return [
+    { countryCode: "us", slug: "about" },
+    { countryCode: "tw", slug: "about" }
+  ]
+  
+  /*
+  // 獲取所有啟用的頁面
+  const pages = await client.fetch<SanityPage[]>(`*[_type == "pages" && isActive == true]{
+    "slug": slug.current
+  }`)
 
-    // 獲取所有啟用的頁面
-    const pages = await client.fetch<SanityPage[]>(`*[_type == "pages" && isActive == true]{
-      "slug": slug.current
-    }`)
+  // 獲取所有國家代碼
+  const countryCodes = await listRegions().then(
+    (regions: HttpTypes.StoreRegion[]) =>
+      regions
+        ?.map((r) => r.countries?.map((c) => c.iso_2))
+        .flat()
+        .filter(Boolean) as string[]
+  )
 
-    // 獲取所有國家代碼
-    const countryCodes = await listRegions().then(
-      (regions: HttpTypes.StoreRegion[]) =>
-        regions
-          ?.map((r) => r.countries?.map((c) => c.iso_2))
-          .flat()
-          .filter(Boolean) as string[]
-    )
+  // 生成所有可能的頁面路徑
+  const paths = countryCodes.flatMap((countryCode) =>
+    pages.map((page: SanityPage) => ({
+      countryCode,
+      slug: page.slug,
+    }))
+  )
+  */
 
-    // 生成所有可能的頁面路徑
-    const paths = countryCodes.flatMap((countryCode) =>
-      pages.map((page: SanityPage) => ({
-        countryCode,
-        slug: page.slug,
-      }))
-    )
-
-    return paths
-  } catch (error) {
-    console.error('Failed to generate static params for pages:', error)
-    return []
-  }
+  return paths
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
