@@ -1,191 +1,45 @@
-import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
-const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
-const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
-
-const regionMapCache = {
-  regionMap: new Map<string, HttpTypes.StoreRegion>(),
-  regionMapUpdated: Date.now(),
-}
-
-async function getRegionMap(cacheId: string) {
-  const { regionMap, regionMapUpdated } = regionMapCache
-
-  if (!BACKEND_URL) {
-    console.error("Middleware.ts: NEXT_PUBLIC_MEDUSA_BACKEND_URL not found in environment variables");
-    // 返回空的 Map 而不是拋出錯誤
-    return new Map<string, HttpTypes.StoreRegion>();
-  }
-
-  if (
-    !regionMap.keys().next().value ||
-    regionMapUpdated < Date.now() - 3600 * 1000
-  ) {
-    // Debug logs
-    console.log("DEBUG: BACKEND_URL =", BACKEND_URL)
-    console.log("DEBUG: PUBLISHABLE_API_KEY =", PUBLISHABLE_API_KEY)
-    // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
-    let regions = []
-    try {
-      const response = await fetch(`${BACKEND_URL}/store/regions`, {
-        headers: {
-          "x-publishable-api-key": PUBLISHABLE_API_KEY || "",
-        },
-        next: {
-          revalidate: 3600,
-          tags: [`regions-${cacheId}`],
-        },
-        cache: "force-cache",
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("Failed to fetch regions:", response.status, errorText)
-        // 不要拋出錯誤，返回空數組
-        regions = [];
-      } else {
-        const json = await response.json()
-        regions = json.regions || []
-      }
-
-    } catch (err) {
-      console.error("Middleware.ts: Exception during fetch to /store/regions", err)
-      // 不要拋出錯誤，返回空數組
-      regions = [];
-    }
-
-    // 如果沒有找到區域，使用預設區域，而不是拋出錯誤
-    if (!regions?.length) {
-      console.warn("No regions found. Using default region mapping.");
-      // 添加預設區域 - tw 和 us
-      const defaultRegion = {
-        id: "default",
-        name: "Default Region",
-        countries: [
-          { iso_2: "tw", display_name: "Taiwan" },
-          { iso_2: "us", display_name: "United States" }
-        ]
-      };
-      regions = [defaultRegion as any];
-    }
-
-    // Create a map of country codes to regions.
-    regions.forEach((region: HttpTypes.StoreRegion) => {
-      region.countries?.forEach((c) => {
-        regionMapCache.regionMap.set(c.iso_2 ?? "", region)
-      })
-    })
-
-    regionMapCache.regionMapUpdated = Date.now()
-  }
-
-  return regionMapCache.regionMap
-}
-
 /**
- * Fetches regions from Medusa and sets the region cookie.
- * @param request
- * @param response
- */
-async function getCountryCode(
-  request: NextRequest,
-  regionMap: Map<string, HttpTypes.StoreRegion | number>
-) {
-  try {
-    let countryCode
-
-    const vercelCountryCode = request.headers
-      .get("x-vercel-ip-country")
-      ?.toLowerCase()
-
-    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
-
-    if (urlCountryCode && regionMap.has(urlCountryCode)) {
-      countryCode = urlCountryCode
-    } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
-      countryCode = vercelCountryCode
-    } else if (regionMap.has(DEFAULT_REGION)) {
-      countryCode = DEFAULT_REGION
-    } else if (regionMap.keys().next().value) {
-      countryCode = regionMap.keys().next().value
-    } else {
-      // 如果都找不到，返回預設值 "tw"
-      countryCode = "tw"
-    }
-
-    return countryCode
-  } catch (error) {
-    console.error("Middleware.ts: Error getting the country code:", error)
-    // 發生錯誤時返回預設值
-    return "tw"
-  }
-}
-
-/**
- * Middleware to handle region selection and onboarding status.
+ * 簡化版的 middleware，只做基本重定向
+ * 避免複雜的區域處理邏輯和API調用
  */
 export async function middleware(request: NextRequest) {
   try {
-    let redirectUrl = request.nextUrl.href
-    let response = NextResponse.redirect(redirectUrl, 307)
-    let cacheIdCookie = request.cookies.get("_medusa_cache_id")
-    let cacheId = cacheIdCookie?.value || crypto.randomUUID()
+    // 直接使用 "tw" 作為預設區域
+    const countryCode = "tw"
     
-    // 嘗試獲取區域地圖，添加錯誤處理
-    let regionMap;
-    try {
-      regionMap = await getRegionMap(cacheId);
-    } catch (error) {
-      console.error("無法獲取區域地圖:", error);
-      // 如果無法獲取區域地圖，則繼續處理請求而不中斷
-      return NextResponse.next();
+    // 檢查 URL 中是否已經包含國家代碼
+    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    const validCountryCodes = ["tw", "us"] // 支持的國家代碼
+    
+    // 如果 URL 路徑已包含有效的國家代碼，直接繼續
+    if (validCountryCodes.includes(urlCountryCode)) {
+      return NextResponse.next()
     }
-
-    const countryCode = regionMap && (await getCountryCode(request, regionMap))
-
-  const urlHasCountryCode =
-    countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
-
-  // if one of the country codes is in the url and the cache id is set, return next
-  if (urlHasCountryCode && cacheIdCookie) {
-    return NextResponse.next()
-  }
-
-  // if one of the country codes is in the url and the cache id is not set, set the cache id and redirect
-  if (urlHasCountryCode && !cacheIdCookie) {
-    response.cookies.set("_medusa_cache_id", cacheId, {
-      maxAge: 60 * 60 * 24,
-    })
-
-    return response
-  }
-
-  // check if the url is a static asset
-  if (request.nextUrl.pathname.includes(".")) {
-    return NextResponse.next()
-  }
-
-  const redirectPath =
-    request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
-
-  const queryString = request.nextUrl.search ? request.nextUrl.search : ""
-
-  // If no country code is set, we redirect to the relevant region.
-  if (!urlHasCountryCode && countryCode) {
-    redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
-  }
-
-  return response
+    
+    // 如果是靜態資源，直接處理
+    if (request.nextUrl.pathname.includes(".")) {
+      return NextResponse.next()
+    }
+    
+    // 如果 URL 不包含國家代碼，重定向到帶有國家代碼的 URL
+    const redirectPath = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+    const queryString = request.nextUrl.search ? request.nextUrl.search : ""
+    
+    // 構建重定向 URL
+    const redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
+    
+    // 執行重定向
+    return NextResponse.redirect(redirectUrl, 307)
   } catch (error) {
-    console.error("Middleware 執行過程中發生錯誤:", error);
-    // 確保即使發生錯誤，請求仍然能夠繼續
-    return NextResponse.next();
+    console.error("Middleware 處理時發生錯誤:", error)
+    // 發生任何錯誤時，都允許請求繼續而不中斷
+    return NextResponse.next()
   }
 }
 
+// 定義 middleware 應用的路徑
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
