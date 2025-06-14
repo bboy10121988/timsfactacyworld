@@ -14,9 +14,9 @@ async function getRegionMap(cacheId: string) {
   const { regionMap, regionMapUpdated } = regionMapCache
 
   if (!BACKEND_URL) {
-    throw new Error(
-      "Middleware.ts: Error fetching regions. Did you set up regions in your Medusa Admin and define a NEXT_PUBLIC_MEDUSA_BACKEND_URL environment variable."
-    )
+    console.error("Middleware.ts: NEXT_PUBLIC_MEDUSA_BACKEND_URL not found in environment variables");
+    // 返回空的 Map 而不是拋出錯誤
+    return new Map<string, HttpTypes.StoreRegion>();
   }
 
   if (
@@ -31,7 +31,7 @@ async function getRegionMap(cacheId: string) {
     try {
       const response = await fetch(`${BACKEND_URL}/store/regions`, {
         headers: {
-          "x-publishable-api-key": PUBLISHABLE_API_KEY!,
+          "x-publishable-api-key": PUBLISHABLE_API_KEY || "",
         },
         next: {
           revalidate: 3600,
@@ -43,21 +43,32 @@ async function getRegionMap(cacheId: string) {
       if (!response.ok) {
         const errorText = await response.text()
         console.error("Failed to fetch regions:", response.status, errorText)
-        throw new Error("Unable to fetch regions from Medusa backend.")
+        // 不要拋出錯誤，返回空數組
+        regions = [];
+      } else {
+        const json = await response.json()
+        regions = json.regions || []
       }
-
-      const json = await response.json()
-      regions = json.regions || []
 
     } catch (err) {
       console.error("Middleware.ts: Exception during fetch to /store/regions", err)
-      throw new Error("Middleware.ts: Failed to fetch regions.")
+      // 不要拋出錯誤，返回空數組
+      regions = [];
     }
 
+    // 如果沒有找到區域，使用預設區域，而不是拋出錯誤
     if (!regions?.length) {
-      throw new Error(
-        "No regions found. Please set up regions in your Medusa Admin."
-      )
+      console.warn("No regions found. Using default region mapping.");
+      // 添加預設區域 - tw 和 us
+      const defaultRegion = {
+        id: "default",
+        name: "Default Region",
+        countries: [
+          { iso_2: "tw", display_name: "Taiwan" },
+          { iso_2: "us", display_name: "United States" }
+        ]
+      };
+      regions = [defaultRegion as any];
     }
 
     // Create a map of country codes to regions.
@@ -99,15 +110,16 @@ async function getCountryCode(
       countryCode = DEFAULT_REGION
     } else if (regionMap.keys().next().value) {
       countryCode = regionMap.keys().next().value
+    } else {
+      // 如果都找不到，返回預設值 "tw"
+      countryCode = "tw"
     }
 
     return countryCode
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.error(
-        "Middleware.ts: Error getting the country code. Did you set up regions in your Medusa Admin and define a NEXT_PUBLIC_MEDUSA_BACKEND_URL environment variable."
-      )
-    }
+    console.error("Middleware.ts: Error getting the country code:", error)
+    // 發生錯誤時返回預設值
+    return "tw"
   }
 }
 
