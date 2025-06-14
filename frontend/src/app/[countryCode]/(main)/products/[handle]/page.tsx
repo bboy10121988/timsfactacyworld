@@ -10,12 +10,16 @@ type Props = {
 
 export async function generateStaticParams() {
   // 為了解決在Vercel上無法連接到本地Medusa API的問題
-  // 返回一個空數組，讓頁面在訪問時按需生成
-  return []
-  
-  // 以下是原始代碼，在本地開發或配置好API後可以取消注釋
-  /*
+  // 返回一個空數組或簡單的靜態路徑，讓頁面在訪問時按需生成
   try {
+    // 簡單的靜態路徑示例
+    return [
+      { countryCode: "us", handle: "t-shirt" },
+      { countryCode: "tw", handle: "t-shirt" }
+    ]
+    
+    // 以下是原始代碼，在本地開發或配置好API後可以取消注釋
+    /*
     const countryCodes = await listRegions().then((regions) =>
       regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
     )
@@ -46,7 +50,7 @@ export async function generateStaticParams() {
         }))
       )
       .filter((param) => param.handle)
-  */
+    */
   } catch (error) {
     console.error(
       `Failed to generate static paths for product pages: ${
