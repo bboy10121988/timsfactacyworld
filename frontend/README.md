@@ -16,6 +16,12 @@
 Combine Medusa's modules for your commerce backend with the newest Next.js 15 features for a performant storefront.</p>
 
 <p align="center">
+  <a href="https://timsfactacyworld.vercel.app">
+    <img src="https://img.shields.io/badge/Vercel-Deployed-success" alt="Vercel Deployment Status" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/medusajs/medusa/blob/master/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome!" />
   </a>
