@@ -20,7 +20,7 @@ export function ProductActionProvider({ children }: { children: React.ReactNode 
   const [options, setOptions] = useState<Record<string, string>>({})
   const [selectedVariant, setSelectedVariant] = useState<HttpTypes.StoreProductVariant>()
   const [isAdding, setIsAdding] = useState(false)
-  const [inStock, setInStock] = useState(true)
+  const [inStock, setInStock] = useState(true) // 預設為可購買狀態
 
   const addToCart = useCallback(async (input: { variantId: string; quantity: number; countryCode: string }) => {
     setIsAdding(true)

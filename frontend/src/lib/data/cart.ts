@@ -44,45 +44,69 @@ export async function retrieveCart(cartId?: string) {
       },
       headers,
       next,
-      cache: "force-cache",
+      cache: "no-store", // 不緩存購物車資料，確保每次都是最新的
     })
     .then(({ cart }) => cart)
-    .catch(() => null)
+    .catch((error) => {
+      console.error("❌ retrieveCart 失敗:", error)
+      return null
+    })
 }
 
 export async function getOrSetCart(countryCode: string) {
+  console.log("🔍 getOrSetCart 開始:", { countryCode })
+  
   const region = await getRegion(countryCode)
 
   if (!region) {
+    console.error("❌ 找不到地區:", countryCode)
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
+  console.log("✅ 找到地區:", { regionId: region.id, regionName: region.name })
+
   let cart = await retrieveCart()
+  console.log("🔍 獲取現有購物車:", cart ? { id: cart.id, region_id: cart.region_id } : "無現有購物車")
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
   if (!cart) {
-    const cartResp = await sdk.store.cart.create(
-      { region_id: region.id },
-      {},
-      headers
-    )
-    cart = cartResp.cart
+    console.log("🛒 創建新購物車...")
+    try {
+      const cartResp = await sdk.store.cart.create(
+        { region_id: region.id },
+        {},
+        headers
+      )
+      cart = cartResp.cart
+      console.log("✅ 創建購物車成功:", { id: cart.id })
 
-    await setCartId(cart.id)
+      await setCartId(cart.id)
 
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag)
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+    } catch (error) {
+      console.error("❌ 創建購物車失敗:", error)
+      throw error
+    }
   }
 
   if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
-    const cartCacheTag = await getCacheTag("carts")
-    revalidateTag(cartCacheTag)
+    console.log("🔄 更新購物車地區...")
+    try {
+      await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+      const cartCacheTag = await getCacheTag("carts")
+      revalidateTag(cartCacheTag)
+      console.log("✅ 購物車地區更新成功")
+    } catch (error) {
+      console.error("❌ 更新購物車地區失敗:", error)
+      throw error
+    }
   }
 
+  console.log("🎉 getOrSetCart 完成:", { cartId: cart.id })
   return cart
 }
 
@@ -120,38 +144,57 @@ export async function addToCart({
   quantity: number
   countryCode: string
 }) {
+  console.log("🛒 addToCart 開始:", { variantId, quantity, countryCode })
+  
   if (!variantId) {
+    console.error("❌ addToCart: Missing variant ID")
     throw new Error("Missing variant ID when adding to cart")
   }
 
-  const cart = await getOrSetCart(countryCode)
+  try {
+    console.log("🔍 獲取或創建購物車...")
+    const cart = await getOrSetCart(countryCode)
 
-  if (!cart) {
-    throw new Error("Error retrieving or creating cart")
+    if (!cart) {
+      console.error("❌ addToCart: Error retrieving or creating cart")
+      throw new Error("Error retrieving or creating cart")
+    }
+
+    console.log("✅ 獲取購物車成功:", { cartId: cart.id })
+
+    const headers = {
+      ...(await getAuthHeaders()),
+    }
+
+    console.log("🔄 添加商品到購物車...")
+    await sdk.store.cart
+      .createLineItem(
+        cart.id,
+        {
+          variant_id: variantId,
+          quantity,
+        },
+        {},
+        headers
+      )
+      .then(async (response) => {
+        console.log("✅ 成功添加商品到購物車:", response)
+        const cartCacheTag = await getCacheTag("carts")
+        revalidateTag(cartCacheTag)
+
+        const fulfillmentCacheTag = await getCacheTag("fulfillment")
+        revalidateTag(fulfillmentCacheTag)
+      })
+      .catch((error) => {
+        console.error("❌ createLineItem 失敗:", error)
+        throw error
+      })
+
+    console.log("🎉 addToCart 完成")
+  } catch (error) {
+    console.error("❌ addToCart 整體失敗:", error)
+    throw error
   }
-
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-
-  await sdk.store.cart
-    .createLineItem(
-      cart.id,
-      {
-        variant_id: variantId,
-        quantity,
-      },
-      {},
-      headers
-    )
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
-
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
-    })
-    .catch(medusaError)
 }
 
 export async function updateLineItem({

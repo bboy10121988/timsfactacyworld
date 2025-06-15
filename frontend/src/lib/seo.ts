@@ -1,58 +1,31 @@
 import { Metadata } from "next"
-import { client } from "@lib/sanity/client"
 
 export const getDefaultSEOSettings = async (): Promise<Metadata> => {
   try {
-    // 獲取 header 文件中的 SEO 設定
-    const query = `*[_type == "header"][0] {
-      storeName,
-      seoSettings {
-        metaTitle,
-        metaDescription,
-        canonicalUrl,
-        "favicon": favicon.asset->url
-      }
-    }`
+    // 使用靜態 SEO 設定避免在服務器端組件中進行動態獲取
+    const storeName = "TIMS HAIR SALON"
     
-    const result = await client.fetch(query)
-    console.log('Sanity SEO 查詢結果:', result)
-    
-    if (!result?.seoSettings) {
-      console.warn('未找到 SEO 設定')
-      return {
-        title: '我的商店',
-        description: undefined,
-        icons: undefined,
-      }
-    }
-
-    const { storeName, seoSettings: seo } = result
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-
     return {
-      metadataBase: new URL(baseUrl),
       title: {
-        absolute: seo.metaTitle || storeName,
-        template: `%s | ${seo.metaTitle || storeName}`,
+        absolute: storeName,
+        template: `%s | ${storeName}`,
       },
-      description: seo.metaDescription,
-      icons: seo.favicon ? {
-        icon: [{ url: seo.favicon }],
-        shortcut: [{ url: seo.favicon }],
-        apple: [{ url: seo.favicon }],
-      } : undefined,
+      description: "專業美髮沙龍與高級美髮產品",
+      icons: {
+        icon: [{ url: '/favicon.ico' }],
+        shortcut: [{ url: '/favicon.ico' }],
+        apple: [{ url: '/favicon.ico' }],
+      },
       openGraph: {
         type: "website",
-        title: seo.metaTitle || storeName,
-        description: seo.metaDescription,
+        title: storeName,
+        description: "專業美髮沙龍與高級美髮產品",
         siteName: storeName,
-        images: seo.favicon ? [{ url: seo.favicon }] : [],
       },
       twitter: {
         card: "summary_large_image",
-        title: seo.metaTitle || storeName,
-        description: seo.metaDescription,
-        images: seo.favicon ? [{ url: seo.favicon }] : [],
+        title: storeName,
+        description: "專業美髮沙龍與高級美髮產品",
       },
     }
   } catch (error) {

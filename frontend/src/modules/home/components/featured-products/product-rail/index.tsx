@@ -30,7 +30,7 @@ export default async function ProductPreviewGrid({
           <ProductPreview 
             product={product}
             isFeatured={collection.handle === "featured"}
-            countryCode={region.currency_code}
+            countryCode="tw"
           />
         </li>
       ))}

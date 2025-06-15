@@ -6,7 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
 
 type ProductOption = {
@@ -47,31 +47,63 @@ export default function ProductPreview({
 
   // 使用 useMemo 優化產品選項的計算
   const productOptions = useMemo(() => {
-    if (!product.variants?.length) return []
+    if (!product.options?.length) return []
 
-    const optionsMap = new Map<string, Set<string>>()
-
-    // 從所有變體中收集選項值
-    product.variants.forEach(variant => {
-      if (!variant.title) return
-      const values = variant.title.split(' / ')
-      values.forEach((value, index) => {
-        const optionKey = product.options?.[index]?.title || `Option ${index + 1}`
-        if (!optionsMap.has(optionKey)) {
-          optionsMap.set(optionKey, new Set<string>())
+    // 直接使用產品的 options 結構，並按照特定順序排序
+    return product.options
+      .slice() // 創建副本避免修改原始數據
+      .sort((a, b) => {
+        // 確保特定選項的順序：尺寸 -> 顏色 -> 其他
+        const getOptionPriority = (title: string) => {
+          const lowerTitle = title.toLowerCase()
+          if (lowerTitle.includes('尺寸') || lowerTitle.includes('size')) return 1
+          if (lowerTitle.includes('顏色') || lowerTitle.includes('color')) return 2
+          return 3
         }
-        optionsMap.get(optionKey)?.add(value)
+        
+        const priorityA = getOptionPriority(a.title)
+        const priorityB = getOptionPriority(b.title)
+        
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB
+        }
+        
+        // 如果優先級相同，按照創建時間排序
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0
+        return timeA - timeB
       })
-    })
+      .map(option => ({
+        title: option.title,
+        values: option.values?.map(v => v.value) || []
+      }))
+  }, [product.options])
 
-    // 轉換成陣列格式
-    return Array.from(optionsMap.entries()).map(([title, values]) => ({
-      title,
-      values: Array.from(values)
-    }))
-  }, [product.variants])
+  // 自動選擇單一選項值
+  const autoSelectSingleOptions = useMemo(() => {
+    const autoSelected: SelectedOptions = {}
+    
+    productOptions.forEach(option => {
+      if (option.values.length === 1) {
+        autoSelected[option.title] = option.values[0]
+      }
+    })
+    
+    return autoSelected
+  }, [productOptions])
+
+  // 在組件載入時自動選擇單一選項值
+  useEffect(() => {
+    if (Object.keys(autoSelectSingleOptions).length > 0) {
+      setSelectedOptions(prev => ({
+        ...autoSelectSingleOptions,
+        ...prev
+      }))
+    }
+  }, [autoSelectSingleOptions])
 
   console.log('產品選項:', productOptions)
+  console.log('產品選項順序:', productOptions.map(opt => opt.title))
 
   // 根據選擇的選項找到對應的變體
   const findVariantId = (selectedOpts: SelectedOptions): string | undefined => {
@@ -79,19 +111,26 @@ export default function ProductPreview({
       return undefined
     }
 
-    // 檢查是否所有選項都已選擇
-    const selectedValues = Object.values(selectedOpts).filter(Boolean)
-    if (selectedValues.length === 0) return undefined
+    // 檢查是否有選擇的選項
+    const selectedEntries = Object.entries(selectedOpts).filter(([_, value]) => value !== null)
+    
+    // 如果沒有選擇任何選項，返回 undefined
+    if (selectedEntries.length === 0) return undefined
+    
+    // 如果選項數量不完整，也返回 undefined
+    if (selectedEntries.length < productOptions.length) return undefined
 
     // 尋找匹配的變體
     const matchedVariant = product.variants.find(variant => {
-      if (!variant.title) return false
-      const variantValues = variant.title.split(' / ')
+      if (!variant.options) return false
       
-      // 檢查每個選擇的值是否與變體的值匹配
-      return Object.entries(selectedOpts).every(([optionTitle, selectedValue], index) => {
-        return variantValues[index] === selectedValue
-      })
+      // 檢查變體的選項是否與選擇的選項匹配
+      return selectedEntries.every(([optionTitle, selectedValue]) => {
+        return variant.options?.some(variantOption => 
+          variantOption.option?.title === optionTitle && 
+          variantOption.value === selectedValue
+        )
+      }) && variant.options.length === selectedEntries.length
     })
 
     return matchedVariant?.id
@@ -111,8 +150,23 @@ export default function ProductPreview({
       e.stopPropagation()
     }
 
+    // 防止重複點擊
+    if (isAdding) {
+      console.log("⚠️ 正在添加中，忽略重複點擊")
+      return
+    }
+
+    console.log("🔍 ProductPreview 加入購物車檢查:", {
+      productTitle: product.title,
+      selectedOptions,
+      productOptions
+    })
+
     const variantId = findVariantId(selectedOptions)
+    console.log("🔍 找到的變體 ID:", variantId)
+    
     if (!variantId) {
+      console.log("❌ 沒有找到匹配的變體")
       setError("請選擇所有必要的選項")
       return
     }
@@ -120,12 +174,21 @@ export default function ProductPreview({
     try {
       setError(null)
       setIsAdding(true)
+      console.log("🛒 ProductPreview 開始加入購物車:", {
+        variantId,
+        quantity: 1,
+        countryCode
+      })
+      
       await addToCart({
         variantId,
         quantity: 1,
         countryCode
       })
-      setSelectedOptions({})
+      
+      console.log("✅ ProductPreview 成功加入購物車!")
+      // 不要清空選項，因為用戶可能想繼續購買相同的變體
+      // setSelectedOptions({})
       setError(null)
       // 只觸發購物車更新事件
       window.dispatchEvent(new Event('cartUpdate'))
@@ -134,7 +197,7 @@ export default function ProductPreview({
         setShowSuccessMessage(false)
       }, 3000)
     } catch (error) {
-      console.error("添加到購物車失敗:", error)
+      console.error("❌ ProductPreview 添加到購物車失敗:", error)
       setError("添加到購物車失敗，請稍後再試")
     } finally {
       setIsAdding(false)
@@ -166,7 +229,6 @@ export default function ProductPreview({
                 thumbnail={product.thumbnail} 
                 images={product.images || []}
                 size="full"
-                showSecondImage={Boolean(isHovered && product.images && product.images.length > 1)}
               />
             </div>
           </LocalizedClientLink>

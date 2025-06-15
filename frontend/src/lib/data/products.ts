@@ -48,7 +48,7 @@ export const listProducts = async ({
         limit,
         offset,
         region_id: region.id,
-        fields: "handle,id,title,subtitle,description,thumbnail,variants,options,variants.title,variants.prices,variants.options,+variants.inventory_quantity,variants.manage_inventory,variants.allow_backorder,metadata,images,images.url",
+        fields: "*options.values,*variants.options.option,+variants.inventory_quantity",
       },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
@@ -148,12 +148,12 @@ export const getProduct = async ({
   }
 
   return sdk.client
-    .fetch<{ product: HttpTypes.StoreProduct }>(`/store/products`, {
+    .fetch<{ products: HttpTypes.StoreProduct[] }>(`/store/products`, {
       method: "GET",
       query: {
         handle,
         region_id: region.id,
-        fields: "handle,id,title,subtitle,description,thumbnail,variants,options,variants.title,variants.prices,variants.options,+variants.inventory_quantity,variants.manage_inventory,variants.allow_backorder,metadata,images,images.url",
+        fields: "*options.values,*variants.options.option,+variants.inventory_quantity",
       },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
@@ -161,7 +161,10 @@ export const getProduct = async ({
       next: { revalidate: 0 },
       cache: "no-store",
     })
-    .then(({ product }) => {
-      return product
+    .then(({ products }) => {
+      if (products.length === 0) {
+        throw new Error(`Product with handle: ${handle} was not found`);
+      }
+      return products[0];
     })
 }

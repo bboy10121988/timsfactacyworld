@@ -18,6 +18,17 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // 修復跨域和 fetch 問題
+  async rewrites() {
+    return [
+      // 代理 API 請求到 Medusa 後端
+      {
+        source: "/api/medusa/:path*",
+        destination: `${process.env.MEDUSA_BACKEND_URL || 'http://localhost:9000'}/:path*`,
+      },
+    ]
+  },
+  // 配置允許的圖片來源
   images: {
     remotePatterns: [
       {

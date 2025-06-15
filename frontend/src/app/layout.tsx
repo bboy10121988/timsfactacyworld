@@ -1,11 +1,10 @@
-import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
-import { getDefaultSEOSettings } from "@lib/seo"
 import { Noto_Sans_TC } from "next/font/google"
-import { RegionProvider } from "@lib/context/region-context"
 import "styles/globals.css"
-import Footer from "@modules/layout/templates/footer"
+import ClientArea from "@modules/layout/components/client-area"
+import SanityFooter from "@modules/layout/templates/footer/sanity-footer"
 
+// 字體配置
 const notoSansTC = Noto_Sans_TC({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
@@ -14,39 +13,43 @@ const notoSansTC = Noto_Sans_TC({
   variable: '--font-noto-sans-tc',
 })
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const defaultSEO = await getDefaultSEOSettings()
-    
-    // 保留預設配置，但允許覆蓋
-    return {
-      ...defaultSEO,
-      icons: defaultSEO.icons || {
-        icon: [{ url: '/favicon.ico' }],
-        shortcut: [{ url: '/favicon.ico' }],
-        apple: [{ url: '/favicon.ico' }],
-      },
-    }
-  } catch (error) {
-    console.error('Error generating metadata:', error)
-    return {
-      title: '我的商店',
-      icons: {
-        icon: [{ url: '/favicon.ico' }],
-      },
-    }
-  }
+// 靜態產生元數據，避免伺服器端的 fetch 操作
+export const metadata: Metadata = {
+  title: {
+    absolute: 'TIMS HAIR SALON',
+    template: '%s | TIMS HAIR SALON',
+  },
+  description: '專業美髮沙龍與高級美髮產品',
+  icons: {
+    icon: [{ url: '/favicon.ico' }],
+    shortcut: [{ url: '/favicon.ico' }],
+    apple: [{ url: '/favicon.ico' }],
+  },
+  openGraph: {
+    type: "website",
+    title: 'TIMS HAIR SALON',
+    description: '專業美髮沙龍與高級美髮產品',
+    siteName: 'TIMS HAIR SALON',
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: 'TIMS HAIR SALON',
+    description: '專業美髮沙龍與高級美髮產品',
+  },
 }
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+// 分割客戶端區域為單獨組件，避免 SSR 問題
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="zh-TW" data-mode="light" suppressHydrationWarning className={`${notoSansTC.variable}`}>
       <body suppressHydrationWarning className="font-sans">
-        <RegionProvider>
-          <main className="relative">{props.children}</main>
-          <Footer />
-        </RegionProvider>
+        <ClientArea>
+          {children}
+        </ClientArea>
+        <SanityFooter />
       </body>
     </html>
   )
 }
+
+export default RootLayout

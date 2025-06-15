@@ -32,7 +32,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
     },
     {
       label: "運送與退貨",
-      component: <ShippingInfoTab />,
+      component: <ShippingInfoTab product={product} />,
     },
   ]
 

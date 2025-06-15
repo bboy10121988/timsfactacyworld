@@ -1,117 +1,107 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
-import { getRegion, listRegions } from "@lib/data/regions"
+import { getProduct, listProducts } from "@lib/data/products"
+import { getRegion } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 
 type Props = {
-  params: Promise<{ countryCode: string; handle: string }>
+  params: { countryCode: string; handle: string }
 }
 
 export async function generateStaticParams() {
-  // 為了解決在Vercel上無法連接到本地Medusa API的問題
-  // 返回一個空數組或簡單的靜態路徑，讓頁面在訪問時按需生成
+  // 返回一個簡單的靜態路徑陣列，讓頁面在訪問時按需生成
   try {
-    // 簡單的靜態路徑示例
     return [
-      { countryCode: "us", handle: "t-shirt" },
-      { countryCode: "tw", handle: "t-shirt" }
+      { countryCode: "tw", handle: "product-1" },
+      { countryCode: "tw", handle: "product-2" }
     ]
-    
-    // 以下是原始代碼，在本地開發或配置好API後可以取消注釋
-    /*
-    const countryCodes = await listRegions().then((regions) =>
-      regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
-    )
-
-    if (!countryCodes) {
-      return []
-    }
-
-    const promises = countryCodes.map(async (country) => {
-      const { response } = await listProducts({
-        countryCode: country,
-        queryParams: { limit: 100, fields: "handle" },
-      })
-
-      return {
-        country,
-        products: response.products,
-      }
-    })
-
-    const countryProducts = await Promise.all(promises)
-
-    return countryProducts
-      .flatMap((countryData) =>
-        countryData.products.map((product) => ({
-          countryCode: countryData.country,
-          handle: product.handle,
-        }))
-      )
-      .filter((param) => param.handle)
-    */
   } catch (error) {
-    console.error(
-      `Failed to generate static paths for product pages: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }.`
-    )
+    console.error(`產生靜態路徑時發生錯誤: ${error instanceof Error ? error.message : "未知錯誤"}.`)
     return []
   }
 }
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
-  const params = await props.params
-  const { handle } = params
-  const region = await getRegion(params.countryCode)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const { handle, countryCode } = params
+    const region = await getRegion(countryCode)
 
-  if (!region) {
-    notFound()
-  }
+    if (!region) {
+      return {
+        title: "商品不存在 | TIMS HAIR SALON",
+        description: "找不到您請求的商品",
+      }
+    }
 
-  const product = await listProducts({
-    countryCode: params.countryCode,
-    queryParams: { handle },
-  }).then(({ response }) => response.products[0])
+    // 嘗試使用 getProduct 函數直接獲取產品
+    try {
+      const product = await getProduct({
+        handle,
+        countryCode,
+      })
 
-  if (!product) {
-    notFound()
-  }
-
-  return {
-    title: `${product.title} | Medusa Store`,
-    description: `${product.title}`,
-    openGraph: {
-      title: `${product.title} | Medusa Store`,
-      description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
-    },
+      return {
+        title: `${product.title} | TIMS HAIR SALON`,
+        description: product.description || `${product.title} - TIMS HAIR SALON`,
+        openGraph: {
+          title: `${product.title} | TIMS HAIR SALON`,
+          description: product.description || `${product.title} - TIMS HAIR SALON`,
+          images: product.thumbnail ? [product.thumbnail] : [],
+        },
+      }
+    } catch (error) {
+      console.error(`無法獲取產品詳情: ${error instanceof Error ? error.message : "未知錯誤"}`)
+      
+      // 回退到基本元數據
+      return {
+        title: "商品 | TIMS HAIR SALON",
+        description: "TIMS HAIR SALON 的商品頁面",
+      }
+    }
+  } catch (error) {
+    console.error(`生成商品頁面元數據時出錯: ${error instanceof Error ? error.message : "未知錯誤"}`)
+    
+    // 返回一個預設元數據
+    return {
+      title: "商品 | TIMS HAIR SALON",
+      description: "TIMS HAIR SALON 的商品頁面",
+    }
   }
 }
 
-export default async function ProductPage(props: Props) {
-  const params = await props.params
-  const region = await getRegion(params.countryCode)
+export default async function ProductPage({ params }: Props) {
+  try {
+    const { countryCode, handle } = params
+    const region = await getRegion(countryCode)
 
-  if (!region) {
+    if (!region) {
+      notFound()
+    }
+
+    // 使用 getProduct 函數獲取完整產品資訊
+    try {
+      const pricedProduct = await getProduct({
+        handle,
+        countryCode,
+      })
+
+      if (!pricedProduct) {
+        notFound()
+      }
+
+      return (
+        <ProductTemplate
+          product={pricedProduct}
+          region={region}
+          countryCode={countryCode}
+        />
+      )
+    } catch (error) {
+      console.error(`無法獲取產品資料: ${error instanceof Error ? error.message : "未知錯誤"}`)
+      notFound()
+    }
+  } catch (error) {
+    console.error(`獲取商品資料時出錯: ${error instanceof Error ? error.message : "未知錯誤"}`)
     notFound()
   }
-
-  const pricedProduct = await listProducts({
-    countryCode: params.countryCode,
-    queryParams: { handle: params.handle },
-  }).then(({ response }) => response.products[0])
-
-  if (!pricedProduct) {
-    notFound()
-  }
-
-  return (
-    <ProductTemplate
-      product={pricedProduct}
-      region={region}
-      countryCode={params.countryCode}
-    />
-  )
 }

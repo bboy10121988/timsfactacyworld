@@ -34,21 +34,22 @@ export const RegionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  const handleSetRegion = (newRegion: Region | null) => {
+  const handleSetRegion: Dispatch<SetStateAction<Region | null>> = (newRegion) => {
     setRegion(newRegion)
     if (typeof window !== 'undefined' && newRegion) {
-      localStorage.setItem("region", newRegion.countryCode)
+      // 當 newRegion 是函數時，我們需要先計算新值
+      const actualRegion = typeof newRegion === 'function' 
+        ? newRegion(region) 
+        : newRegion
+      
+      if (actualRegion) {
+        localStorage.setItem("region", actualRegion.countryCode)
+      }
     }
   }
 
   return (
     <RegionContext.Provider value={{ region, setRegion: handleSetRegion }}>
-      {children}
-    </RegionContext.Provider>
-  )
-
-  return (
-    <RegionContext.Provider value={value}>
       {children}
     </RegionContext.Provider>
   )

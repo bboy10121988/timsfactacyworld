@@ -93,7 +93,7 @@ export default function PaginatedProducts({
           {products.map((p) => {
             return (
               <li key={p.id} className="bg-white">
-                <ProductPreview product={p} countryCode={countryCode} />
+                <ProductPreview product={p} countryCode="tw" />
               </li>
             )
           })}

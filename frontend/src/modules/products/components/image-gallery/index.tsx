@@ -100,7 +100,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {images.map((image, index) => (
             <button
-              key={image.id} // 移除 thumb- 前綴,直接使用圖片的 ID
+              key={`thumb-${image.id || `index-${index}`}`}
               onClick={() => setSelectedImageIndex(index)}
               className={`relative w-20 h-24 flex-shrink-0 border-2 transition-all ${
                 selectedImageIndex === index ? "border-black" : "border-transparent hover:border-gray-300"
