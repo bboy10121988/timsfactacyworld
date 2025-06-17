@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
-import PaginatedProducts from "./paginated-products"
+import InfiniteScrollProducts from "./infinite-scroll-products"
 
 const StoreTemplate = ({
   sortBy,
@@ -14,7 +14,6 @@ const StoreTemplate = ({
   page?: string
   countryCode: string
 }) => {
-  const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
   return (
@@ -23,9 +22,8 @@ const StoreTemplate = ({
         <h1 className="h1" data-testid="store-page-title">全部商品</h1>
       </div>
       <Suspense fallback={<SkeletonProductGrid />}>
-        <PaginatedProducts
+        <InfiniteScrollProducts
           sortBy={sort}
-          page={pageNumber}
           countryCode={countryCode}
         />
       </Suspense>

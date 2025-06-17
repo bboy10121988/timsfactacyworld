@@ -47,6 +47,8 @@ const SearchResults = ({ query, initialType }: SearchResultsProps) => {
           if (productsRes.ok) {
             const data = await productsRes.json()
             console.log('商品搜尋結果:', data)
+            console.log('第一個商品詳細資料:', data.products?.[0])
+            console.log('第一個商品的變體:', data.products?.[0]?.variants)
             setProducts(data.products || [])
             setTotalProducts(data.products?.length || 0)
           } else {
@@ -202,18 +204,22 @@ const SearchResults = ({ query, initialType }: SearchResultsProps) => {
                 <h2 className="text-2xl font-bold border-l-4 border-gray-900 pl-3">商品 ({products.length})</h2>
               </div>
             )}
-            {/* 商品網格 - 左右間距為0，卡片間距也為0 */}
+            {/* 商品網格 - 使用與其他頁面相同的樣式 */}
             <div className="px-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-0">
-                {products.map(product => (
-                  <ProductPreview
-                    key={product.id}
-                    product={product}
-                    isFeatured={false}
-                    countryCode="tw"
-                  />
-                ))}
-              </div>
+              <ul className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-4 gap-y-8" data-testid="search-products-list">
+                {products.map(product => {
+                  console.log('渲染搜尋商品:', product.title, '變體數量:', product.variants?.length, '第一個變體:', product.variants?.[0])
+                  return (
+                    <li key={product.id}>
+                      <ProductPreview
+                        product={product}
+                        isFeatured={false}
+                        countryCode="tw"
+                      />
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
           </div>
         )}

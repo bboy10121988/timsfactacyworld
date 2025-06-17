@@ -2,7 +2,9 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProduct, listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
+import { generateProductKeywords } from "@lib/seo"
 import ProductTemplate from "@modules/products/templates"
+import { getStoreName } from "@lib/store-name"
 
 type Props = {
   params: { countryCode: string; handle: string }
@@ -25,10 +27,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { handle, countryCode } = params
     const region = await getRegion(countryCode)
+    const storeName = await getStoreName()
 
     if (!region) {
       return {
-        title: "商品不存在 | TIMS HAIR SALON",
+        title: `商品不存在 | ${storeName}`,
         description: "找不到您請求的商品",
       }
     }
@@ -40,12 +43,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         countryCode,
       })
 
+      const keywords = generateProductKeywords(product, {
+        presetKeywords: {      'shampoo': ['洗髮精', '去屑', '頭皮護理', await getStoreName()],
+      'conditioner': ['潤髮乳', '護髮素', await getStoreName()]
+        },
+        extractFields: ['title', 'subtitle', 'description', 'tags', 'collection']
+      })
+
       return {
-        title: `${product.title} | TIMS HAIR SALON`,
-        description: product.description || `${product.title} - TIMS HAIR SALON`,
+        title: `${product.title} | ${storeName}`,
+        description: product.description || `${product.title} - ${storeName}`,
+        keywords: keywords,
         openGraph: {
-          title: `${product.title} | TIMS HAIR SALON`,
-          description: product.description || `${product.title} - TIMS HAIR SALON`,
+          title: `${product.title} | ${storeName}`,
+          description: product.description || `${product.title} - ${storeName}`,
           images: product.thumbnail ? [product.thumbnail] : [],
         },
       }
@@ -54,17 +65,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       
       // 回退到基本元數據
       return {
-        title: "商品 | TIMS HAIR SALON",
-        description: "TIMS HAIR SALON 的商品頁面",
+        title: `商品 | ${storeName}`,
+        description: `${storeName} 的商品頁面`,
       }
     }
   } catch (error) {
     console.error(`生成商品頁面元數據時出錯: ${error instanceof Error ? error.message : "未知錯誤"}`)
     
-    // 返回一個預設元數據
+    // 由於不知道是否能獲取 storeName，所以返回固定文字
     return {
-      title: "商品 | TIMS HAIR SALON",
-      description: "TIMS HAIR SALON 的商品頁面",
+      title: "商品頁面",
+      description: "商品頁面",
     }
   }
 }

@@ -3,6 +3,7 @@ import { getRegion } from "@lib/data/regions"
 import { getReturnPolicy } from "@lib/data/return-policy"
 import { notFound } from "next/navigation"
 import { PortableText } from '@portabletext/react'
+import { getStoreName } from "@lib/store-name"
 
 type Highlight = {
   title: string;
@@ -20,9 +21,13 @@ type Props = {
   params: { countryCode: string }
 }
 
-export const metadata: Metadata = {
-  title: "退換貨政策 | TIMS HAIR SALON",
-  description: "了解我們的退換貨政策、流程及條款",
+export async function generateMetadata(): Promise<Metadata> {
+  const storeName = await getStoreName()
+  
+  return {
+    title: `退換貨政策 | ${storeName}`,
+    description: "了解我們的退換貨政策、流程及條款",
+  }
 }
 
 export default async function ReturnPolicyPage({ params }: Props) {

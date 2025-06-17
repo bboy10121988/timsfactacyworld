@@ -20,4 +20,8 @@ async function getAdminToken() {
   }
 }
 
-getAdminToken();
+export { getAdminToken };
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  getAdminToken();
+}

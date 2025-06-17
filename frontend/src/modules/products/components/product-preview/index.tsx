@@ -8,6 +8,7 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
+import { getPromotionLabels, debugPromotionLabels, getProductStockStatus } from "@lib/promotion-utils"
 
 type ProductOption = {
   title: string
@@ -31,13 +32,26 @@ export default function ProductPreview({
     product,
   })
 
-  console.log('Product details:', {
-    id: product.id,
-    title: product.title,
-    imagesCount: product.images?.length,
-    images: product.images,
-    thumbnail: product.thumbnail
-  })
+  // 使用新的促銷標籤系統
+  const promotionLabels = useMemo(() => {
+    return getPromotionLabels(product)
+  }, [product])
+
+  // 獲取庫存狀態
+  const productStockStatus = useMemo(() => {
+    return getProductStockStatus(product)
+  }, [product])
+
+  // 為了向後相容，保留 isProductSoldOut
+  const isProductSoldOut = productStockStatus.isSoldOut
+
+  // 除錯資訊（開發環境）
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const debugInfo = debugPromotionLabels(product)
+      console.log(`【${product.title}】促銷標籤分析:`, debugInfo)
+    }
+  }, [product])
 
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({})
   const [isAdding, setIsAdding] = useState(false)
@@ -102,13 +116,17 @@ export default function ProductPreview({
     }
   }, [autoSelectSingleOptions])
 
-  console.log('產品選項:', productOptions)
-  console.log('產品選項順序:', productOptions.map(opt => opt.title))
+  // ...existing code...
 
   // 根據選擇的選項找到對應的變體
   const findVariantId = (selectedOpts: SelectedOptions): string | undefined => {
     if (!product.variants || product.variants.length === 0) {
       return undefined
+    }
+
+    // 如果商品沒有選項，直接返回第一個變體
+    if (productOptions.length === 0) {
+      return product.variants[0]?.id
     }
 
     // 檢查是否有選擇的選項
@@ -205,14 +223,14 @@ export default function ProductPreview({
   }
 
   return (
-    <div className="relative group w-full mb-8">
+    <div className={`relative group w-full mb-8 ${isFeatured ? 'featured-product-card' : ''}`}>
       {/* 成功提示彈窗 */}
       {showSuccessMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-black/90 text-white px-4 py-2 rounded-md shadow-lg flex items-center space-x-2 animate-fade-in-down">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span className="text-body-small">Item Added to Cart</span>
+          <span className="text-xs">Item Added to Cart</span>
         </div>
       )}
       
@@ -224,71 +242,92 @@ export default function ProductPreview({
         >
           {/* 商品圖片區塊 */}
           <LocalizedClientLink href={`/products/${product.handle}`} className="block absolute inset-0">
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`absolute inset-0 flex items-center justify-center ${isFeatured ? 'product-image' : ''}`}>
               <Thumbnail 
                 thumbnail={product.thumbnail} 
                 images={product.images || []}
                 size="full"
               />
             </div>
+            
+            {/* 左上角標籤區域 */}
+            <div className="product-labels-container" style={{ zIndex: 30 }}>
+              {/* 使用新的促銷標籤系統 */}
+              {promotionLabels.map((label, index) => (
+                <div key={`${label.type}-${index}`} className={label.className}>
+                  {label.text}
+                </div>
+              ))}
+            </div>
+            
+            {/* 售完狀態 - 只顯示反灰層 */}
+            {isProductSoldOut && (
+              <div className="absolute inset-0 bg-black/50 z-20 pointer-events-none">
+              </div>
+            )}
           </LocalizedClientLink>
 
           {/* 選項和加入購物車區塊 - 在 Link 外面 */}
-          <div className="absolute bottom-0 left-0 right-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out transform translate-y-1 group-hover:translate-y-0">
-            <div className="w-full bg-white/95 backdrop-blur-[2px]">
-              {productOptions.map((option, index) => (
-                <div key={index} className="flex flex-col border-t first:border-t-0 border-black/[0.06]">
-                  <div className="text-body-small text-black/60 px-2 md:px-8 py-1 border-b border-black/[0.06]">
-                    {option.title}
-                  </div>
-                  <div 
-                    className="grid"
-                    style={{ 
-                      gridTemplateColumns: `repeat(${option.values.length}, minmax(0, 1fr))`
-                    }}
-                  >
-                    {option.values.map((value, valueIndex) => (
-                      <button
-                        key={valueIndex}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handleOptionSelect(option.title, value)
-                        }}
-                        className={`w-full py-3 border border-black h4 transition-colors
-                          ${selectedOptions[option.title] === value 
-                            ? 'bg-black text-white' 
-                            : 'text-black hover:bg-black hover:text-white'}`}
-                      >
-                        {value}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {productOptions.length > 0 && (
-                <>
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={isAdding || !findVariantId(selectedOptions)}
-                    className="w-full py-3 border border-black h4 hover:bg-black hover:text-white transition-colors disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200"
-                  >
-                    {isAdding ? "Adding..." : "Add to Cart"}
-                  </button>
-                  {error && (
-                    <div className="text-red-500 text-xs text-center py-1 px-2 md:px-8">
-                      {error}
+          {!isProductSoldOut && (
+            <div className="absolute bottom-0 left-0 right-0 
+                          md:opacity-0 md:group-hover:opacity-100 md:transition-all md:duration-200 md:ease-in-out md:transform md:translate-y-full md:group-hover:translate-y-0
+                          opacity-100 translate-y-0">
+              <div className="w-full bg-white/95 backdrop-blur-[2px]">
+                {productOptions
+                  .filter(option => option.values.length > 1) // 只顯示有多個選擇的選項
+                  .map((option, index) => (
+                  <div key={index} className="flex flex-col border-t first:border-t-0 border-black/[0.06]">
+                    <div className="text-xs text-black/60 px-2 md:px-8 py-1 border-b border-black/[0.06]">
+                      {option.title}
                     </div>
-                  )}
-                </>
-              )}
+                    <div 
+                      className="grid"
+                      style={{ 
+                        gridTemplateColumns: `repeat(${option.values.length}, minmax(0, 1fr))`
+                      }}
+                    >
+                      {option.values.map((value, valueIndex) => (
+                        <button
+                          key={valueIndex}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleOptionSelect(option.title, value)
+                          }}
+                          className={`w-full py-2 border border-black text-sm transition-colors
+                            ${selectedOptions[option.title] === value 
+                              ? 'bg-black text-white' 
+                              : 'text-black hover:bg-black hover:text-white'}`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* 購物車按鈕 - 無論是否有選項都顯示 */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAdding || (productOptions.filter(option => option.values.length > 1).length > 0 && !findVariantId(selectedOptions))}
+                  className="w-full py-2 border border-black text-sm hover:bg-black hover:text-white transition-colors disabled:bg-gray-200 disabled:text-gray-500 disabled:border-gray-200"
+                >
+                  {isAdding ? "處理中..." : 
+                   productStockStatus.canPreorder ? "預訂" : "加入購物車"}
+                </button>
+                {error && (
+                  <div className="text-red-500 text-xs text-center py-1 px-2 md:px-8">
+                    {error}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 商品資訊區塊 */}
         <LocalizedClientLink href={`/products/${product.handle}`}>
           <div className="px-2 md:px-8 mt-4">
-            <h3 className="text-body-small" data-testid="product-title">
+            <h3 className="text-xs" data-testid="product-title">
               {product.title}
             </h3>
             {cheapestPrice && (

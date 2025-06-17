@@ -10,7 +10,7 @@ const CategoriesAndTagsTab = ({ product }: ProductTabsProps) => {
       <div className="grid grid-cols-1 gap-y-8">
         {/* 分類 */}
         <div>
-          <h3 className="text-base-semi mb-4">商品分類</h3>
+          <h3 className="text-base font-semibold mb-4">商品分類</h3>
           <div className="grid grid-cols-1 gap-y-2">
             {product.collection ? (
               <div className="flex items-center gap-2">
@@ -24,7 +24,7 @@ const CategoriesAndTagsTab = ({ product }: ProductTabsProps) => {
 
         {/* 標籤 */}
         <div>
-          <h3 className="text-base-semi mb-4">商品標籤</h3>
+          <h3 className="text-base font-semibold mb-4">商品標籤</h3>
           <div className="flex flex-wrap gap-2">
             {product.tags && product.tags.length > 0 ? (
               product.tags.map((tag) => (

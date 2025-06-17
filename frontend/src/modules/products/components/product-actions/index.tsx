@@ -286,10 +286,36 @@ export default function ProductActions({
       return true
     }
 
-    // 由於 Store API 限制，暫時使用 manage_inventory 作為庫存指示
-    // 在實際生產環境中，應該通過管理員 API 或自定義端點獲取準確的庫存數量
-    console.log("📦 管理庫存但不允許預購，假設有庫存（需要後續實現真實庫存檢查）")
-    return true
+    // 檢查實際庫存數量 - 與 ProductPreview 保持一致的邏輯
+    const hasStock = selectedVariantMemo.inventory_quantity !== undefined && selectedVariantMemo.inventory_quantity > 0
+    console.log("📦 管理庫存且不允許預購，庫存數量:", selectedVariantMemo.inventory_quantity, "有庫存:", hasStock)
+    return hasStock
+  }, [selectedVariantMemo])
+
+  // 計算選中變體的庫存狀態
+  const variantStockStatus = useMemo(() => {
+    if (!selectedVariantMemo) {
+      return { hasStock: false, canPreorder: false, isSoldOut: false }
+    }
+
+    // 如果不管理庫存，永遠有庫存
+    if (!selectedVariantMemo.manage_inventory) {
+      return { hasStock: true, canPreorder: false, isSoldOut: false }
+    }
+
+    // 檢查庫存數量
+    const hasStock = selectedVariantMemo.inventory_quantity !== undefined && selectedVariantMemo.inventory_quantity > 0
+
+    if (hasStock) {
+      return { hasStock: true, canPreorder: false, isSoldOut: false }
+    } else {
+      // 沒有庫存
+      if (selectedVariantMemo.allow_backorder) {
+        return { hasStock: false, canPreorder: true, isSoldOut: false }
+      } else {
+        return { hasStock: false, canPreorder: false, isSoldOut: true }
+      }
+    }
   }, [selectedVariantMemo])
 
   const handleAddToCart = async () => {
@@ -433,12 +459,16 @@ export default function ProductActions({
         <div className="text-sm">
           {selectedVariantMemo ? (
             <div className="flex items-center gap-2">
-              <span className={`inline-block w-3 h-3 rounded-full ${inStockMemo ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              <span className={inStockMemo ? 'text-green-600' : 'text-red-600'}>
-                {inStockMemo 
-                  ? '有庫存'
-                  : (selectedVariantMemo as any)?.allow_backorder ? '可預訂' : '缺貨中'
-                }
+              <span className={`inline-block w-3 h-3 rounded-full ${
+                variantStockStatus.hasStock ? 'bg-green-500' : 
+                variantStockStatus.canPreorder ? 'bg-orange-500' : 'bg-red-500'
+              }`}></span>
+              <span className={
+                variantStockStatus.hasStock ? 'text-green-600' : 
+                variantStockStatus.canPreorder ? 'text-orange-600' : 'text-red-600'
+              }>
+                {variantStockStatus.hasStock ? '有庫存' :
+                 variantStockStatus.canPreorder ? '可預訂' : '售完'}
               </span>
             </div>
           ) : (
@@ -457,10 +487,11 @@ export default function ProductActions({
               onClick={handleAddToCart}
               variant="secondary"
               className="w-full h-12 uppercase tracking-wide text-sm font-light border border-black hover:bg-gray-100"
-              disabled={!inStockMemo || !!disabled || isAdding}
+              disabled={variantStockStatus.isSoldOut || !!disabled || isAdding}
               isLoading={isAdding}
             >
-              {isAdding ? '處理中...' : '加入購物車'}
+              {isAdding ? '處理中...' : 
+               variantStockStatus.canPreorder ? '預訂' : '加入購物車'}
             </Button>
             
             {/* 立即購買按鈕 - 放在下面 */}
@@ -468,11 +499,12 @@ export default function ProductActions({
               onClick={handleBuyNow}
               variant="primary"
               className="w-full h-12 uppercase tracking-wide text-sm font-light bg-black hover:bg-gray-800"
-              disabled={!inStockMemo || !!disabled || isAdding}
+              disabled={variantStockStatus.isSoldOut || !!disabled || isAdding}
               isLoading={isAdding}
               data-testid="add-product-button"
             >
-              {isAdding ? '處理中...' : '立即購買'}
+              {isAdding ? '處理中...' : 
+               variantStockStatus.canPreorder ? '立即預訂' : '立即購買'}
             </Button>
           </div>
         )}
@@ -480,6 +512,7 @@ export default function ProductActions({
         <MobileActions
           product={product}
           show={!inView}
+          variantStockStatus={variantStockStatus}
         />
       </div>
     </>

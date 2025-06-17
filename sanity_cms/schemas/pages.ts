@@ -30,32 +30,11 @@ export default {
     {
       name: 'seo',
       title: 'SEO 設定',
-      type: 'object',
+      type: 'seoMeta',
       options: {
         collapsible: true,
         collapsed: false,
       },
-      fields: [
-        {
-          name: 'metaTitle',
-          title: 'Meta 標題',
-          type: 'string',
-          description: '此頁面特定的標題，將覆蓋網站設定中的預設網站標題，顯示在瀏覽器分頁和搜尋結果中',
-        },
-        {
-          name: 'metaDescription',
-          title: 'Meta 描述',
-          type: 'text',
-          rows: 3,
-          description: '頁面的 meta description，用於 SEO',
-        },
-        {
-          name: 'canonicalUrl',
-          title: 'Canonical URL',
-          type: 'url',
-          description: '頁面的標準 URL',
-        },
-      ],
     },
     {
       name: 'mainSections',

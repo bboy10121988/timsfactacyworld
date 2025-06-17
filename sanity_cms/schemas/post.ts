@@ -29,6 +29,15 @@ export default {
       options: { source: 'title', maxLength: 96 },
     },
     {
+      name: 'seo',
+      title: 'SEO 設定',
+      type: 'seoMeta',
+      options: {
+        collapsible: true,
+        collapsed: false,
+      },
+    },
+    {
       name: 'author',
       title: '作者',
       type: 'reference',

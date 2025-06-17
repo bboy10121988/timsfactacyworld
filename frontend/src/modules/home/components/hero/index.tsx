@@ -1,7 +1,6 @@
 "use client"
 
 import { Button, Heading } from "@medusajs/ui"
-import { getHomeHero } from "@lib/sanity"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -57,20 +56,35 @@ const Hero = ({ slides, settings }: HeroProps) => {
 
   return (
     <div className="relative w-full">
-      {slide.backgroundImage && (
-        <div className="relative aspect-[21/9] small:aspect-[16/9]">
-          <Image
-            src={slide.backgroundImage}
-            alt={`${slide.heading} - ${slide.subheading}`}
-            fill
-            className="object-cover transition-all duration-700 ease-in-out transform hover:scale-[1.02]"
-            sizes="100vw"
-            priority
-          />
-        </div>
-      )}
+      {/* 輪播圖片容器 - 添加淡入淡出效果 */}
+      <div className="relative aspect-[21/9] small:aspect-[16/9] overflow-hidden">
+        {slides.map((slideItem, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {slideItem.backgroundImage && (
+              <Image
+                src={slideItem.backgroundImage}
+                alt={`${slideItem.heading} - ${slideItem.subheading}`}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority={index === 0}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* 內容覆蓋層 - 添加淡入淡出效果 */}
       <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center p-4 md:p-16 lg:p-32 gap-6 bg-gradient-to-b from-black/10 via-black/30 to-black/50">
-        <span>
+        <div 
+          key={currentSlide}
+          className="animate-fade-in-content"
+        >
           <Heading
             level="h1"
             className="text-heading-1 text-white font-heading text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-6"
@@ -93,48 +107,32 @@ const Hero = ({ slides, settings }: HeroProps) => {
               {slide.subheading}
             </Heading>
           )}
-        </span>
-        {slide.buttonText && slide.buttonLink && (
-          <Button asChild variant="secondary" 
-            className="btn bg-white hover:bg-white/90 text-gray-900 px-8 py-3 text-base md:text-lg font-medium rounded-lg 
-              shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
-            style={{
-              letterSpacing: "var(--letter-spacing-wide)",
-              fontFamily: "var(--font-base)"
-            }}
-          >
-            <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-          </Button>
-        )}
+          {slide.buttonText && slide.buttonLink && (
+            <Button asChild variant="secondary" 
+              className="btn bg-white hover:bg-white/90 text-gray-900 px-8 py-3 text-base md:text-lg font-medium rounded-lg 
+                shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              style={{
+                letterSpacing: "var(--letter-spacing-wide)",
+                fontFamily: "var(--font-base)"
+              }}
+            >
+              <Link href={slide.buttonLink}>{slide.buttonText}</Link>
+            </Button>
+          )}
+        </div>
       </div>
 
-      {settings.showArrows && slides.length > 1 && (
-        <>
-          <button
-            onClick={goToPrevSlide}
-            className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 text-white p-4 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 group"
-            aria-label="上一張圖片"
-          >
-            ←
-          </button>
-          <button
-            onClick={goToNextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-lg transition-colors"
-            aria-label="下一張圖片"
-          >
-            →
-          </button>
-        </>
-      )}
-
+      {/* 點點導航 - 改進樣式和響應 */}
       {settings.showDots && slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-3">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentSlide ? "bg-white" : "bg-white/50"
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? "bg-white scale-110 shadow-lg" 
+                  : "bg-white/60 hover:bg-white/80 scale-100"
               }`}
               aria-label={`前往第 ${index + 1} 張圖片`}
             />

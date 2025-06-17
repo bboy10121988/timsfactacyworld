@@ -137,7 +137,12 @@ export default async function Nav() {
       )}
 
       <div className="sticky top-0 inset-x-0 z-50 group transition-all duration-300">
-        <header className="relative h-20 mx-auto border-b bg-white/95 border-ui-border-base backdrop-blur transition-all duration-300 hover:bg-white">
+        <header 
+          className="relative mx-auto border-b bg-white/95 border-ui-border-base backdrop-blur transition-all duration-300 hover:bg-white"
+          style={{ 
+            height: `${Math.max(80, 80 + Math.floor(((headerData?.logoWidth || 150) - 150) / 50) * 8)}px` 
+          }}
+        >
           <nav className="px-6 md:px-12 h-full max-w-[1440px] mx-auto">
           <div className="flex justify-between items-center h-full animate-fade-in">
             {/* 左側區塊 */}
@@ -202,14 +207,27 @@ export default async function Nav() {
                 data-testid="nav-store-link"
               >
                 {headerData?.logo ? (
-                  <Image
-                    src={headerData.logo.url}
-                    alt={headerData.logo.alt || "Store logo"}
-                    width={150}
-                    height={40}
-                    className="h-10 w-auto object-contain"
-                    style={{ minWidth: '150px' }}
-                  />
+                  (() => {
+                    const logoWidth = headerData?.logoWidth || 150
+                    // 計算動態高度：基礎高度 + logo 寬度影響  
+                    const navHeight = Math.max(80, 80 + Math.floor((logoWidth - 150) / 50) * 8)
+                    // logo 高度為導航列高度的 50%，但至少 40px，最多 80px
+                    const logoHeight = Math.min(80, Math.max(40, navHeight * 0.5))
+                    
+                    return (
+                      <Image
+                        src={headerData.logo.url}
+                        alt={headerData.logo.alt || "Store logo"}
+                        width={logoWidth}
+                        height={logoHeight}
+                        className="w-auto object-contain transition-all duration-300"
+                        style={{ 
+                          minWidth: `${logoWidth}px`,
+                          height: `${logoHeight}px`
+                        }}
+                      />
+                    )
+                  })()
                 ) : (
                   headerData?.storeName || "Medusa Store"
                 )}

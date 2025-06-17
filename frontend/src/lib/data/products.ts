@@ -48,7 +48,7 @@ export const listProducts = async ({
         limit,
         offset,
         region_id: region.id,
-        fields: "*options.values,*variants.options.option,+variants.inventory_quantity",
+        fields: "*options.values,*variants.options.option,+variants.inventory_quantity,+metadata",
       },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
@@ -153,7 +153,7 @@ export const getProduct = async ({
       query: {
         handle,
         region_id: region.id,
-        fields: "*options.values,*variants.options.option,+variants.inventory_quantity",
+        fields: "*options.values,*variants.options.option,+variants.inventory_quantity,+metadata",
       },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,

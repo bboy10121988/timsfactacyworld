@@ -10,14 +10,14 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
       <div className="grid grid-cols-1 gap-y-6">
         <div>
           <span className="font-semibold text-base">商品描述</span>
-          <p className="mt-2 text-gray-700 whitespace-pre-line">
+          <p className="mt-2 text-base text-gray-700 whitespace-pre-line">
             {product.description || "暫無商品描述"}
           </p>
         </div>
         {product.material && (
           <div>
             <span className="font-semibold text-base">材質</span>
-            <p className="mt-2 text-gray-700">{product.material}</p>
+            <p className="mt-2 text-base text-gray-700">{product.material}</p>
           </div>
         )}
       </div>

@@ -10,6 +10,12 @@ export default {
       description: '用於SEO和管理目的的標題'
     },
     {
+      name: 'seo',
+      title: 'SEO設定',
+      type: 'seoMeta',
+      description: '搜尋引擎優化設定'
+    },
+    {
       name: 'mainSections',
       title: '頁面區塊',
       type: 'array',

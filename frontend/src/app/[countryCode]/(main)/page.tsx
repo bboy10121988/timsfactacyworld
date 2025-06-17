@@ -15,9 +15,23 @@ import type { FeaturedProductsSection } from '@lib/types/page-sections'
 import type { BlogSection } from '@lib/types/page-sections'
 import type { YoutubeSection as YoutubeSectionType } from '@lib/types/page-sections'
 import type { ServiceCards } from '@lib/types/service-cards'
+import { getStoreName } from "@lib/store-name"
 
 
-// Metadata will be inherited from root layout
+export async function generateMetadata(): Promise<Metadata> {
+  const { title } = await getHomeBanners()
+  const storeName = await getStoreName()
+  
+  return {
+    title: title || storeName,
+    description: '專業美髮沙龍與高級美髮產品',
+    openGraph: {
+      title: title || storeName,
+      description: '專業美髮沙龍與高級美髮產品',
+    }
+  }
+}
+
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {

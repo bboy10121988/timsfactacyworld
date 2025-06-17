@@ -681,6 +681,17 @@ input[type="search"]::-webkit-search-results-decoration {
   }
 }
 
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideInRight {
   from {
     transform: translateX(30px);
@@ -698,6 +709,10 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .animate-slide-in {
   animation: slideInRight 0.6s ease forwards;
+}
+
+.animate-fade-in-content {
+  animation: fadeInContent 0.8s ease forwards;
 }
 
 /* 導航欄滾動效果 */
@@ -1035,12 +1050,14 @@ input[type="search"]::-webkit-search-results-decoration {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    /* 移除 hover 放大效果 */
+    /* transition: transform 0.5s ease; */
   }
 
-  .image-container:hover img {
+  /* 移除圖文區塊的 hover 放大效果 */
+  /* .image-container:hover img {
     transform: scale(1.05);
-  }
+  } */
 
   /* 精選商品區塊 */
   .featured-products {
@@ -1053,6 +1070,24 @@ input[type="search"]::-webkit-search-results-decoration {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-6);
     margin-top: var(--spacing-8);
+  }
+
+  /* 精選商品卡片 - 淡入淡出效果 */
+  .featured-product-card {
+    transition: opacity 0.4s ease, transform 0.3s ease;
+  }
+
+  .featured-product-card:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+  }
+
+  .featured-product-card .product-image {
+    transition: transform 0.4s ease;
+  }
+
+  .featured-product-card:hover .product-image {
+    transform: scale(1.03);
   }
 
   /* 部落格文章區塊 */
@@ -1457,4 +1492,196 @@ input[type="search"]::-webkit-search-results-decoration {
     color: #000000;
     border-color: #ffffff;
   }
-}
+}  /* ========== 商品標籤樣式 ========== */
+  .product-label {
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 600; /* font-semibold */
+    text-transform: uppercase;
+    letter-spacing: 0.05em; /* tracking-wide */
+    padding: 0.25rem 0.5rem; /* px-2 py-1 */
+    border-radius: 0.25rem; /* rounded */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    backdrop-filter: blur(4px);
+    z-index: 20;
+    border-width: 1px;
+  }
+
+  /* 折扣標籤樣式 */
+  .product-label.discount {
+    background: linear-gradient(135deg, #ef4444, #dc2626); /* gradient red */
+    color: white;
+    font-weight: 700; /* font-bold */
+    border-color: #f87171; /* border-red-400 */
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* 一般促銷標籤樣式 */
+  .product-label.promotion {
+    background-color: #ef4444; /* bg-red-500 */
+    color: white;
+    border-color: #f87171; /* border-red-400 */
+  }
+
+  /* 新品標籤 */
+  .product-label.new {
+    background-color: #10b981; /* bg-green-500 */
+    color: white;
+    border-color: #34d399; /* border-green-400 */
+  }
+
+  /* 熱銷標籤 */
+  .product-label.hot {
+    background-color: #f97316; /* bg-orange-500 */
+    color: white;
+    border-color: #fb923c; /* border-orange-400 */
+  }
+
+  /* 人氣標籤 */
+  .product-label.popular {
+    background-color: #f97316; /* bg-orange-500 */
+    color: white;
+    border-color: #fb923c; /* border-orange-400 */
+  }
+
+  /* 限量標籤 */
+  .product-label.limited {
+    background-color: #8b5cf6; /* bg-purple-500 */
+    color: white;
+    border-color: #a78bfa; /* border-purple-400 */
+  }
+
+  /* 暢銷標籤 */
+  .product-label.bestseller {
+    background-color: #eab308; /* bg-yellow-500 */
+    color: white;
+    border-color: #facc15; /* border-yellow-400 */
+  }
+
+  /* 精選標籤 */
+  .product-label.featured {
+    background-color: #06b6d4; /* bg-cyan-500 */
+    color: white;
+    border-color: #22d3ee; /* border-cyan-400 */
+  }
+
+  /* 特殊活動標籤 */
+  .product-label.special-event {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1); /* gradient purple to indigo */
+    color: white;
+    border-color: #a78bfa; /* border-purple-400 */
+    animation: pulse-glow 2s infinite;
+  }
+
+  .product-label.preorder {
+    background-color: #f97316; /* bg-orange-500 */
+    color: white;
+    border-color: #fb923c; /* border-orange-400 */
+  }
+
+  .product-label.sold-out {
+    background-color: #dc2626; /* bg-red-600 */
+    color: white;
+    font-size: 0.75rem; /* text-xs - 與預訂標籤相同 */
+    padding: 0.25rem 0.5rem; /* px-2 py-1 - 與預訂標籤相同 */
+    border-color: #ef4444; /* border-red-500 */
+  }
+
+  /* 促銷活動標籤 */
+  .product-label.campaign {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8); /* gradient blue */
+    color: white;
+    border-color: #60a5fa; /* border-blue-400 */
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* 組合優惠標籤 */
+  .product-label.bundle {
+    background-color: #059669; /* bg-green-600 */
+    color: white;
+    border-color: #10b981; /* border-green-500 */
+  }
+
+  /* 限時搶購標籤 */
+  .product-label.flash-sale {
+    background: linear-gradient(135deg, #dc2626, #b91c1c); /* gradient red */
+    color: white;
+    border-color: #ef4444; /* border-red-500 */
+    animation: flash-pulse 1s infinite;
+  }
+
+  /* 清倉特價標籤 */
+  .product-label.clearance {
+    background-color: #dc2626; /* bg-red-600 */
+    color: white;
+    border-color: #ef4444; /* border-red-500 */
+    font-weight: 700; /* font-bold */
+  }
+
+  /* 獨家標籤 */
+  .product-label.exclusive {
+    background: linear-gradient(135deg, #374151, #1f2937); /* gradient gray */
+    color: white;
+    border-color: #4b5563; /* border-gray-600 */
+  }
+
+  /* 特價標籤 */
+  .product-label.sale {
+    background-color: #dc2626; /* bg-red-600 */
+    color: white;
+    border-color: #ef4444; /* border-red-500 */
+  }
+
+  /* 折扣碼提示標籤 */
+  .product-label.discount-code {
+    background-color: #6366f1; /* bg-indigo-500 */
+    color: white;
+    border-color: #818cf8; /* border-indigo-400 */
+    font-size: 0.625rem; /* text-xs */
+  }
+
+  /* 折扣標籤特殊動畫 */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(239, 68, 68, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* 限時搶購動畫 */
+  @keyframes flash-pulse {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(220, 38, 38, 0.5);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(220, 38, 38, 0.8);
+      transform: scale(1.02);
+    }
+  }
+
+  /* 標籤容器 */
+  .product-labels-container {
+    position: absolute;
+    top: 0.5rem; /* top-2 */
+    left: 0.5rem; /* left-2 */
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* gap-1 */
+    pointer-events: none;
+    z-index: 30; /* 提高 z-index 讓標籤在反灰層之上 */
+  }
+
+  /* 響應式調整 */
+  @media (max-width: 640px) {
+    .product-label {
+      font-size: 0.625rem; /* 更小的字體 */
+      padding: 0.125rem 0.375rem; /* 更小的內距 */
+    }
+
+    .product-labels-container {
+      top: 0.25rem;
+      left: 0.25rem;
+    }
+  }

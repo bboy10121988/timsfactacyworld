@@ -4,6 +4,7 @@ export interface Footer {
     url: string
     alt?: string
   }
+  logoWidth?: number
   sections?: Section[]
   contactInfo?: {
     phone?: string

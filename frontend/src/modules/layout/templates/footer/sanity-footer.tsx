@@ -26,13 +26,13 @@ export default async function SanityFooter() {
             {/* 品牌區塊 */}
             <div className="space-y-6">
               <LocalizedClientLink href="/" className="block">
-                <div className="w-40">
+                <div style={{ width: `${footer?.logoWidth || 160}px` }}>
                   <Image
                     src={footer?.logo?.url || "/images/44dto-bmpua.webp"}
                     alt={footer?.logo?.alt || "SALON"}
-                    width={160}
+                    width={footer?.logoWidth || 160}
                     height={60}
-                    className="w-full"
+                    className="w-full h-auto object-contain"
                   />
                 </div>
               </LocalizedClientLink>

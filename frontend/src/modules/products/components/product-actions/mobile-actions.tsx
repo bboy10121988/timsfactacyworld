@@ -19,11 +19,17 @@ import { HttpTypes } from "@medusajs/types"
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
   show: boolean
+  variantStockStatus?: {
+    hasStock: boolean
+    canPreorder: boolean
+    isSoldOut: boolean
+  }
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
   product,
   show,
+  variantStockStatus,
 }) => {
   const router = useRouter()
   const { state, open, close } = useToggleState()
@@ -87,12 +93,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
     }
   }
 
-  // 檢查是否可以使用預訂功能
-  const canBackorder = useMemo(() => {
-    return selectedVariant?.allow_backorder && 
-           (selectedVariant.inventory_quantity === 0 || 
-            selectedVariant.inventory_quantity === undefined)
-  }, [selectedVariant])
+  // 不再需要 canBackorder 邏輯，因為我們使用傳入的 variantStockStatus
 
   return (
     <>
@@ -120,32 +121,32 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               </div>
               <Button
                 onClick={handleAddToCart}
-                disabled={!inStock || !selectedVariant}
+                disabled={variantStockStatus?.isSoldOut || !selectedVariant}
                 className="w-full"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
                 {!selectedVariant
                   ? "選擇款式"
-                  : !inStock
-                  ? "缺貨中"
-                  : canBackorder
-                  ? "加入預訂"
+                  : variantStockStatus?.isSoldOut
+                  ? "售完"
+                  : variantStockStatus?.canPreorder
+                  ? "預訂"
                   : "加入購物車"}
               </Button>
             </div>
             <Button
               onClick={handleBuyNow}
               variant="secondary"
-              disabled={!inStock || !selectedVariant}
+              disabled={variantStockStatus?.isSoldOut || !selectedVariant}
               className="w-full border border-black"
             >
               {!selectedVariant
                 ? "選擇款式"
-                : !inStock
-                ? "缺貨中"
-                : canBackorder
-                ? "預訂購買"
+                : variantStockStatus?.isSoldOut
+                ? "售完"
+                : variantStockStatus?.canPreorder
+                ? "立即預訂"
                 : "立即購買"}
             </Button>
             {!isSimple && (
@@ -161,13 +162,13 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             {/* 顯示庫存狀態 */}
             {selectedVariant && (
               <div className="text-xs text-gray-500 text-center mt-1">
-                {!inStock
-                  ? "缺貨中"
-                  : canBackorder
-                  ? "可接受預訂"
-                  : selectedVariant.inventory_quantity !== undefined
-                  ? `庫存: ${selectedVariant.inventory_quantity}`
-                  : "有庫存"}
+                {variantStockStatus?.hasStock
+                  ? `庫存: ${selectedVariant.inventory_quantity || '充足'}`
+                  : variantStockStatus?.canPreorder
+                  ? "可預訂"
+                  : variantStockStatus?.isSoldOut
+                  ? "售完"
+                  : "請選擇規格"}
               </div>
             )}
           </div>

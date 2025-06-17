@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       query: {
         limit: 100,  // 獲取更多產品以確保搜索準確性
         region_id: defaultRegion.id,
-        fields: "handle,id,title,thumbnail,variants,options,variants.title,variants.prices.amount,variants.prices.original_amount,description,images,collection_id,created_at,updated_at,type_id,status,weight,length,height,width,material,hs_code,origin_country,mid_code",
+        fields: "handle,id,title,thumbnail,variants,options,metadata,variants.title,variants.prices.amount,variants.prices.original_amount,variants.manage_inventory,variants.allow_backorder,variants.inventory_quantity,description,images,collection_id,created_at,updated_at,type_id,status,weight,length,height,width,material,hs_code,origin_country,mid_code",
       },
       headers: {
         "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,

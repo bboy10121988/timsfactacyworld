@@ -7,6 +7,7 @@ import homePage from './homePage'
 import pages from './pages'
 import footer from './footer'
 import returnPolicy from './returnPolicy'
+import seoMeta from './seoMeta'
 
 // Block schemas
 import mainBanner from './blocks/mainBanner'
@@ -28,6 +29,9 @@ export const schemaTypes = [
   header,
   footer,
   returnPolicy,
+
+  // Objects
+  seoMeta,
 
   // Blocks
   mainBanner,

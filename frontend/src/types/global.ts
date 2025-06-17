@@ -29,6 +29,7 @@ export type SanityHeader = {
     alt: string
   }
   storeName?: string
+  logoWidth?: number
   navigation?: {
     name: string
     href: string
@@ -48,6 +49,46 @@ export type SanityHeader = {
       content?: string
     }
     linkUrl?: string
-    pauseOnHover?: boolean
+  pauseOnHover?: boolean
   }
+}
+
+export type SeoMeta = {
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  canonicalUrl?: string
+  noIndex?: boolean
+  ogTitle?: string
+  ogDescription?: string
+  ogImage?: {
+    asset?: {
+      url: string
+    }
+    alt?: string
+    hotspot?: {
+      x: number
+      y: number
+      height: number
+      width: number
+    }
+  }
+}
+
+export type BlogPost = {
+  _id: string
+  _type: string
+  title: string
+  slug: string
+  publishedAt: string
+  body: any
+  author: {
+    name: string
+    bio?: string
+    image?: string
+  }
+  mainImage?: string
+  categories?: Array<{
+    title: string
+  }>
 }

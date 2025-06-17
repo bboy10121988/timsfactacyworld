@@ -4,6 +4,7 @@ import type { Category } from './types/sanity'
 import type { MainSection } from './types/page-sections'
 import type { PageData } from './types/pages'
 import type { Footer } from './types/footer'
+import type { FeaturedProduct, BlogPost } from './types/global'
 
 const client = createClient({
   projectId: "m7o2mv1n",
@@ -13,7 +14,7 @@ const client = createClient({
   token: "skxPHbtETeuof6qw2oYMoST8kD2UCmM1UTWEjAqw03YETyws2ZhLtUlUGoPieCQQ9Y4SkaoLWXHZ8mOs34ZUmqFMPnr7tnoqY1HuLVnMTwZ0SVhDV2mOuk336ICH1h7JuzUnEyyYOiJljwvERUlw7GEelitairKw8gRMHs8HABPpZZT1TWzZ"
 })
 
-export async function getHomeBanners() {
+export async function getHomeBanners(): Promise<{ title: string; mainSections: MainSection[] }> {
   const query = `*[_type == "homePage"][0] {
     title,
     "mainSections": mainSections[] {
@@ -123,7 +124,7 @@ export async function getHomeBanners() {
     })
   }
   
-  return result as { mainSections: MainSection[] }
+  return result as { title: string; mainSections: MainSection[] }
 }
 
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
@@ -144,6 +145,7 @@ export async function getHeader() {
       alt
     },
     storeName,
+    logoWidth,
     navigation[]{
       name,
       href
@@ -536,6 +538,7 @@ export async function getFooter(): Promise<Footer | null> {
       "url": asset->url,
       alt
     },
+    logoWidth,
     sections[] {
       title,
       links[] {

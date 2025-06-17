@@ -21,6 +21,14 @@ export default defineType({
       },
     }),
     defineField({
+      name: 'logoWidth',
+      title: 'Logo 寬度',
+      type: 'number',
+      description: 'Logo 的顯示寬度（像素），預設為 160px',
+      initialValue: 160,
+      validation: rule => rule.min(50).max(500).warning('Logo 寬度建議在 50px-500px 之間')
+    }),
+    defineField({
       name: 'sections',
       title: '頁尾自訂模塊區域',
       description: '自訂的頁尾模塊區域，從左側第三欄開始（前兩欄為商品系列和商品分類，系統自動生成），最多可新增三個模塊（總共5欄）',

@@ -5,12 +5,14 @@ import ProductActions from "@modules/products/components/product-actions"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
 import ProductTabs from "@modules/products/components/product-tabs"
+import ProductInfoTab from "@modules/products/components/product-info-tab"
 import LiveInventory from "@modules/products/components/live-inventory"
 import ReturnPolicyAccordion from "@modules/products/components/return-policy-accordion"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import { ProductActionProvider } from "@lib/context/product-context"
 import { HttpTypes } from "@medusajs/types"
+import StoreName from "@modules/products/components/store-name"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -70,14 +72,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         {/* 右側：商品資訊區塊 */}
         <div className="flex flex-col gap-y-6">
           {/* 品牌名稱 */}
-          <div className="uppercase text-xs tracking-widest text-gray-500">TIMS HAIR SALON</div>
+          <StoreName />
           
           {/* 產品標題 */}
           <h1 className="text-2xl font-light uppercase tracking-wide">{product.title}</h1>
           
           {/* 產品副標題 */}
           {product.subtitle && (
-            <p className="text-sm text-gray-600 mt-1">{product.subtitle}</p>
+            <p className="text-base text-gray-600 mt-1">{product.subtitle}</p>
           )}
           
           {/* 產品行動區塊 - 購買選項 */}
@@ -91,8 +93,13 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             </Suspense>
           </ProductActionProvider>
 
-          {/* 產品資訊 - 標籤式版本 */}
-          <div className="mt-2 border-t border-gray-200 pt-6">
+          {/* 產品資訊 - 直接顯示，不需要展開 */}
+          <div className="mt-6 border-t border-gray-200 pt-6">
+            <ProductInfoTab product={product} />
+          </div>
+
+          {/* 其他產品標籤 - 保持展開收合功能 */}
+          <div className="mt-6 border-t border-gray-200 pt-6">
             <ProductTabs product={product} />
           </div>
         </div>
