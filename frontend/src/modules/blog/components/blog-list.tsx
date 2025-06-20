@@ -12,11 +12,12 @@ interface Category {
 interface BlogListProps {
   initialPosts: BlogPost[]
   categories: Category[]
+  countryCode?: string
 }
 
 const POSTS_PER_PAGE = 9
 
-export default function BlogList({ initialPosts, categories }: BlogListProps) {
+export default function BlogList({ initialPosts, categories, countryCode = "tw" }: BlogListProps) {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   
@@ -42,7 +43,7 @@ export default function BlogList({ initialPosts, categories }: BlogListProps) {
       {/* 文章列表 */}
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0">
         {currentPosts.map((post) => (
-          <BlogCard key={post._id} post={post} />
+          <BlogCard key={post._id} post={post} countryCode={countryCode} />
         ))}
       </ul>
 

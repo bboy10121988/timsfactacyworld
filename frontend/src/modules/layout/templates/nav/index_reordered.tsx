@@ -133,13 +133,16 @@ export default async function Nav() {
         <header 
           className="relative mx-auto border-b bg-white border-ui-border-base shadow-sm"
           style={{
-            height: `${mainNavHeight}px`
+            minHeight: `${mainNavHeight}px`
           }}
         >
           <nav 
-            className="px-6 md:px-12 max-w-[1440px] mx-auto h-full flex items-center"
+            className="px-6 md:px-12 max-w-[1440px] mx-auto"
+            style={{
+              minHeight: `${mainNavHeight}px`
+            }}
           >
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-between items-center h-full">
               {/* 左側區塊 */}
               <div className="flex items-center gap-x-8">
                 <MobileMenu 

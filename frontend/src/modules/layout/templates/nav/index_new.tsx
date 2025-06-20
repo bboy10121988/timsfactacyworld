@@ -20,151 +20,159 @@ export default async function Nav() {
   const categories = await listCategories()
   const headerData = await getHeader() as SanityHeader
 
-  // 從 Sanity 獲取跑馬燈資料
+  // 從 Sanity 獲取跑馬燈資料 - 處理新的物件結構並記錄啟用狀態
   const enabledTexts = headerData?.marquee?.enabled 
     ? [
+        // 收集啟用且有內容的文字及其原始位置
         ...(headerData.marquee.text1?.enabled && headerData.marquee.text1?.content?.trim() 
-            ? [{content: headerData.marquee.text1.content}] : []),
+            ? [{content: headerData.marquee.text1.content, position: 1}] : []),
         ...(headerData.marquee.text2?.enabled && headerData.marquee.text2?.content?.trim() 
-            ? [{content: headerData.marquee.text2.content}] : []),
+            ? [{content: headerData.marquee.text2.content, position: 2}] : []),
         ...(headerData.marquee.text3?.enabled && headerData.marquee.text3?.content?.trim() 
-            ? [{content: headerData.marquee.text3.content}] : [])
+            ? [{content: headerData.marquee.text3.content, position: 3}] : [])
       ]
     : []
 
+  // 根據開啟組合判斷顯示策略 - 確保只提取字串內容
   const marqueeTexts = enabledTexts.map(item => String(item.content)).filter(text => text.trim())
   const textCount = marqueeTexts.length
 
-  const textDisplayTime = 3
+  // 固定文字停留時間為3秒，根據項目數量計算總動畫時間
+  const textDisplayTime = 3 // 每個文字停留3秒
   const calculateAnimationDuration = (count: number) => {
-    if (count === 1) return textDisplayTime * 2
-    return count * textDisplayTime
+    if (count === 1) return textDisplayTime * 2 // 單項目稍微慢一點
+    return count * textDisplayTime // 多項目：項目數 × 3秒
   }
   
   const animationDuration = calculateAnimationDuration(textCount)
-  const pauseOnHover = headerData?.marquee?.pauseOnHover !== false
+  const pauseOnHover = headerData?.marquee?.pauseOnHover !== false // 預設為 true
 
+  // 根據啟用的文字數量決定動畫類別 - 分支結構處理
   const getMarqueeClass = (count: number) => {
-    if (count === 0) return ''
-    if (count === 1) return 'animate-marquee-1'
-    if (count === 2) return 'animate-marquee-2'
-    if (count === 3) return 'animate-marquee-3'
-    return 'animate-marquee'
+    if (count === 0) return '' // 無文字
+    if (count === 1) return 'animate-marquee-1' // 單項目靜止
+    if (count === 2) return 'animate-marquee-2' // 雙項目循環：行1 → 行2 → 行1
+    if (count === 3) return 'animate-marquee-3' // 三項目循環：行1 → 行2 → 行3 → 行1
+    return 'animate-marquee' // 回退到原始動畫
   }
 
+  // 原始的固定跑馬燈內容（當Sanity沒有設定時使用）
   const defaultAnnouncements = [
     "新會員首購享85折",
     "全館消費滿$2000免運",
     "會員點數最高30倍送"
   ]
 
-  // 計算主導覽列高度
-  const mainNavHeight = Math.max(48, (headerData?.logoHeight || 36) + 24)
-
   return (
     <>
-      {/* 1. 跑馬燈 - 最上層，非 sticky */}
-      <div className="relative z-0">
-        {(headerData?.marquee?.enabled && textCount > 0) ? (
-          <div className="bg-gray-900 text-white overflow-hidden h-9">
-            <div className="relative h-full">
-              {headerData?.marquee?.linkUrl ? (
-                <a 
-                  href={headerData.marquee.linkUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="block w-full h-full"
-                >
-                  <div 
-                    className={`absolute inset-x-0 flex flex-col ${getMarqueeClass(textCount)} ${pauseOnHover ? 'hover:animation-paused' : ''}`}
-                    style={{ 
-                      '--marquee-duration': `${animationDuration}s`
-                    } as React.CSSProperties}
-                  >
-                    {marqueeTexts.map((text, index) => (
-                      <div 
-                        key={`marquee-link-${index}`} 
-                        className="flex-none h-9 flex items-center justify-center text-xs text-white hover:underline"
-                      >
-                        {text}
-                      </div>
-                    ))}
-                  </div>
-                </a>
-              ) : (
+      {/* 跑馬燈 - 只有在後台啟用且有文字時才顯示，否則顯示預設的 */}
+      {(headerData?.marquee?.enabled && textCount > 0) ? (
+        <div className="bg-gray-900 text-white overflow-hidden h-9">
+          <div className="relative h-full">
+            {headerData?.marquee?.linkUrl ? (
+              <a 
+                href={headerData.marquee.linkUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="block w-full h-full"
+              >
                 <div 
                   className={`absolute inset-x-0 flex flex-col ${getMarqueeClass(textCount)} ${pauseOnHover ? 'hover:animation-paused' : ''}`}
                   style={{ 
                     '--marquee-duration': `${animationDuration}s`
                   } as React.CSSProperties}
                 >
-                  {marqueeTexts.map((text, index) => (
-                    <div 
-                      key={`marquee-nolink-${index}`} 
-                      className="flex-none h-9 flex items-center justify-center text-xs text-white"
-                    >
-                      {text}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-gray-900 text-white overflow-hidden h-9">
-            <div className="relative h-full">
-              <div className="absolute inset-x-0 flex flex-col animate-marquee">
-                {defaultAnnouncements.map((text, index) => (
-                  <div key={`default-${index}`} className="flex-none h-9 flex items-center justify-center text-xs text-white">
+                {/* 顯示所有啟用的文字 */}
+                {marqueeTexts.map((text, index) => (
+                  <div 
+                    key={`marquee-link-${index}-${text.slice(0, 10).replace(/[^a-zA-Z0-9]/g, '')}`} 
+                    className="flex-none h-9 flex items-center justify-center text-xs text-white hover:underline"
+                  >
                     {text}
                   </div>
                 ))}
-                <div key="default-repeat" className="flex-none h-9 flex items-center justify-center text-xs text-white">
-                  {defaultAnnouncements[0]}
                 </div>
+              </a>
+            ) : (
+              <div 
+                className={`absolute inset-x-0 flex flex-col ${getMarqueeClass(textCount)} ${pauseOnHover ? 'hover:animation-paused' : ''}`}
+                style={{ 
+                  '--marquee-duration': `${animationDuration}s`
+                } as React.CSSProperties}
+              >
+                {/* 顯示所有啟用的文字 */}
+                {marqueeTexts.map((text, index) => (
+                  <div 
+                    key={`marquee-nolink-${index}-${text.slice(0, 10).replace(/[^a-zA-Z0-9]/g, '')}`} 
+                    className="flex-none h-9 flex items-center justify-center text-xs text-white"
+                  >
+                    {text}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gray-900 text-white overflow-hidden h-9">
+          <div className="relative h-full">
+            <div className="absolute inset-x-0 flex flex-col animate-marquee">
+              {/* 顯示預設公告，確保順序正確 */}
+              <div key="default-1" className="flex-none h-9 flex items-center justify-center text-xs text-white">
+                {defaultAnnouncements[0]}
+              </div>
+              <div key="default-2" className="flex-none h-9 flex items-center justify-center text-xs text-white">
+                {defaultAnnouncements[1]}
+              </div>
+              <div key="default-3" className="flex-none h-9 flex items-center justify-center text-xs text-white">
+                {defaultAnnouncements[2]}
+              </div>
+              {/* 重複第一個文字確保無縫滾動 */}
+              <div key="default-1-repeat" className="flex-none h-9 flex items-center justify-center text-xs text-white">
+                {defaultAnnouncements[0]}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* 2. 主選單導覽列 - 中間層，Sticky top-0 */}
-      <div className="sticky top-0 inset-x-0 z-[100] group transition-all duration-300">
+      {/* Sticky 導覽列區塊 */}
+      <div className="sticky top-0 inset-x-0 z-50 group transition-all duration-300">
+        {/* 主導覽列 */}
         <header 
-          className="relative mx-auto border-b bg-white border-ui-border-base shadow-sm"
-          style={{
-            height: `${mainNavHeight}px`
-          }}
+          className="relative mx-auto border-b bg-white/95 border-ui-border-base backdrop-blur transition-all duration-300 hover:bg-white h-12"
         >
-          <nav 
-            className="px-6 md:px-12 max-w-[1440px] mx-auto h-full flex items-center"
-          >
-            <div className="flex justify-between items-center w-full">
+          <nav className="px-6 md:px-12 h-full max-w-[1440px] mx-auto">
+            <div className="flex justify-between items-center h-full animate-fade-in">
               {/* 左側區塊 */}
               <div className="flex items-center gap-x-8">
                 <MobileMenu 
                   regions={regions} 
                   navigation={headerData?.navigation}
                   categories={categories}
-                  headerData={headerData}
                 />
                 <div className="hidden xsmall:flex items-center gap-x-6">
                   {headerData?.navigation?.map(({ name, href }: {name: string; href: string}, index: number) => {
+                    // 確保 name 和 href 都是字串
                     if (typeof name !== 'string' || typeof href !== 'string') {
+                      console.warn('Navigation item has invalid name or href:', { name, href })
                       return null
                     }
 
-                    const isExternal = /^(http|https|www)/.test(href)
-                    const isHome = href === '/' || href === '/home'
+                    // 判斷是否為外部連結
+                    const isExternal = /^(http|https|www)/.test(href);
+                    // 判斷是否為首頁連結 (支援 / 和 /home)
+                    const isHome = href === '/' || href === '/home';
+                    // 處理連結
                     const processedHref = isExternal 
                       ? href 
                       : isHome 
                         ? '/' 
                         : href.startsWith('/') 
                           ? href 
-                          : `/${href}`
+                          : `/${href}`;
 
-                    const uniqueKey = `nav-${index}-${name.replace(/[^a-zA-Z0-9]/g, '')}`
+                    const uniqueKey = `nav-${index}-${name.replace(/[^a-zA-Z0-9]/g, '')}-${href.replace(/[^a-zA-Z0-9]/g, '')}`;
 
                     return isExternal ? (
                       <a
@@ -185,12 +193,12 @@ export default async function Nav() {
                       >
                         <span className="!text-[13px] !font-medium !leading-none">{name}</span>
                       </LocalizedClientLink>
-                    )
+                    );
                   })}
                 </div>
               </div>
 
-              {/* 中間區塊 - Logo */}
+              {/* 中間區塊 */}
               <div className="flex items-center justify-center">
                 <LocalizedClientLink
                   href="/"
@@ -198,17 +206,23 @@ export default async function Nav() {
                   data-testid="nav-store-link"
                 >
                   {headerData?.logo ? (
-                    <Image
-                      src={headerData.logo.url}
-                      alt={headerData.logo.alt || "Store logo"}
-                      width={200}
-                      height={headerData?.logoHeight || 36}
-                      className="w-auto object-contain transition-all duration-300"
-                      style={{ 
-                        height: `${headerData?.logoHeight || 36}px`,
-                        width: 'auto'
-                      }}
-                    />
+                    (() => {
+                      const logoHeight = headerData?.logoHeight || 36
+                      
+                      return (
+                        <Image
+                          src={headerData.logo.url}
+                          alt={headerData.logo.alt || "Store logo"}
+                          width={200}
+                          height={logoHeight}
+                          className="w-auto object-contain transition-all duration-300"
+                          style={{ 
+                            height: `${logoHeight}px`,
+                            width: 'auto'
+                          }}
+                        />
+                      )
+                    })()
                   ) : (
                     headerData?.storeName || "Medusa Store"
                   )}
@@ -243,29 +257,24 @@ export default async function Nav() {
             </div>
           </nav>
         </header>
-      </div>
 
-      {/* 3. 分類導覽列 - 下層，Sticky 在主導覽列下方 */}
-      <div 
-        className="sticky inset-x-0 z-[90] hidden xsmall:block border-b border-ui-border-base bg-white shadow-sm"
-        style={{
-          top: `${mainNavHeight}px`
-        }}
-      >
-        <div className="px-4 md:px-8 flex justify-between items-center py-2 text-sm text-neutral-600">
-          <div className="flex items-center gap-x-6">
-            {categories?.map((category: {id: string; handle: string; name: string}) => (
-              <LocalizedClientLink
-                key={category.id}
-                href={`/categories/${category.handle}`}
-                className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
-              >
-                <span className="!text-[13px] !font-medium !leading-none">{category.name}</span>
-              </LocalizedClientLink>
-            ))}
-          </div>
-          <div className="relative group flex items-center">
-            <SearchBarClient />
+        {/* 分類導覽列 - 在 sticky 容器內的第二層 */}
+        <div className="hidden xsmall:block border-b border-ui-border-base bg-white/95 backdrop-blur transition-all duration-300 hover:bg-white">
+          <div className="px-4 md:px-8 flex justify-between items-center py-2 text-sm text-neutral-600">
+            <div className="flex items-center gap-x-6">
+              {categories?.map((category: {id: string; handle: string; name: string}) => (
+                <LocalizedClientLink
+                  key={category.id}
+                  href={`/categories/${category.handle}`}
+                  className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
+                >
+                  <span className="!text-[13px] !font-medium !leading-none">{category.name}</span>
+                </LocalizedClientLink>
+              ))}
+            </div>
+            <div className="relative group flex items-center">
+              <SearchBarClient />
+            </div>
           </div>
         </div>
       </div>

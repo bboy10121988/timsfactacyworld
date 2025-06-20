@@ -27,7 +27,7 @@ export type BlogPost = {
   cstatus?: string
 }
 
-export default function BlogCard({ post }: { post: BlogPost }) {
+export default function BlogCard({ post, countryCode = "tw" }: { post: BlogPost; countryCode?: string }) {
   // 處理摘要內容
   const getExcerpt = (content: any) => {
     if (typeof content === 'string') {
@@ -49,7 +49,7 @@ export default function BlogCard({ post }: { post: BlogPost }) {
 
   return (
     <li className="group relative">
-      <Link href={`/blog/${post.slug?.current ?? ""}`}>
+      <Link href={`/${countryCode}/blog/${post.slug?.current ?? ""}`}>
         <article className="h-full flex flex-col border border-transparent hover:border-gray-200 transition-all duration-200">
           <div className="aspect-[16/9] w-full relative">
             {post.mainImage?.asset?.url ? (

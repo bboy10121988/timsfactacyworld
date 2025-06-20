@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { XMarkIcon, Bars3Icon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -11,13 +11,23 @@ type MobileMenuProps = {
   regions: StoreRegion[]
   navigation?: Array<{name: string; href: string}>
   categories?: Array<{id: string; handle: string; name: string}>
+  headerData?: SanityHeader
 }
 
-export default function MobileMenu({ regions, navigation, categories }: MobileMenuProps) {
+export default function MobileMenu({ regions, navigation, categories, headerData }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [cart, setCart] = useState<any>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+
+  // 計算選單頂部偏移 - 與桌機版導覽列高度保持一致
+  const menuTopOffset = useMemo(() => {
+    const logoHeight = headerData?.logoHeight || 36
+    const mainNavHeight = Math.max(48, logoHeight + 24)  // 與桌機版一致：logo + 24px
+    const marqueeHeight = 36
+    const bufferHeight = 2
+    return marqueeHeight + mainNavHeight + bufferHeight
+  }, [headerData?.logoHeight])
 
   useEffect(() => {
     if (showSearch && searchRef.current) {
@@ -45,7 +55,12 @@ export default function MobileMenu({ regions, navigation, categories }: MobileMe
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-white">
+        <div 
+          className="fixed inset-x-0 bottom-0 z-[110] bg-white shadow-lg border-t border-gray-200"
+          style={{
+            top: `${menuTopOffset}px`
+          }}
+        >
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex-1"></div>
             <button

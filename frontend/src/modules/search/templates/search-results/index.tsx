@@ -206,7 +206,7 @@ const SearchResults = ({ query, initialType }: SearchResultsProps) => {
             )}
             {/* 商品網格 - 使用與其他頁面相同的樣式 */}
             <div className="px-0">
-              <ul className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-4 gap-y-8" data-testid="search-products-list">
+              <ul className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-0" data-testid="search-products-list">
                 {products.map(product => {
                   console.log('渲染搜尋商品:', product.title, '變體數量:', product.variants?.length, '第一個變體:', product.variants?.[0])
                   return (

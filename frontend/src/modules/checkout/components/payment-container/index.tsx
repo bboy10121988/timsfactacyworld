@@ -108,7 +108,7 @@ export const StripeCardContainer = ({
         (stripeReady ? (
           <div className="my-4 transition-all duration-150 ease-in-out">
             <Text className="text-sm text-ui-fg-base mb-1 font-medium">
-              Enter your card details:
+              請輸入信用卡資料：
             </Text>
             <CardElement
               options={useOptions as StripeCardElementOptions}

@@ -69,7 +69,7 @@ export default function InfiniteProducts({
 
   return (
     <div className="flex-1 content-container">
-      <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-4 gap-y-8">
+      <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-0">
         {products.map((product) => (
           <li key={product.id}>
             <ProductPreview product={product} />

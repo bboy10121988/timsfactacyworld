@@ -75,6 +75,19 @@ export default {
                       validation: (Rule: any) => Rule.required().min(0)
                     },
                     {
+                      name: 'priceType',
+                      title: '價格類型',
+                      type: 'string',
+                      options: {
+                        list: [
+                          {title: '起價', value: 'up'},
+                          {title: '固定價格', value: 'fixed'}
+                        ]
+                      },
+                      initialValue: 'up',
+                      description: '選擇顯示「起」或固定金額'
+                    },
+                    {
                       name: 'stylistName',
                       title: '設計師名稱',
                       type: 'string'
@@ -93,6 +106,13 @@ export default {
                           type: 'string'
                         }
                       ]
+                    },
+                    {
+                      name: 'isDefault',
+                      title: '標示為預設卡片',
+                      type: 'boolean',
+                      description: '勾選後將作為首頁預設顯示的卡片（每個服務只能有一個預設）',
+                      initialValue: false
                     }
                   ],
                   preview: {

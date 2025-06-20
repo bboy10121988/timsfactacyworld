@@ -6,12 +6,14 @@ type LineItemUnitPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
   currencyCode: string
+  className?: string
 }
 
 const LineItemUnitPrice = ({
   item,
   style = "default",
   currencyCode,
+  className,
 }: LineItemUnitPriceProps) => {
   const { total, original_total } = item
   const hasReducedPrice = total < original_total
@@ -46,7 +48,7 @@ const LineItemUnitPrice = ({
       <span
         className={clx("text-base-regular", {
           "text-ui-fg-interactive": hasReducedPrice,
-        })}
+        }, className)}
         data-testid="product-unit-price"
       >
         {convertToLocale({

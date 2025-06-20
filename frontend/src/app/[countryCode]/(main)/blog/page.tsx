@@ -1,11 +1,16 @@
 import { unstable_noStore as noStore } from 'next/cache'
+import Image from 'next/image'
+import Link from 'next/link'
 import client from "@lib/sanity"
 import BlogList from "@modules/blog/components/blog-list"
 
 interface Post {
   _id: string
   title: string
-  slug: string
+  slug: {
+    current?: string
+    _type?: string
+  }
   publishedAt: string
   mainImage: {
     asset: {
@@ -32,7 +37,7 @@ async function getAllPosts(category?: string) {
       ? `*[_type == "post" && "${category}" in categories[]->title] | order(publishedAt desc) {
           _id,
           title,
-          "slug": slug.current,
+          slug,
           publishedAt,
           mainImage {
             asset->{
@@ -47,7 +52,7 @@ async function getAllPosts(category?: string) {
       : `*[_type == "post"] | order(publishedAt desc) {
           _id,
           title,
-          "slug": slug.current,
+          slug,
           publishedAt,
           mainImage {
             asset->{
@@ -103,6 +108,29 @@ async function getCategories() {
   }
 }
 
+// 取得最新文章
+async function getLatestPosts() {
+  try {
+    noStore()
+    const query = `*[_type == "post"] | order(publishedAt desc)[0...4] {
+      _id,
+      title,
+      slug,
+      publishedAt,
+      mainImage {
+        asset->{
+          url
+        }
+      }
+    }`
+    const posts = await client.fetch(query)
+    return posts || []
+  } catch (error) {
+    console.error("Error fetching latest posts:", error)
+    return []
+  }
+}
+
 // 取得網站資訊
 async function getSiteInfo() {
   try {
@@ -139,14 +167,15 @@ export default async function BlogListPage({
   searchParams: { category?: string }
 }) {
   try {
-    const [posts, categories, siteInfo] = await Promise.all([
+    const [posts, categories, siteInfo, latestPosts] = await Promise.all([
       getAllPosts(searchParams.category),
       getCategories(),
-      getSiteInfo()
+      getSiteInfo(),
+      getLatestPosts()
     ])
 
     return (
-      <div className="bg-gray-50 min-h-[80vh] mt-[72px]">
+      <div className="bg-white min-h-[80vh] mt-[72px]">
         <div className="mx-auto">
           <div className="grid grid-cols-12">
             {/* 左側分類側邊欄 */}
@@ -177,6 +206,53 @@ export default async function BlogListPage({
                     </li>
                   ))}
                 </ul>
+
+                {/* 最新文章四則 */}
+                {latestPosts && latestPosts.length > 0 && (
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                      最新文章
+                    </h3>
+                    <div className="space-y-3">
+                      {latestPosts.map((article: any) => (
+                        <Link
+                          key={article._id}
+                          href={`/${params.countryCode}/blog/${article.slug?.current}`}
+                          className="block group hover:bg-gray-50 p-2 rounded-lg transition-all duration-200"
+                        >
+                          <div className="flex space-x-4">
+                            {article.mainImage?.asset?.url && (
+                              <div className="w-12 h-12 relative flex-shrink-0">
+                                <Image
+                                  src={article.mainImage.asset.url}
+                                  alt={article.title}
+                                  fill
+                                  className="object-cover rounded"
+                                  sizes="48px"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-medium text-gray-900 group-hover:text-blue-600 leading-tight overflow-hidden" 
+                                  style={{ 
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical'
+                                  }}>
+                                {article.title}
+                              </h4>
+                              {article.publishedAt && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {new Date(article.publishedAt).toLocaleDateString("zh-TW")}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </nav>
             </aside>
 
@@ -198,6 +274,7 @@ export default async function BlogListPage({
                   <BlogList 
                     initialPosts={posts} 
                     categories={categories}
+                    countryCode={params.countryCode}
                   />
                 ) : (
                   <div className="text-center py-12 bg-white">
@@ -217,7 +294,7 @@ export default async function BlogListPage({
   } catch (error) {
     console.error("Error in BlogListPage:", error)
     return (
-      <div className="py-12 bg-gray-50 min-h-[80vh]">
+      <div className="py-12 bg-white min-h-[80vh]">
         <div className="mx-auto text-center">
           <h1 className="h1 text-red-600">載入發生錯誤</h1>
           <p className="mt-4 text-content-responsive text-gray-600">請稍後再試</p>

@@ -121,20 +121,38 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           })}
         >
           {type === "preview" && (
-            <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
-              <LineItemUnitPrice
-                item={item}
-                style="tight"
-                currencyCode={currencyCode}
-              />
-            </span>
+            <div className="flex flex-col items-end gap-y-1 text-sm">
+              <div className="flex items-center gap-x-2">
+                <Text className="text-ui-fg-muted text-xs">數量:</Text>
+                <Text className="text-ui-fg-base text-xs">{item.quantity}</Text>
+              </div>
+              <div className="flex items-center gap-x-2">
+                <Text className="text-ui-fg-muted text-xs">單價:</Text>
+                <LineItemUnitPrice
+                  item={item}
+                  style="tight"
+                  currencyCode={currencyCode}
+                  className="text-xs"
+                />
+              </div>
+              <div className="flex items-center gap-x-2">
+                <Text className="text-ui-fg-muted text-xs">小計:</Text>
+                <LineItemPrice
+                  item={item}
+                  style="tight"
+                  currencyCode={currencyCode}
+                  className="text-xs font-medium"
+                />
+              </div>
+            </div>
           )}
-          <LineItemPrice
-            item={item}
-            style="tight"
-            currencyCode={currencyCode}
-          />
+          {type === "full" && (
+            <LineItemPrice
+              item={item}
+              style="tight"
+              currencyCode={currencyCode}
+            />
+          )}
         </span>
       </Table.Cell>
     </Table.Row>

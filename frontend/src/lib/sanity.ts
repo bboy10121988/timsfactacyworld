@@ -7,9 +7,9 @@ import type { Footer } from './types/footer'
 import type { FeaturedProduct, BlogPost } from './types/global'
 
 const client = createClient({
-  projectId: "m7o2mv1n",
-  dataset: "production",
-  apiVersion: "2024-01-01",
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "m7o2mv1n",
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
+  apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2022-03-25",
   useCdn: true,
   token: "skxPHbtETeuof6qw2oYMoST8kD2UCmM1UTWEjAqw03YETyws2ZhLtUlUGoPieCQQ9Y4SkaoLWXHZ8mOs34ZUmqFMPnr7tnoqY1HuLVnMTwZ0SVhDV2mOuk336ICH1h7JuzUnEyyYOiJljwvERUlw7GEelitairKw8gRMHs8HABPpZZT1TWzZ"
 })
@@ -93,7 +93,9 @@ export async function getHomeBanners(): Promise<{ title: string; mainSections: M
             "stylists": stylists[] {
               levelName,
               price,
+              priceType,
               stylistName,
+              isDefault,
               "cardImage": cardImage {
                 "url": asset->url,
                 "alt": alt
@@ -258,16 +260,22 @@ export async function getPageBySlug(slug: string): Promise<PageData | null> {
             isActive,
             heading,
             subheading,
-            showHeading,
-            showSubheading,
-            services[] {
+            cardsPerRow,
+            "cards": cards[] {
               title,
-              description,
-              "icon": icon.asset->url,
-              link {
-                text,
-                url
-              }
+              englishTitle,
+              "stylists": stylists[] {
+                levelName,
+                price,
+                priceType,
+                stylistName,
+                isDefault,
+                "cardImage": cardImage {
+                  "url": asset->url,
+                  "alt": alt
+                }
+              },
+              link
             }
           },
           _type == "contactSection" => {
@@ -451,12 +459,24 @@ export async function getAllPages(): Promise<PageData[]> {
             isActive,
             heading,
             subheading,
-            showHeading,
-            showSubheading,
-            services[] {
+            cardsPerRow,
+            "cards": cards[] {
               title,
-              description,
-              "icon": icon.asset->url,
+              englishTitle,
+              "stylists": stylists[] {
+                levelName,
+                price,
+                priceType,
+                stylistName,
+                isDefault,
+                "cardImage": cardImage {
+                  "url": asset->url,
+                  "alt": alt
+                }
+              },
+              link
+            }
+          },
               link {
                 text,
                 url
@@ -505,7 +525,9 @@ export async function getServiceSection(): Promise<ServiceCards | null> {
         "stylists": stylists[] {
           levelName,
           price,
+          priceType,
           stylistName,
+          isDefault,
           "cardImage": cardImage {
             "url": asset->url,
             "alt": alt

@@ -782,13 +782,12 @@ input[type="search"]::-webkit-search-results-decoration {
     height: 100%;
     background-color: var(--bg-primary);
     border: 1px solid var(--border-primary);
-    border-radius: 0.5rem;
+    border-radius: 0;
     transition: all 0.2s ease;
     overflow: hidden;
   }
 
   .product-preview:hover {
-    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
   }
 
@@ -960,303 +959,160 @@ input[type="search"]::-webkit-search-results-decoration {
     backdrop-filter: blur(4px);
   }
 
-  /* ===== 主要區塊樣式 ===== */
+  /* ===== Kitsuné 風格的服務卡片樣式 ===== */
   
-  /* Hero 區塊 */
-  .hero-section {
-    position: relative;
-    width: 100%;
-    min-height: calc(100vh - 4rem);
-    display: flex;
-    align-items: center;
+  .service-card-kitsune {
+    background: #ffffff;
+    border: 1px solid rgba(120, 113, 108, 0.15);
+    border-radius: 1.5rem;
+    transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     overflow: hidden;
-    padding: var(--spacing-8) 0;
   }
 
-  .hero-content {
+  .service-card-kitsune:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(120, 113, 108, 0.1);
+    border-color: rgba(120, 113, 108, 0.25);
+  }
+
+  .service-card-kitsune .image-container {
     position: relative;
-    z-index: 2;
-    max-width: 650px;
-  }
-
-  .hero-title {
-    font-family: var(--font-heading);
-    font-size: clamp(2rem, 5vw, var(--font-size-5xl));
-    font-weight: var(--font-weight-bold);
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
-    color: var(--text-primary);
-  }
-
-  .hero-description {
-    font-size: clamp(var(--font-size-base), 2vw, var(--font-size-xl));
-    line-height: var(--line-height-relaxed);
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-  }
-
-  /* 服務卡片區塊 */
-  .service-cards-section {
-    padding: var(--spacing-16) 0;
-    background: var(--bg-secondary);
-  }
-
-  .service-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-6) 0; /* 移除水平間距，保持垂直間距 */
-    margin-top: var(--spacing-8);
-  }
-
-  /* 圖文區塊 */
-  .image-text-block {
-    padding: var(--spacing-16) 0;
-  }
-
-  .image-text-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-8);
-    align-items: center;
-  }
-
-  .image-text-container.image-left {
-    grid-template-columns: 1.2fr 0.8fr;
-  }
-
-  .image-text-container.image-right {
-    grid-template-columns: 0.8fr 1.2fr;
-  }
-
-  .image-text-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-4);
-  }
-
-  .image-container {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 75%;
+    aspect-ratio: 4/3;
     overflow: hidden;
-    border-radius: 0.5rem;
   }
 
-  .image-container img {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .service-card-kitsune .service-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* 移除 hover 放大效果 */
-    /* transition: transform 0.5s ease; */
+    transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  /* 移除圖文區塊的 hover 放大效果 */
-  /* .image-container:hover img {
+  .service-card-kitsune:hover .service-image {
     transform: scale(1.05);
-  } */
-
-  /* 精選商品區塊 */
-  .featured-products {
-    padding: var(--spacing-16) 0;
-    background: var(--bg-primary);
   }
 
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-6);
-    margin-top: var(--spacing-8);
+  .service-card-kitsune .content {
+    padding: 2rem;
+    color: #44403c;
   }
 
-  /* 精選商品卡片 - 淡入淡出效果 */
-  .featured-product-card {
-    transition: opacity 0.4s ease, transform 0.3s ease;
+  .service-card-kitsune .title {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: #1c1917;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.025em;
+    line-height: 1.3;
   }
 
-  .featured-product-card:hover {
-    opacity: 0.85;
-    transform: translateY(-2px);
+  .service-card-kitsune .subtitle {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: #78716c;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
   }
 
-  .featured-product-card .product-image {
-    transition: transform 0.4s ease;
-  }
-
-  .featured-product-card:hover .product-image {
-    transform: scale(1.03);
-  }
-
-  /* 部落格文章區塊 */
-  .blog-section {
-    padding: var(--spacing-16) 0;
-    background: var(--bg-secondary);
-  }
-
-  .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--spacing-6);
-    margin-top: var(--spacing-8);
-  }
-
-  .blog-card {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .blog-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .blog-card .image-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%;
-    overflow: hidden;
-  }
-
-  .blog-card .blog-image {
+  .service-card-kitsune .price-tag {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(120, 113, 108, 0.1);
+    border-radius: 2rem;
+    padding: 0.625rem 1.25rem;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1c1917;
+    letter-spacing: 0.025em;
   }
 
-  .blog-card:hover .blog-image {
-    transform: scale(1.08);
-  }
-
-  .blog-card .content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.5rem;
-  }
-
-  .blog-card .meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: var(--font-size-sm);
-    color: var(--text-tertiary);
-  }
-
-  .blog-card .title {
-    font-family: var(--font-heading);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    line-height: 1.4;
-    color: var(--text-primary);
-  }
-
-  .blog-card .excerpt {
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-normal);
-    color: var(--text-secondary);
-    margin-bottom: auto;
-  }
-
-  /* Youtube 區塊 */
-  .youtube-section {
-    padding: var(--spacing-16) 0;
-    background: var(--bg-primary);
-  }
-
-  .youtube-container {
-    position: relative;
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .youtube-content {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .youtube-content iframe {
+  .service-card-kitsune .level-tag {
+    background: rgba(28, 25, 23, 0.9);
+    color: white;
+    border-radius: 2rem;
+    padding: 0.5rem 1rem;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 1.5rem;
+    left: 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .service-card-kitsune .book-button {
+    background: #1c1917;
+    color: white;
     border: none;
+    border-radius: 1rem;
+    padding: 1rem 2rem;
+    width: 100%;
+    font-size: 0.875rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
 
-  /* 區段標題統一樣式 */
-  .section-title {
-    text-align: center;
-    margin-bottom: var(--spacing-8);
+  .service-card-kitsune .book-button:hover {
+    background: #292524;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(28, 25, 23, 0.3);
   }
 
-  .section-title h2 {
-    font-family: var(--font-heading);
-    font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-4xl));
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+  .service-card-kitsune .book-button:active {
+    transform: scale(0.98);
+  }
+
+  /* Kitsuné 風格的區塊標題 */
+  .kitsune-section-title {
+    font-size: clamp(1.875rem, 4vw, 2.5rem);
+    font-weight: 300;
+    color: #1c1917;
+    letter-spacing: 0.025em;
+    line-height: 1.2;
     margin-bottom: 1rem;
   }
 
-  .section-title p {
-    font-size: clamp(var(--font-size-base), 2vw, var(--font-size-lg));
-    color: var(--text-secondary);
-    max-width: 600px;
+  .kitsune-section-subtitle {
+    font-size: 1.125rem;
+    font-weight: 300;
+    color: #78716c;
+    line-height: 1.6;
+    letter-spacing: 0.025em;
+    max-width: 32rem;
     margin: 0 auto;
   }
 
-  /* 響應式調整 */
-  @media (max-width: 768px) {
-    .image-text-container,
-    .image-text-container.image-left,
-    .image-text-container.image-right {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-6);
-    }
-
-    .service-grid,
-    .products-grid,
-    .blog-grid {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-
-    .hero-section {
-      min-height: calc(80vh - 4rem);
-      text-align: center;
-    }
-
-    .hero-content {
-      margin: 0 auto;
-    }
+  /* Kitsuné 風格的選擇器 */
+  .kitsune-select {
+    background: white;
+    border: 1px solid rgba(120, 113, 108, 0.2);
+    border-radius: 1rem;
+    padding: 0.75rem 1.5rem;
+    color: #44403c;
+    font-weight: 300;
+    letter-spacing: 0.025em;
+    transition: all 0.3s ease;
   }
 
-  @media (max-width: 480px) {
-    .service-grid,
-    .products-grid,
-    .blog-grid {
-      grid-template-columns: 1fr;
-    }
+  .kitsune-select:hover {
+    border-color: rgba(120, 113, 108, 0.3);
   }
+
+  .kitsune-select:focus {
+    border-color: #1c1917;
+    box-shadow: 0 0 0 3px rgba(28, 25, 23, 0.1);
+  }
+
+  /* 服務卡片區塊 */
 }
 
 /* ========== 商品詳細頁面樣式 (Modern Product Page) ========== */
@@ -1492,7 +1348,27 @@ input[type="search"]::-webkit-search-results-decoration {
     color: #000000;
     border-color: #ffffff;
   }
-}  /* ========== 商品標籤樣式 ========== */
+}
+
+/* ========== 商品標籤樣式 ========== */
+  /* 標籤容器樣式 - 向下排列，不限制寬度 */
+  .product-labels-container {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 30;
+    /* 不設定任何寬度相關的屬性，讓內容自然排列 */
+  }
+
+  /* 標籤之間的間距 - 外框到外框的距離 */
+  .product-labels-container > * {
+    margin-bottom: 4px; /* 增加標籤外框之間的距離 */
+  }
+
+  .product-labels-container > *:last-child {
+    margin-bottom: 0;
+  }
+
   .product-label {
     font-size: 0.75rem; /* text-xs */
     font-weight: 600; /* font-semibold */
@@ -1504,6 +1380,10 @@ input[type="search"]::-webkit-search-results-decoration {
     backdrop-filter: blur(4px);
     z-index: 20;
     border-width: 1px;
+    display: inline-block; /* 讓標籤寬度跟隨文字內容 */
+    width: auto; /* 自動寬度 */
+    white-space: nowrap; /* 防止文字換行 */
+    /* 移除 max-width 限制，讓標籤完全根據文字內容縮放 */
   }
 
   /* 折扣標籤樣式 */
@@ -1661,27 +1541,85 @@ input[type="search"]::-webkit-search-results-decoration {
     }
   }
 
-  /* 標籤容器 */
-  .product-labels-container {
-    position: absolute;
-    top: 0.5rem; /* top-2 */
-    left: 0.5rem; /* left-2 */
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem; /* gap-1 */
-    pointer-events: none;
-    z-index: 30; /* 提高 z-index 讓標籤在反灰層之上 */
+  /* 簡化標籤樣式 - 強制垂直排列，不等寬 */
+  .product-labels-container .product-label.gold-gradient-base,
+  .product-labels-container .product-label.gold-gradient-shine,
+  .product-labels-container .product-label.gold-gradient-pulse,
+  .product-labels-container .product-label.gold-coin-effect {
+    /* 完全重置所有可能影響寬度的屬性 */
+    all: unset !important;
+    
+    /* 重新設定基本樣式 */
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    
+    /* 紅金配色 - 純紅色背景漸層 */
+    background: linear-gradient(135deg, 
+      #8B0000 0%,     /* 深紅色 */
+      #B22222 25%,    /* 中深紅 */
+      #DC143C 50%,    /* 深紅 */
+      #CD5C5C 75%,    /* 淺紅色 */
+      #8B0000 100%    /* 回到深紅色 */
+    ) !important;
+    color: #FFD700 !important; /* 金色文字 */
+    border: 2px solid #FFD700 !important; /* 金色外框 */
+    
+    /* 強制垂直排列且自適應寬度 */
+    display: block !important;
+    width: fit-content !important;
+    white-space: nowrap !important;
+    padding: 2px 0.75rem 2px 1rem !important; /* 增加左邊距為小點留空間 */
+    
+    /* 明確設定標籤間距 */
+    margin-bottom: 4px !important;
+    
+    /* 確保在容器中正確顯示 */
+    position: relative !important;
+    z-index: 20 !important;
   }
 
-  /* 響應式調整 */
-  @media (max-width: 640px) {
-    .product-label {
-      font-size: 0.625rem; /* 更小的字體 */
-      padding: 0.125rem 0.375rem; /* 更小的內距 */
-    }
-
-    .product-labels-container {
-      top: 0.25rem;
-      left: 0.25rem;
-    }
+  /* 最後一個標籤不需要下邊距 */
+  .product-labels-container .product-label.gold-gradient-base:last-child,
+  .product-labels-container .product-label.gold-gradient-shine:last-child,
+  .product-labels-container .product-label.gold-gradient-pulse:last-child,
+  .product-labels-container .product-label.gold-coin-effect:last-child {
+    margin-bottom: 0 !important;
   }
+
+  /* 內線框 - 金色內框 */
+  .product-labels-container .product-label.gold-gradient-base::before,
+  .product-labels-container .product-label.gold-gradient-shine::before,
+  .product-labels-container .product-label.gold-gradient-pulse::before,
+  .product-labels-container .product-label.gold-coin-effect::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 3px !important;
+    left: 3px !important;
+    right: 3px !important;
+    bottom: 3px !important;
+    border: 1px solid #FFD700 !important; /* 金色內框 */
+    border-radius: 2px !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+
+  /* 左側小點裝飾 - 金色 */
+  .product-labels-container .product-label.gold-gradient-base::after,
+  .product-labels-container .product-label.gold-gradient-shine::after,
+  .product-labels-container .product-label.gold-gradient-pulse::after,
+  .product-labels-container .product-label.gold-coin-effect::after {
+    content: '•' !important;
+    position: absolute !important;
+    left: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #FFD700 !important; /* 金色小點 */
+    font-size: 8px !important;
+    font-weight: bold !important;
+    pointer-events: none !important;
+    z-index: 3 !important; /* 確保在內線框之上 */
+  }
+
+

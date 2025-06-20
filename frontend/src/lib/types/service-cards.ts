@@ -1,7 +1,9 @@
 export type ServiceStyleLevel = {
   levelName: string
   price: number
+  priceType?: 'up' | 'fixed'
   stylistName?: string
+  isDefault?: boolean
   cardImage?: {
     url: string
     alt?: string

@@ -24,7 +24,7 @@ export default async function ProductPreviewGrid({
   }
 
   return (
-    <ul className="grid grid-cols-2 small:grid-cols-4 gap-[1px] w-full bg-neutral-200">
+    <ul className="grid grid-cols-2 small:grid-cols-4 gap-0 w-full">
       {products.map(product => (
         <li key={product.id} className="w-full bg-white">
           <ProductPreview 

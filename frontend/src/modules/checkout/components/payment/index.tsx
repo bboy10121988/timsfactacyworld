@@ -119,7 +119,7 @@ const Payment = ({
             }
           )}
         >
-          Payment
+          付款方式
           {!isOpen && paymentReady && <CheckCircleSolid />}
         </Heading>
         {!isOpen && paymentReady && (
@@ -129,7 +129,7 @@ const Payment = ({
               className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               data-testid="edit-payment-button"
             >
-              Edit
+              編輯
             </button>
           </Text>
         )}
@@ -169,13 +169,13 @@ const Payment = ({
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
               <Text className="text-sm text-ui-fg-base mb-1 font-medium">
-                Payment method
+                付款方式
               </Text>
               <Text
                 className="text-xs text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                禮品卡
               </Text>
             </div>
           )}
@@ -197,8 +197,8 @@ const Payment = ({
             data-testid="submit-payment-button"
           >
             {!activeSession && isStripeFunc(selectedPaymentMethod)
-              ? " Enter card details"
-              : "Continue to review"}
+              ? "輸入信用卡資料"
+              : "繼續檢視訂單"}
           </Button>
         </div>
 
@@ -207,7 +207,7 @@ const Payment = ({
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
                 <Text className="text-sm text-ui-fg-base mb-1 font-medium">
-                  Payment method
+                  付款方式
                 </Text>
                 <Text
                   className="text-xs text-ui-fg-subtle"
@@ -219,7 +219,7 @@ const Payment = ({
               </div>
               <div className="flex flex-col w-1/3">
                 <Text className="text-sm text-ui-fg-base mb-1 font-medium">
-                  Payment details
+                  付款詳情
                 </Text>
                 <div
                   className="flex gap-2 text-xs text-ui-fg-subtle items-center"
@@ -233,7 +233,7 @@ const Payment = ({
                   <Text>
                     {isStripeFunc(selectedPaymentMethod) && cardBrand
                       ? cardBrand
-                      : "Another step will appear"}
+                      : "將於下一步顯示"}
                   </Text>
                 </div>
               </div>
@@ -241,13 +241,13 @@ const Payment = ({
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                付款方式
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
                 data-testid="payment-method-summary"
               >
-                Gift card
+                禮品卡
               </Text>
             </div>
           ) : null}

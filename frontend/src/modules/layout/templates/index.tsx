@@ -2,7 +2,7 @@ import React from "react"
 
 import Nav from "@modules/layout/templates/nav"
 
-const Layout: React.FC<{
+const 204Layout: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
   return (

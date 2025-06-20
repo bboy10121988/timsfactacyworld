@@ -29,7 +29,7 @@ export type SanityHeader = {
     alt: string
   }
   storeName?: string
-  logoWidth?: number
+  logoHeight?: number
   navigation?: {
     name: string
     href: string

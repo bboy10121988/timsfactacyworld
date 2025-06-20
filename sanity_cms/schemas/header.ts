@@ -28,12 +28,12 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'logoWidth',
-      title: 'Logo Width (px)',
+      name: 'logoHeight',
+      title: 'Logo Height (px)',
       type: 'number',
-      description: 'Set the width of the logo in pixels (50-300px)',
-      validation: Rule => Rule.min(50).max(300),
-      initialValue: 150,
+      description: 'Set the height of the logo in pixels (24-64px recommended)',
+      validation: Rule => Rule.min(24).max(64),
+      initialValue: 36,
     }),
     defineField({
       name: 'navigation',
