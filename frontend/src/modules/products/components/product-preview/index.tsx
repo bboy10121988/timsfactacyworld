@@ -378,21 +378,23 @@ export default function ProductPreview({
               </>
             )}
             
-            {/* 左上角促銷標籤區域 */}
-            <div className="absolute top-2 left-2 z-30 flex flex-col gap-1">
-              {/* 顯示促銷折扣標籤，優先顯示有折扣的標籤 */}
-              {promotionLabels
-                .filter(label => label.type !== 'sold-out' && label.type !== 'preorder')
-                .slice(0, 4) // 增加到最多顯示4個促銷標籤，確保固定金額折扣能顯示
-                .map((label, index) => (
-                <div 
-                  key={`${label.type}-${index}`} 
-                  className={label.className || 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-gray-800 text-white border-white'}
-                >
-                  {label.text}
-                </div>
-              ))}
-            </div>
+            {/* 左上角促銷標籤區域 - 僅在商品未售完時顯示 */}
+            {!isProductSoldOut && (
+              <div className="absolute top-2 left-2 z-30 flex flex-col gap-1">
+                {/* 顯示促銷折扣標籤，優先顯示有折扣的標籤 */}
+                {promotionLabels
+                  .filter(label => label.type !== 'sold-out' && label.type !== 'preorder')
+                  .slice(0, 4) // 增加到最多顯示4個促銷標籤，確保固定金額折扣能顯示
+                  .map((label, index) => (
+                  <div 
+                    key={`${label.type}-${index}`} 
+                    className={label.className || 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-gray-800 text-white border-white'}
+                  >
+                    {label.text}
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* 右上角庫存狀態標籤區域 */}
             <div className="absolute top-2 right-2 z-30">
