@@ -19,12 +19,11 @@ export default async function Orders() {
   }
 
   return (
-    <div className="w-full" data-testid="orders-page-wrapper">
+    <div className="w-full mx-6 md:mx-12" data-testid="orders-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="h1">Orders</h1>
+        <h1 className="h1">訂單</h1>
         <p className="text-base-regular">
-          View your previous orders and their status. You can also create
-          returns or exchanges for your orders if needed.
+          查看您之前的訂單及其狀態。如有需要，您也可以為訂單申請退貨或換貨。
         </p>
       </div>
       <div>

@@ -24,13 +24,11 @@ export default async function Profile() {
   }
 
   return (
-    <div className="w-full" data-testid="profile-page-wrapper">
+    <div className="w-full mx-6 md:mx-12" data-testid="profile-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="h1">Profile</h1>
+        <h1 className="h1">個人資料</h1>
         <p className="text-base-regular">
-          View and update your profile information, including your name, email,
-          and phone number. You can also update your billing address, or change
-          your password.
+          查看和更新您的個人資料，包括姓名、電子郵件和電話號碼。您也可以更新帳單地址或變更密碼。
         </p>
       </div>
       <div className="flex flex-col gap-y-8 w-full">

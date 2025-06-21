@@ -24,12 +24,11 @@ export default async function Addresses(props: {
   }
 
   return (
-    <div className="w-full" data-testid="addresses-page-wrapper">
+    <div className="w-full mx-6 md:mx-12" data-testid="addresses-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="h1">Shipping Addresses</h1>
+        <h1 className="h1">收貨地址</h1>
         <p className="text-base-regular">
-          View and update your shipping addresses, you can add as many as you
-          like. Saving your addresses will make them available during checkout.
+          查看和更新您的收貨地址，您可以新增任意數量的地址。儲存地址後，在結帳時就可以使用。
         </p>
       </div>
       <AddressBook customer={customer} region={region} />
