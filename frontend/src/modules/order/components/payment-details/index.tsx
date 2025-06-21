@@ -15,14 +15,14 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Payment
+        付款資訊
       </Heading>
       <div>
         {payment && (
           <div className="flex items-start gap-x-1 w-full">
             <div className="flex flex-col w-1/3">
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                Payment method
+                付款方式
               </Text>
               <Text
                 className="txt-medium text-ui-fg-subtle"
@@ -45,9 +45,9 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
                     : `${convertToLocale({
                         amount: payment.amount,
                         currency_code: order.currency_code,
-                      })} paid at ${new Date(
+                      })} 已於 ${new Date(
                         payment.created_at ?? ""
-                      ).toLocaleString()}`}
+                      ).toLocaleString()} 付款`}
                 </Text>
               </div>
             </div>
