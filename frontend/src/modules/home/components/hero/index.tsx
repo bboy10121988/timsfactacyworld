@@ -56,8 +56,8 @@ const Hero = ({ slides, settings }: HeroProps) => {
 
   return (
     <div className="relative w-full">
-      {/* 輪播圖片容器 - 添加淡入淡出效果 */}
-      <div className="relative aspect-[21/9] small:aspect-[16/9] overflow-hidden">
+      {/* 輪播圖片容器 - 調整高度比例及響應式設計 */}
+      <div className="relative aspect-[16/11] xs:aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] overflow-hidden">
         {slides.map((slideItem, index) => (
           <div
             key={index}
@@ -70,8 +70,8 @@ const Hero = ({ slides, settings }: HeroProps) => {
                 src={slideItem.backgroundImage}
                 alt={`${slideItem.heading} - ${slideItem.subheading}`}
                 fill
-                className="object-cover"
-                sizes="100vw"
+                className="object-cover object-center"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 100vw"
                 priority={index === 0}
               />
             )}
@@ -79,17 +79,17 @@ const Hero = ({ slides, settings }: HeroProps) => {
         ))}
       </div>
       
-      {/* 內容覆蓋層 - 添加淡入淡出效果 */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center p-4 md:p-16 lg:p-32 gap-6 bg-gradient-to-b from-black/10 via-black/30 to-black/50">
+      {/* 內容覆蓋層 - 優化手機版顯示 */}
+      <div className="absolute inset-0 z-10 flex flex-col justify-end sm:justify-center items-center text-center p-4 pb-16 sm:p-16 md:p-16 lg:p-32 gap-3 sm:gap-6 bg-gradient-to-b from-black/10 via-black/30 to-black/60">
         <div 
           key={currentSlide}
-          className="animate-fade-in-content"
+          className="animate-fade-in-content max-w-[90%] sm:max-w-4xl"
         >
           <Heading
             level="h1"
-            className="text-heading-1 text-white font-heading text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-6"
+            className="text-heading-1 text-white font-heading text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-2 sm:mb-6"
             style={{
-              textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              textShadow: "0 2px 4px rgba(0,0,0,0.3)",
               letterSpacing: "var(--letter-spacing-tight)"
             }}
           >
@@ -98,9 +98,9 @@ const Hero = ({ slides, settings }: HeroProps) => {
           {slide.subheading && (
             <Heading
               level="h2"
-              className="text-heading-2 text-white/95 text-xl md:text-2xl lg:text-3xl font-light mb-10"
+              className="text-heading-2 text-white/95 text-sm sm:text-xl md:text-2xl lg:text-3xl font-light mb-4 sm:mb-10"
               style={{
-                textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                 letterSpacing: "var(--letter-spacing-wide)"
               }}
             >
@@ -109,7 +109,7 @@ const Hero = ({ slides, settings }: HeroProps) => {
           )}
           {slide.buttonText && slide.buttonLink && (
             <Button asChild variant="secondary" 
-              className="btn bg-white hover:bg-white/90 text-gray-900 px-8 py-3 text-base md:text-lg font-medium rounded-lg 
+              className="btn bg-white hover:bg-white/90 text-gray-900 px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base md:text-lg font-medium rounded-lg 
                 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
               style={{
                 letterSpacing: "var(--letter-spacing-wide)",
@@ -122,14 +122,14 @@ const Hero = ({ slides, settings }: HeroProps) => {
         </div>
       </div>
 
-      {/* 點點導航 - 改進樣式和響應 */}
+      {/* 點點導航 - 改進響應式樣式 */}
       {settings.showDots && slides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-3">
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-2 sm:gap-3">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                 index === currentSlide 
                   ? "bg-white scale-110 shadow-lg" 
                   : "bg-white/60 hover:bg-white/80 scale-100"

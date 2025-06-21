@@ -107,6 +107,13 @@ module.exports = {
         'hidden': 'hidden',
       },
       screens: {
+        xs: "480px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
+        // 保留原有斷點，以確保向後相容
         "2xsmall": "320px",
         xsmall: "512px",
         small: "1024px",
@@ -149,6 +156,16 @@ module.exports = {
           },
           "100%": {
             visibility: "hidden",
+          },
+        },
+        "fade-in-content": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(10px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
         "accordion-slide-up": {
@@ -222,6 +239,7 @@ module.exports = {
         "slide-in": "slide-in 1.2s cubic-bezier(.41,.73,.51,1.02)",
         leave: "leave 150ms ease-in forwards",
         "fade-in-down": "fadeInDown 0.3s ease-out",
+        "fade-in-content": "fade-in-content 0.5s ease-out forwards",
         marquee: 'marquee 12s cubic-bezier(0.4, 0, 0.2, 1) infinite'
       },
     },
