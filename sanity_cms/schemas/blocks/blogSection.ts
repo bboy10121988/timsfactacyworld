@@ -22,10 +22,19 @@ export default {
     },
     {
       name: 'limit',
-      title: '顯示數量',
+      title: '顯示文章數量',
+      type: 'number',
+      initialValue: 6,
+      validation: Rule => Rule.required().min(1).max(12),
+      description: '設定最多顯示幾篇文章'
+    },
+    {
+      name: 'postsPerRow',
+      title: '每行文章數量',
       type: 'number',
       initialValue: 3,
-      validation: Rule => Rule.required().min(1).max(12)
+      validation: Rule => Rule.required().min(1).max(4),
+      description: '設定每行要顯示幾篇文章'
     }
   ],
   preview: {

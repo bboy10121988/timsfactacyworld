@@ -69,9 +69,10 @@ export async function getHomeBanners(): Promise<{ title: string; mainSections: M
         _type == "blogSection" => {
           _type,
           isActive,
-          heading,
-          showLatestPosts,
-          postsCount
+          title,
+          "category": category->title,
+          limit,
+          postsPerRow
         },
         _type == "youtubeSection" => {
           _type,
@@ -335,7 +336,7 @@ export async function getAllPosts(category?: string, limit: number = 50): Promis
       body // 添加內文欄位
     }`
 
-    const posts = await client.fetch<BlogPost[]>(query)
+    const posts = await client.fetch<BlogPost>(query)
     return posts || []
   } catch (error) {
     console.error('[getAllPosts] 從 Sanity 獲取部落格文章時發生錯誤:', error)
@@ -434,8 +435,9 @@ export async function getAllPages(): Promise<PageData[]> {
           _type == "blogSection" => {
             isActive,
             title,
-            category,
-            limit
+            "category": category->title,
+            limit,
+            postsPerRow
           },
           _type == "youtubeSection" => {
             isActive,

@@ -274,6 +274,7 @@ export default async function Home(props: {
                     title={blogSection.title || "最新文章"}
                     category={blogSection.category}
                     limit={blogSection.limit || 6}
+                    postsPerRow={blogSection.postsPerRow || 3}
                   />
                 )
               }

@@ -43,11 +43,13 @@ async function getBlogPosts(category?: string, limit: number = 6) {
 export default async function BlogPosts({ 
   category,
   limit = 6,
-  title = "最新文章"
+  title = "最新文章",
+  postsPerRow = 3
 }: { 
   category?: string
   limit?: number
   title?: string 
+  postsPerRow?: number 
 }) {
   try {
     const posts = await getBlogPosts(category, limit)
@@ -59,6 +61,22 @@ export default async function BlogPosts({
       post.slug?.current &&
       post.mainImage?.asset?.url
     ))
+
+    // 根據 postsPerRow 設置網格樣式
+    const getGridCols = (cols: number) => {
+      switch (cols) {
+        case 1:
+          return "grid-cols-1"
+        case 2:
+          return "grid-cols-1 md:grid-cols-2"
+        case 3:
+          return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        case 4:
+          return "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        default:
+          return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+      }
+    }
 
     if (!validPosts || validPosts.length === 0) {
       return (
@@ -83,7 +101,7 @@ export default async function BlogPosts({
             </div>
           </div>
           {validPosts && validPosts.length > 0 ? (
-            <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0">
+            <ul className={`grid ${getGridCols(postsPerRow)} gap-0`}>
               {validPosts.map((post) => (
                 <BlogCard 
                   key={post._id || post.title} 

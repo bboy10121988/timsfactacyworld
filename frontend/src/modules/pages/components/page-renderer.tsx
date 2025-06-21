@@ -63,6 +63,7 @@ interface BlogSection {
   title?: string
   category?: string
   limit: number
+  postsPerRow?: number
 }
 
 interface YoutubeSectionType {
@@ -270,6 +271,7 @@ export default function PageRenderer({ pageData }: PageRendererProps) {
                       title={blogSection.title || "最新文章"}
                       category={blogSection.category}
                       limit={blogSection.limit || 6}
+                      postsPerRow={blogSection.postsPerRow || 3}
                     />
                   </div>
                 )

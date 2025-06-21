@@ -46,6 +46,7 @@ export type BlogSection = {
   title?: string
   category?: string
   limit?: number
+  postsPerRow?: number
 }
 
 export type FeaturedProductsSection = {
