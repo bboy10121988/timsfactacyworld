@@ -1,8 +1,10 @@
+import type { PortableTextBlock } from '@portabletext/types'
+
 export type ContentSection = {
   _type: "contentSection"
   isActive: boolean
-  title?: string
-  content: string
+  heading?: string
+  content: PortableTextBlock[]
 }
 
 export type ContactSection = {

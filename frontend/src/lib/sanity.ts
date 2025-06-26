@@ -14,7 +14,7 @@ const client = createClient({
   token: "skxPHbtETeuof6qw2oYMoST8kD2UCmM1UTWEjAqw03YETyws2ZhLtUlUGoPieCQQ9Y4SkaoLWXHZ8mOs34ZUmqFMPnr7tnoqY1HuLVnMTwZ0SVhDV2mOuk336ICH1h7JuzUnEyyYOiJljwvERUlw7GEelitairKw8gRMHs8HABPpZZT1TWzZ"
 })
 
-export async function getHomeBanners(): Promise<{ title: string; mainSections: MainSection[] }> {
+export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
   const query = `*[_type == "homePage"][0] {
     title,
     "mainSections": mainSections[] {
@@ -97,12 +97,26 @@ export async function getHomeBanners(): Promise<{ title: string; mainSections: M
               priceType,
               stylistName,
               isDefault,
-              "cardImage": cardImage {
+              "cardImage": {
                 "url": asset->url,
                 "alt": alt
               }
             },
             link
+          }
+        },
+        _type == "contentSection" => {
+          _type,
+          isActive,
+          heading,
+          "content": content[]{
+            ...,
+            markDefs[]{
+              ...,
+              _type == "internalLink" => {
+                "slug": @.reference->slug.current
+              }
+            }
           }
         },
         // Default case - 包含 _type 以便識別未處理的 section 類型

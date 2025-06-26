@@ -360,7 +360,7 @@ export default function ProductPreview({
                 </button>
                 
                 {/* 圖片指示器 */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-40 flex space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex space-x-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
                   {allImages.map((_, index) => (
                     <button
                       key={index}
@@ -369,8 +369,8 @@ export default function ProductPreview({
                         e.stopPropagation()
                         setCurrentImageIndex(index)
                       }}
-                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                        index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-200 shadow-md ${
+                        index === currentImageIndex ? 'bg-white border border-gray-300' : 'bg-white/60 border border-white/20'
                       }`}
                     />
                   ))}

@@ -6,20 +6,22 @@ import FeaturedProducts from "@modules/home/components/featured-products"
 import ImageTextBlock from "@modules/home/components/image-text-block"
 import YoutubeSection from "@modules/home/components/youtube-section"
 import ServiceCardsSection from "@modules/home/components/service-cards-section"
+import ContentSection from "@modules/home/components/content-section"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
-import { getHomeBanners, getServiceSection } from "@lib/sanity";
+import { getHomepage } from "@lib/sanity"; // 使用 getHomepage 並移除 getServiceSection
 import type { MainBanner } from '@lib/types/page-sections'
 import type { ImageTextBlock as ImageTextBlockType } from '@lib/types/page-sections'
 import type { FeaturedProductsSection } from '@lib/types/page-sections'
 import type { BlogSection } from '@lib/types/page-sections'
 import type { YoutubeSection as YoutubeSectionType } from '@lib/types/page-sections'
 import type { ServiceCards } from '@lib/types/service-cards'
+import type { ContentSection as ContentSectionType } from '@lib/types/page-sections'
 import { getStoreName } from "@lib/store-name"
 
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { title } = await getHomeBanners()
+  const { title } = await getHomepage() // 使用 getHomepage
   const storeName = await getStoreName()
   
   return {
@@ -40,137 +42,16 @@ export default async function Home(props: {
   const region = await getRegion(countryCode)
 
   const { collections } = await listCollections({})
-  const { mainSections } = await getHomeBanners()
+  const { mainSections } = await getHomepage() // 一次性獲取所有區塊
 
-  // 從後端獲取服務卡片資料，如果沒有則使用靜態資料作為 fallback
-  const backendServiceCards = await getServiceSection()
-  
-  // 靜態服務卡片資料作為 fallback - 使用 Unsplash 隨機圖片
-  const fallbackServiceCards: ServiceCards = {
-    _type: "serviceCardSection",
-    isActive: true,
-    heading: "我們的服務",
-    subheading: "專業髮型設計服務，由經驗豐富的造型師為您打造專屬風格",
-    cardsPerRow: 3,
-    cards: [
-      {
-        title: "剪髮造型",
-        englishTitle: "Hair Cut & Style",
-        stylists: [
-          {
-            levelName: "資深設計師",
-            price: 1200,
-            stylistName: "Tim",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Tim - 剪髮造型"
-            }
-          },
-          {
-            levelName: "首席設計師", 
-            price: 1500,
-            stylistName: "Sarah",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Sarah - 剪髮造型"
-            }
-          },
-          {
-            levelName: "設計師",
-            price: 800,
-            stylistName: "Jenny",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Jenny - 剪髮造型"
-            }
-          }
-        ],
-        link: "#book-now"
-      },
-      {
-        title: "染髮服務",
-        englishTitle: "Hair Coloring",
-        stylists: [
-          {
-            levelName: "色彩專家",
-            price: 3500,
-            stylistName: "Tim",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Tim - 染髮專家"
-            }
-          },
-          {
-            levelName: "資深設計師",
-            price: 2800,
-            stylistName: "Sarah",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1526045478516-99145907023c?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Sarah - 染髮服務"
-            }
-          },
-          {
-            levelName: "設計師",
-            price: 2000,
-            stylistName: "Jenny",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Jenny - 染髮服務"
-            }
-          }
-        ],
-        link: "#book-now"
-      },
-      {
-        title: "燙髮造型",
-        englishTitle: "Hair Perm",
-        stylists: [
-          {
-            levelName: "燙髮專家",
-            price: 2500,
-            stylistName: "Tim",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Tim - 燙髮專家"
-            }
-          },
-          {
-            levelName: "資深設計師",
-            price: 2000,
-            stylistName: "Sarah",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Sarah - 燙髮服務"
-            }
-          },
-          {
-            levelName: "設計師",
-            price: 1500,
-            stylistName: "Jenny",
-            cardImage: {
-              url: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&h=450&fit=crop&auto=format&q=80",
-              alt: "Jenny - 燙髮服務"
-            }
-          }
-        ],
-        link: "#book-now"
-      }
-    ]
-  }
-
-  // 選擇要使用的服務卡片資料：優先使用後端資料，如果沒有或未啟用則使用 fallback
-  const serviceCardsToUse = (backendServiceCards && backendServiceCards.isActive) 
-    ? backendServiceCards 
-    : fallbackServiceCards
+  // 移除舊的 service cards 邏輯
 
   if (!region) {
     return null
   }
 
-  // Debug用，完整列出所有sections
-  console.log("Homepage - mainSections:", JSON.stringify(mainSections, null, 2))
-  console.log("Homepage - serviceCards from backend:", backendServiceCards)
-  console.log("Homepage - using serviceCards:", serviceCardsToUse === backendServiceCards ? 'backend' : 'fallback')
+  // 簡化日誌
+  console.log("Homepage - mainSections from Sanity:", JSON.stringify(mainSections, null, 2))
 
   return (
     <>
@@ -182,6 +63,10 @@ export default async function Home(props: {
             console.warn(`Filtering out invalid section at index ${index}:`, section);
             return false;
           }
+          // 過濾掉非作用中的 section
+          if (section.isActive === false) {
+            return false;
+          }
           return true;
         })
         .map((section: any, index: number) => {
@@ -190,17 +75,7 @@ export default async function Home(props: {
             switch (sectionType) {
               case "serviceCardSection": {
                 const serviceSection = section as ServiceCards;
-                if (!serviceSection.isActive) {
-                  return (
-                    <ServiceCardsSection
-                      key={index}
-                      heading={fallbackServiceCards.heading}
-                      subheading={fallbackServiceCards.subheading}
-                      cardsPerRow={fallbackServiceCards.cardsPerRow}
-                      cards={fallbackServiceCards.cards}
-                    />
-                  );
-                }
+                // 直接渲染從 Sanity 獲取的資料
                 return (
                   <ServiceCardsSection
                     key={index}
@@ -213,7 +88,6 @@ export default async function Home(props: {
               }
               case "mainBanner": {
                 const bannerSection = section as MainBanner
-                if (!bannerSection.isActive) return null
                 if (!bannerSection.slides || !Array.isArray(bannerSection.slides)) {
                   console.error("Invalid mainBanner section:", bannerSection)
                   return null
@@ -227,7 +101,6 @@ export default async function Home(props: {
               }
               case "imageTextBlock": {
                 const imageBlock = section as ImageTextBlockType
-                if (!imageBlock.isActive) return null
                 return (
                   <ImageTextBlock
                     key={index}
@@ -244,7 +117,6 @@ export default async function Home(props: {
               }
               case "featuredProducts": {
                 const featuredBlock = section as FeaturedProductsSection
-                if (!featuredBlock.isActive) return null
                 if (!featuredBlock.collection_id) {
                   console.error("Invalid featuredProducts section:", featuredBlock)
                   return null
@@ -267,7 +139,6 @@ export default async function Home(props: {
               }
               case "blogSection": {
                 const blogSection = section as BlogSection
-                if (!blogSection.isActive) return null
                 return (
                   <BlogPosts 
                     key={index}
@@ -280,7 +151,6 @@ export default async function Home(props: {
               }
               case "youtubeSection": {
                 const youtubeBlock = section as YoutubeSectionType
-                if (!youtubeBlock.isActive) return null
                 if (!youtubeBlock.videoUrl) {
                   console.error("Invalid YouTube section (missing video URL):", youtubeBlock)
                   return null
@@ -294,6 +164,16 @@ export default async function Home(props: {
                     description={youtubeBlock.description}
                     videoUrl={youtubeBlock.videoUrl}
                     fullWidth={youtubeBlock.fullWidth}
+                  />
+                )
+              }
+              case "contentSection": {
+                const contentBlock = section as ContentSectionType
+                return (
+                  <ContentSection
+                    key={index}
+                    heading={contentBlock.heading}
+                    content={contentBlock.content}
                   />
                 )
               }
