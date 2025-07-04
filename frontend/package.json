@@ -16,6 +16,7 @@
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@medusajs/js-sdk": "latest",
@@ -29,6 +30,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.15.0",
+    "google-auth-library": "^10.1.0",
     "groq": "^3.92.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.511.0",

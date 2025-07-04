@@ -1884,9 +1884,16 @@
   resolved "https://registry.npmjs.org/@medusajs/auth-github/-/auth-github-2.8.3.tgz"
   integrity sha512-7oq97DGhZy+ng0P3y770DZGw1PzPW6P/j/+ZGiPd41BrDGam3VE46aarzeK132x4JPeOGhATRfxl0ZR7ctKX0A==
 
+"@medusajs/auth-google@^2.8.5":
+  version "2.8.5"
+  resolved "https://registry.npmmirror.com/@medusajs/auth-google/-/auth-google-2.8.5.tgz"
+  integrity sha512-YRa7farYBDGw/JNyhxf3BNY0+De8Y5ZUcmmyjMR6GR1muROKF34x8q00xUHaXIwaLvsZ0+M1aUDNdoiODLq1Mg==
+  dependencies:
+    jsonwebtoken "^9.0.2"
+
 "@medusajs/auth-google@2.8.3":
   version "2.8.3"
-  resolved "https://registry.npmjs.org/@medusajs/auth-google/-/auth-google-2.8.3.tgz"
+  resolved "https://registry.npmmirror.com/@medusajs/auth-google/-/auth-google-2.8.3.tgz"
   integrity sha512-3qumRLEUut8kkjem6/uz7NQzZyNrQjTPT5i45cw61rjU9vNf5OVqe8fo/mu+iAo++YVdJxIwFgVB7a+7pk8dng==
   dependencies:
     jsonwebtoken "^9.0.2"

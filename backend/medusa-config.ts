@@ -16,6 +16,7 @@ module.exports = defineConfig({
   modules: {
     // 在 Medusa v2 中，庫存服務已被內建整合，無需額外定義
     // 如果需要自定義配置，可以在這裡添加其他模組
+    // Google Auth 暫時移除，等待官方支援
   },
   plugins: []
 })

@@ -21,6 +21,41 @@ export const retrieveCustomer =
 
     if (!authHeaders) return null
 
+    // 檢查是否是 Google OAuth token
+    const cookies = await import('next/headers').then(m => m.cookies())
+    const token = (await cookies).get("_medusa_jwt")?.value
+    
+    if (token?.startsWith('google_oauth:')) {
+      // 處理 Google OAuth 用戶
+      try {
+        const sessionData = JSON.parse(token.replace('google_oauth:', ''))
+        console.log('找到 Google OAuth 會話:', sessionData)
+        
+        // 返回 Google OAuth 用戶資料
+        return {
+          id: sessionData.customer_id,
+          email: sessionData.email,
+          first_name: sessionData.first_name,
+          last_name: sessionData.last_name,
+          company_name: null,
+          phone: null,
+          has_account: true,
+          metadata: {
+            auth_provider: 'google'
+          },
+          addresses: [],
+          default_billing_address_id: null,
+          default_shipping_address_id: null,
+          created_at: sessionData.created_at,
+          updated_at: sessionData.created_at,
+        } as unknown as HttpTypes.StoreCustomer
+      } catch (error) {
+        console.error('無法解析 Google OAuth 會話:', error)
+        return null
+      }
+    }
+
+    // 處理一般的 Medusa JWT token
     const headers = {
       ...authHeaders,
     }
@@ -68,6 +103,22 @@ export async function signup(_currentState: unknown, formData: FormData) {
     phone: formData.get("phone") as string,
   }
 
+  // 驗證必填欄位
+  if (!customerForm.email || !password || !customerForm.first_name || !customerForm.last_name) {
+    return "請填寫所有必填欄位"
+  }
+
+  // 驗證電子郵件格式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(customerForm.email)) {
+    return "請輸入有效的電子郵件地址"
+  }
+
+  // 驗證密碼強度
+  if (password.length < 6) {
+    return "密碼長度至少需要 6 個字元"
+  }
+
   try {
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
@@ -100,13 +151,55 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    console.error("註冊錯誤:", error)
+    
+    // 處理不同類型的錯誤
+    if (error.message || error.response?.data?.message) {
+      const errorMessage = error.message || error.response.data.message
+      
+      // 帳戶已存在
+      if (errorMessage.includes('already exists') || errorMessage.includes('duplicate') || 
+          errorMessage.includes('已存在') || errorMessage.includes('conflict')) {
+        return "該電子郵件地址已被註冊，請使用其他郵件地址或嘗試登入"
+      }
+      
+      // 無效的電子郵件
+      if (errorMessage.includes('invalid email') || errorMessage.includes('email')) {
+        return "電子郵件地址格式不正確"
+      }
+      
+      // 密碼問題
+      if (errorMessage.includes('password') || errorMessage.includes('密碼')) {
+        return "密碼不符合要求，請確保長度至少 6 個字元"
+      }
+      
+      // 網路連接問題
+      if (errorMessage.includes('network') || errorMessage.includes('fetch') || 
+          errorMessage.includes('timeout') || error.code === 'NETWORK_ERROR') {
+        return "網路連接出現問題，請檢查網路連接後重試"
+      }
+      
+      return errorMessage
+    }
+    
+    return "註冊失敗，請稍後再試"
   }
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+
+  // 驗證必填欄位
+  if (!email || !password) {
+    return "請輸入電子郵件和密碼"
+  }
+
+  // 驗證電子郵件格式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return "請輸入有效的電子郵件地址"
+  }
 
   try {
     await sdk.auth
@@ -117,13 +210,55 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag(customerCacheTag)
       })
   } catch (error: any) {
-    return error.toString()
+    console.error("登入錯誤:", error)
+    
+    // 處理不同類型的登入錯誤
+    if (error.message || error.response?.data?.message) {
+      const errorMessage = error.message || error.response.data.message
+      
+      // 帳戶不存在或密碼錯誤
+      if (errorMessage.includes('unauthorized') || errorMessage.includes('invalid credentials') ||
+          errorMessage.includes('401') || errorMessage.includes('authentication failed') ||
+          errorMessage.includes('incorrect') || errorMessage.includes('wrong password') ||
+          errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
+        return "電子郵件或密碼錯誤，請檢查後重試"
+      }
+      
+      // 帳戶被鎖定或停用
+      if (errorMessage.includes('locked') || errorMessage.includes('disabled') || 
+          errorMessage.includes('suspended') || errorMessage.includes('blocked')) {
+        return "帳戶已被停用，請聯繫客服"
+      }
+      
+      // 太多次失敗嘗試
+      if (errorMessage.includes('too many attempts') || errorMessage.includes('rate limit') ||
+          errorMessage.includes('temporary') || errorMessage.includes('timeout')) {
+        return "登入嘗試次數過多，請稍後再試"
+      }
+      
+      // 電子郵件未驗證
+      if (errorMessage.includes('not verified') || errorMessage.includes('email verification') ||
+          errorMessage.includes('confirm email')) {
+        return "請先驗證您的電子郵件地址"
+      }
+      
+      // 網路連接問題
+      if (errorMessage.includes('network') || errorMessage.includes('fetch') || 
+          errorMessage.includes('timeout') || error.code === 'NETWORK_ERROR') {
+        return "網路連接出現問題，請檢查網路連接後重試"
+      }
+      
+      return errorMessage
+    }
+    
+    return "登入失敗，請稍後再試"
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    console.error("購物車轉移錯誤:", error)
+    // 購物車轉移失敗不應該阻止登入成功，只記錄錯誤
   }
 }
 
