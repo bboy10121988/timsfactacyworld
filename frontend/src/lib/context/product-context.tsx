@@ -2,7 +2,6 @@
 
 import { HttpTypes } from "@medusajs/types"
 import { createContext, useContext, useState, useCallback } from "react"
-import { addToCart as addToCartAction } from "@lib/data/cart"
 
 interface ProductActionContext {
   addToCart: (input: { variantId: string; quantity: number; countryCode: string }) => Promise<void>
@@ -25,11 +24,27 @@ export function ProductActionProvider({ children }: { children: React.ReactNode 
   const addToCart = useCallback(async (input: { variantId: string; quantity: number; countryCode: string }) => {
     setIsAdding(true)
     try {
-      await addToCartAction(input)
+      console.log("🛒 ProductActionContext 開始加入購物車:", input)
+      
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      console.log("✅ ProductActionContext 加入購物車成功:", result)
+      
       // 觸發全局購物車更新事件
       window.dispatchEvent(new Event('cartUpdate'))
     } catch (error) {
-      console.error("加入購物車失敗:", error)
+      console.error("❌ ProductActionContext 加入購物車失敗:", error)
       throw error
     } finally {
       setIsAdding(false)

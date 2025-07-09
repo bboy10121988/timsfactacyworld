@@ -132,16 +132,8 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
   }
 
   const getDefaultServiceImage = (serviceTitle: string): string => {
-    // 根據服務類型返回適合的預設圖片
-    if (serviceTitle.includes('剪髮') || serviceTitle.includes('Cut')) {
-      return 'https://images.unsplash.com/photo-1562004760-acbaefb9ac18?w=600&h=450&fit=crop&auto=format&q=80'
-    } else if (serviceTitle.includes('染髮') || serviceTitle.includes('Color')) {
-      return 'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=600&h=450&fit=crop&auto=format&q=80'
-    } else if (serviceTitle.includes('燙髮') || serviceTitle.includes('Perm')) {
-      return 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=600&h=450&fit=crop&auto=format&q=80'
-    } else {
-      return 'https://images.unsplash.com/photo-1562004760-acbaefb9ac18?w=600&h=450&fit=crop&auto=format&q=80'
-    }
+    // 根據服務類型返回適合的預設圖片 - 暫時使用透明圖片避免 404 錯誤
+    return 'data:image/svg+xml,%3Csvg width="600" height="450" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100%25" height="100%25" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial" font-size="20" fill="%236b7280" text-anchor="middle" dy=".3em"%3E服務圖片%3C/text%3E%3C/svg%3E'
   }
 
   const getSelectedStylistName = (): string | null => {
@@ -298,25 +290,24 @@ export default function ServiceCardsSection({
     'englishTitle' in card
   ) ?? []
 
-  // 從有效卡片中提取設計師資訊
+  // 從有效卡片中提取設計師資訊，過濾掉通用標籤
   const allStylists = Array.from(new Set(
     validCards.flatMap(card => 
       Array.isArray(card?.stylists) 
         ? card.stylists
             .filter((s): s is Stylist => s !== null && s !== undefined && typeof s.stylistName === 'string')
             .map(s => s.stylistName!)
-            .filter(name => name !== "All Stylists" && name !== "All stylists" && name !== "all stylists") // 過濾掉錯誤的設計師名稱
+            .filter(name => {
+              const lowercaseName = name.toLowerCase()
+              // 過濾掉通用設計師標籤
+              return !lowercaseName.includes('all stylists') && 
+                     !lowercaseName.includes('all stylist') && 
+                     lowercaseName !== 'all' &&
+                     name.trim().length > 0
+            })
         : []
     )
   )).sort()
-
-  // 調試資訊：檢查是否有重複的 "All Stylists"
-  console.log('All stylists array:', allStylists)
-  console.log('Raw stylists data:', validCards.flatMap(card => 
-    Array.isArray(card?.stylists) 
-      ? card.stylists.map(s => s?.stylistName)
-      : []
-  ))
 
   if (!validCards.length) {
     return null

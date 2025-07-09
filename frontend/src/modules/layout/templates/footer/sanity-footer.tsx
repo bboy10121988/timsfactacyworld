@@ -31,8 +31,12 @@ export default async function SanityFooter() {
                     src={footer?.logo?.url || "/images/44dto-bmpua.webp"}
                     alt={footer?.logo?.alt || "SALON"}
                     width={footer?.logoWidth || 160}
-                    height={60}
-                    className="w-full h-auto object-contain"
+                    height={160}
+                    className="w-auto h-auto object-contain"
+                    style={{ 
+                      maxWidth: `${footer?.logoWidth || 160}px`,
+                      maxHeight: '60px'
+                    }}
                   />
                 </div>
               </LocalizedClientLink>

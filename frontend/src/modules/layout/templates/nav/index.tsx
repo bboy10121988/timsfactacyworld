@@ -202,11 +202,10 @@ export default async function Nav() {
                       src={headerData.logo.url}
                       alt={headerData.logo.alt || "Store logo"}
                       width={200}
-                      height={headerData?.logoHeight || 36}
-                      className="w-auto object-contain transition-all duration-300"
+                      height={200}
+                      className="w-auto h-auto object-contain transition-all duration-300"
                       style={{ 
-                        height: `${headerData?.logoHeight || 36}px`,
-                        width: 'auto'
+                        maxHeight: `${headerData?.logoHeight || 36}px`
                       }}
                     />
                   ) : (

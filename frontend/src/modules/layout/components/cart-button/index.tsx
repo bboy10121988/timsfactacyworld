@@ -1,6 +1,5 @@
 "use client"
 
-import { retrieveCart } from "@lib/data/cart"
 import CartDropdown from "../cart-dropdown"
 import { ShoppingCart } from "lucide-react"
 import { useEffect, useState, useCallback } from "react"
@@ -10,10 +9,16 @@ export default function CartButton() {
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
 
-  // 獨立的獲取購物車函數
+  // 獨立的獲取購物車函數 - 使用 API 路由而非 Server Action
   const fetchCart = useCallback(async () => {
-    const cartData = await retrieveCart().catch(() => null)
-    setCart(cartData)
+    try {
+      const response = await fetch('/api/cart/get')
+      const data = await response.json()
+      setCart(data.cart)
+    } catch (error) {
+      console.error('Failed to fetch cart:', error)
+      setCart(null)
+    }
   }, [])
 
   useEffect(() => {

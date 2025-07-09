@@ -8,7 +8,7 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
-import { getPromotionLabels, debugPromotionLabels, getProductStockStatus, generateMockPromotionLabels, shouldUseMockLabels, getPromotionLabelsAsync } from "@lib/promotion-utils"
+import { getPromotionLabels, debugPromotionLabels, getProductStockStatus, generateMockPromotionLabels, shouldUseMockLabels, getPromotionLabelsAsync, PromotionLabel } from "@lib/promotion-utils"
 
 type ProductOption = {
   title: string
@@ -37,19 +37,60 @@ export default function ProductPreview({
     const loadPromotionLabels = async () => {
       setIsLoadingPromotions(true)
       try {
-        // 優先使用真實的促銷 API 獲取標籤
-        const labels = await getPromotionLabelsAsync(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
+        // 檢查是否使用真實 API
+        const useRealAPI = process.env.NEXT_PUBLIC_USE_REAL_PROMOTION_API === 'true'
+        const useMockLabels = process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS === 'true'
+        
+        // 調試日誌（僅在詳細調試模式開啟時）
+        if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+          console.log('🔧 Environment variables:', {
+            NEXT_PUBLIC_USE_REAL_PROMOTION_API: process.env.NEXT_PUBLIC_USE_REAL_PROMOTION_API,
+            NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS: process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS,
+            useRealAPI,
+            useMockLabels
+          })
+        }
+        
+        let labels: PromotionLabel[] = []
+        
+        if (useRealAPI) {
+          if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+            console.log('📡 Attempting to use real API for promotion labels')
+          }
+          // 優先使用真實的促銷 API 獲取標籤，有自動回退機制
+          labels = await getPromotionLabelsAsync(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
+        } else {
+          if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+            console.log('🎭 Using fallback method for promotion labels')
+          }
+          // 使用同步方法獲取標籤（避免 API 調用）
+          if (shouldUseMockLabels()) {
+            if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+              console.log('🎨 Generating mock labels')
+            }
+            labels = generateMockPromotionLabels(product.id)
+          } else {
+            if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+              console.log('🏷️ Using product-based labels')
+            }
+            labels = getPromotionLabels(product)
+          }
+        }
+        
         setPromotionLabels(labels)
         
-        // 開發環境下顯示調試資訊
-        if (process.env.NODE_ENV === 'development') {
+        // 開發環境下顯示調試資訊（只在開發模式且詳細調試開啟時）
+        if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
           console.log(`【${product.title}】促銷標籤:`, labels)
           console.log(`【${product.title}】標籤數量:`, labels.length)
           console.log(`【${product.title}】過濾後標籤:`, labels.filter(label => label.type !== 'sold-out' && label.type !== 'preorder'))
         }
       } catch (error) {
         console.error('Failed to load promotion labels:', error)
-        // 如果 API 失敗，回退到模擬資料
+        // 如果 API 失敗，回退到最安全的模式
+        if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
+          console.log('🚨 API failed, using safest fallback')
+        }
         const fallbackLabels = shouldUseMockLabels() 
           ? generateMockPromotionLabels(product.id)
           : getPromotionLabels(product)
@@ -70,9 +111,9 @@ export default function ProductPreview({
   // 為了向後相容，保留 isProductSoldOut
   const isProductSoldOut = productStockStatus.isSoldOut
 
-  // 除錯資訊（開發環境）
+  // 除錯資訊（僅在詳細調試模式開啟時）
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
       const debugInfo = debugPromotionLabels(product)
       console.log(`【${product.title}】促銷標籤分析:`, debugInfo)
     }

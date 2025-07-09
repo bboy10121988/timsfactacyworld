@@ -659,13 +659,23 @@ export async function getPromotionLabelsAsync(
   const useRealAPI = process.env.NEXT_PUBLIC_USE_REAL_PROMOTION_API === 'true'
   
   if (useRealAPI) {
-    // 使用新的主動促銷標籤獲取方法
-    const activeLabels = await getActivePromotionLabels(product, regionId)
-    if (activeLabels.length > 0) {
-      return activeLabels
+    try {
+      // 使用新的主動促銷標籤獲取方法
+      const activeLabels = await getActivePromotionLabels(product, regionId)
+      if (activeLabels.length > 0) {
+        return activeLabels
+      }
+      // 如果沒有主動促銷，回退到原方法
+      return await getRealPromotionLabels(product, regionId)
+    } catch (error) {
+      console.error('Real API failed, falling back to mock/local data:', error)
+      // API 失敗時回退到本地邏輯
+      if (shouldUseMockLabels()) {
+        return generateMockPromotionLabels(product.id)
+      } else {
+        return getPromotionLabels(product)
+      }
     }
-    // 如果沒有主動促銷，回退到原方法
-    return await getRealPromotionLabels(product, regionId)
   } else {
     // 使用現有的同步方法
     if (shouldUseMockLabels()) {
@@ -678,8 +688,7 @@ export async function getPromotionLabelsAsync(
 
 // 切換假資料模式的環境變數檢查
 export function shouldUseMockLabels(): boolean {
-  return process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS === 'true' || 
-         process.env.NODE_ENV === 'development'
+  return process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS === 'true'
 }
 
 /**
@@ -695,12 +704,32 @@ export async function getActivePromotionLabels(
   try {
     const labels: PromotionLabel[] = []
     
+    // 使用 Next.js API 路由代理來避免 CORS 問題
+    const baseUrl = '/api/medusa'
+    
+    // 檢查後端是否可用
+    try {
+      const healthCheck = await fetch(`${baseUrl}/store/auth`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!healthCheck.ok) {
+        console.warn('Medusa backend not available, using fallback')
+        throw new Error('Backend unavailable')
+      }
+    } catch (error) {
+      console.warn('Backend health check failed:', error)
+      throw new Error('Backend unavailable')
+    }
+    
     // 創建一個測試購物車來檢查促銷活動
-    const cartResponse = await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/carts`, {
+    const cartResponse = await fetch(`${baseUrl}/store/carts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ''
       },
       body: JSON.stringify({
         region_id: regionId
@@ -708,7 +737,9 @@ export async function getActivePromotionLabels(
     })
 
     if (!cartResponse.ok) {
-      throw new Error('Failed to create cart')
+      const errorText = await cartResponse.text()
+      console.error('Failed to create cart:', errorText)
+      throw new Error(`Failed to create cart: ${cartResponse.status}`)
     }
 
     const cartData = await cartResponse.json()
@@ -721,11 +752,10 @@ export async function getActivePromotionLabels(
     }
 
     // 添加商品到購物車
-    const addItemResponse = await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/carts/${cartId}/line-items`, {
+    const addItemResponse = await fetch(`${baseUrl}/store/carts/${cartId}/line-items`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ''
       },
       body: JSON.stringify({
         variant_id: firstVariant.id,
@@ -836,11 +866,8 @@ export async function getActivePromotionLabels(
 
     // 清理測試購物車（可選）
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/carts/${cartId}`, {
+      await fetch(`${baseUrl}/store/carts/${cartId}`, {
         method: 'DELETE',
-        headers: {
-          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ''
-        }
       })
     } catch (error) {
       console.warn('Failed to cleanup test cart:', error)
