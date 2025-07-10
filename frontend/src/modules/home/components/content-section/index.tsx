@@ -8,7 +8,7 @@ interface ContentSectionProps {
 
 const ContentSection = ({ heading, content }: ContentSectionProps) => {
   return (
-    <div className="py-12">
+    <div className={heading ? "py-8 md:py-12" : "py-0"}>
       <div className="content-container">
         {heading && <h2 className="text-3xl font-bold mb-4">{heading}</h2>}
         <div className="prose lg:prose-xl">

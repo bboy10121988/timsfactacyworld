@@ -15,12 +15,7 @@ export default {
       type: 'string',
       initialValue: '我們的服務'
     },
-    {
-      name: 'subheading',
-      title: '副標題',
-      type: 'string',
-      initialValue: '專業髮型設計服務，由經驗豐富的造型師為您打造專屬風格'
-    },
+
     {
       name: 'cardsPerRow',
       title: '每行卡片數量',
@@ -131,12 +126,6 @@ export default {
                   }
                 }
               ]
-            },
-            {
-              name: 'link',
-              title: '連結',
-              type: 'string',
-              description: '點擊卡片時的連結網址'
             }
           ],
           preview: {
@@ -157,13 +146,11 @@ export default {
   ],
   preview: {
     select: {
-      title: 'heading',
-      subtitle: 'subheading'
+      title: 'heading'
     },
-    prepare({title, subtitle}: {title?: string, subtitle?: string}) {
+    prepare({title}: {title?: string}) {
       return {
-        title: title || '服務卡片區塊',
-        subtitle: subtitle || ''
+        title: title || '服務卡片區塊'
       }
     }
   }

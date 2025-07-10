@@ -26,7 +26,6 @@ export interface SanityImage {
 
 export interface FeaturedProduct {
   heading: string
-  subheading?: string
   showHeading: boolean
   showSubheading: boolean
   collection_id: string

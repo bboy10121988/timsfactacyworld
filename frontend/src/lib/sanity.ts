@@ -10,8 +10,8 @@ const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "m7o2mv1n",
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2022-03-25",
-  useCdn: true,
-  token: "skxPHbtETeuof6qw2oYMoST8kD2UCmM1UTWEjAqw03YETyws2ZhLtUlUGoPieCQQ9Y4SkaoLWXHZ8mOs34ZUmqFMPnr7tnoqY1HuLVnMTwZ0SVhDV2mOuk336ICH1h7JuzUnEyyYOiJljwvERUlw7GEelitairKw8gRMHs8HABPpZZT1TWzZ"
+  useCdn: true
+  // 移除無效的 token，只讀取公開數據
 })
 
 export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
@@ -24,8 +24,8 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
           isActive,
           "slides": slides[] {
             heading,
-            subheading,
             "backgroundImage": backgroundImage.asset->url,
+            "backgroundImageAlt": backgroundImage.alt,
             buttonText,
             buttonLink
           },
@@ -40,6 +40,7 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
       _type,
       isActive,
       heading,
+      hideTitle,
       content,
       "image": image {
         "url": asset->url,
@@ -60,7 +61,6 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
         _type == "featuredProducts" => {
           _type,
           heading,
-          subheading,
           showHeading,
           showSubheading,
           collection_id,
@@ -86,7 +86,6 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
           _type,
           isActive,
           heading,
-          subheading,
           cardsPerRow,
           "cards": cards[] {
             title,
@@ -97,7 +96,7 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
               priceType,
               stylistName,
               isDefault,
-              "cardImage": {
+              "cardImage": cardImage {
                 "url": asset->url,
                 "alt": alt
               }
@@ -207,8 +206,8 @@ export async function getPageBySlug(slug: string): Promise<PageData | null> {
             isActive,
             "slides": slides[] {
               heading,
-              subheading,
               "backgroundImage": backgroundImage.asset->url,
+              "backgroundImageAlt": backgroundImage.alt,
               buttonText,
               buttonLink
             },
@@ -222,6 +221,7 @@ export async function getPageBySlug(slug: string): Promise<PageData | null> {
           _type == "imageTextBlock" => {
             isActive,
             heading,
+            hideTitle,
             content,
             "image": image {
               "url": asset->url,
@@ -274,7 +274,6 @@ export async function getPageBySlug(slug: string): Promise<PageData | null> {
           _type == "serviceCardSection" => {
             isActive,
             heading,
-            subheading,
             cardsPerRow,
             "cards": cards[] {
               title,
@@ -387,7 +386,6 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {   
   
   return client.fetch(query, { slug })
 }
-
 export async function getAllPages(): Promise<PageData[]> {
   try {
     const query = `*[_type == "pages" && isActive == true] {
@@ -407,8 +405,8 @@ export async function getAllPages(): Promise<PageData[]> {
             isActive,
             "slides": slides[] {
               heading,
-              subheading,
               "backgroundImage": backgroundImage.asset->url,
+              "backgroundImageAlt": backgroundImage.alt,
               buttonText,
               buttonLink
             },
@@ -422,6 +420,8 @@ export async function getAllPages(): Promise<PageData[]> {
           _type == "imageTextBlock" => {
             isActive,
             heading,
+            hideTitle,
+            content,
             content,
             "image": image {
               "url": asset->url,
@@ -474,7 +474,6 @@ export async function getAllPages(): Promise<PageData[]> {
           _type == "serviceCardSection" => {
             isActive,
             heading,
-            subheading,
             cardsPerRow,
             "cards": cards[] {
               title,
@@ -533,7 +532,6 @@ export async function getServiceSection(): Promise<ServiceCards | null> {
       _type,
       isActive,
       heading,
-      subheading,
       cardsPerRow,
       "cards": cards[] {
         title,
@@ -548,8 +546,7 @@ export async function getServiceSection(): Promise<ServiceCards | null> {
             "url": asset->url,
             "alt": alt
           }
-        },
-        link
+        }
       }
     }`
 

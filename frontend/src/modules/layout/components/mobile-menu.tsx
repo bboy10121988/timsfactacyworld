@@ -18,16 +18,49 @@ export default function MobileMenu({ regions, navigation, categories, headerData
   const [isOpen, setIsOpen] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [cart, setCart] = useState<any>(null)
+  const [menuTopOffset, setMenuTopOffset] = useState(0)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // 計算選單頂部偏移 - 與桌機版導覽列高度保持一致
-  const menuTopOffset = useMemo(() => {
-    const logoHeight = headerData?.logoHeight || 36
-    const mainNavHeight = Math.max(48, logoHeight + 24)  // 與桌機版一致：logo + 24px
-    const marqueeHeight = 36
-    const bufferHeight = 2
-    return marqueeHeight + mainNavHeight + bufferHeight
-  }, [headerData?.logoHeight])
+  // 動態計算選單頂部偏移 - 確保選單緊貼導覽列底部
+  useEffect(() => {
+    const calculateMenuTopOffset = () => {
+      // 直接使用 sticky 導覽列的位置計算
+      const stickyNav = document.querySelector('.sticky.top-0')
+      
+      if (stickyNav) {
+        const stickyNavRect = stickyNav.getBoundingClientRect()
+        // 選單頂部位置 = sticky 導覽列頂部 + sticky 導覽列高度
+        const totalOffset = stickyNavRect.top + stickyNavRect.height
+        
+        setMenuTopOffset(totalOffset)
+        console.log(`📱 選單位置計算: sticky導覽頂部=${stickyNavRect.top}px, 高度=${stickyNavRect.height}px, 選單位置=${totalOffset}px`)
+      }
+    }
+
+    // 初始計算
+    calculateMenuTopOffset()
+
+    // 監聽視窗大小變化
+    window.addEventListener('resize', calculateMenuTopOffset)
+    
+    // 使用 MutationObserver 監聽 DOM 變化
+    const observer = new MutationObserver(() => {
+      // 延遲一點計算，確保 DOM 更新完成
+      setTimeout(calculateMenuTopOffset, 100)
+    })
+    const targetNode = document.body
+    observer.observe(targetNode, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    })
+
+    return () => {
+      window.removeEventListener('resize', calculateMenuTopOffset)
+      observer.disconnect()
+    }
+  }, [isOpen]) // 當選單開啟時重新計算
 
   useEffect(() => {
     if (showSearch && searchRef.current) {
@@ -46,10 +79,23 @@ export default function MobileMenu({ regions, navigation, categories, headerData
   const totalItems = cart?.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0
 
   return (
-    <div className="block xsmall:hidden">
+    <div className="block lg:hidden">
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true)
+          // 立即重新計算選單位置
+          setTimeout(() => {
+            const stickyNav = document.querySelector('.sticky.top-0')
+            if (stickyNav) {
+              const stickyNavRect = stickyNav.getBoundingClientRect()
+              const totalOffset = stickyNavRect.top + stickyNavRect.height
+              setMenuTopOffset(totalOffset)
+              console.log(`📱 開啟選單時位置: ${totalOffset}px`)
+            }
+          }, 10)
+        }}
         className="flex items-center justify-center w-8 h-8"
+        aria-label="開啟選單"
       >
         <Bars3Icon className="w-6 h-6" />
       </button>
@@ -58,7 +104,9 @@ export default function MobileMenu({ regions, navigation, categories, headerData
         <div 
           className="fixed inset-x-0 bottom-0 z-[110] bg-white shadow-lg border-t border-gray-200"
           style={{
-            top: `${menuTopOffset}px`
+            top: `${menuTopOffset}px`,
+            maxHeight: `calc(100vh - ${menuTopOffset}px)`,
+            overflowY: 'auto'
           }}
         >
           <div className="flex items-center justify-between p-4 border-b">

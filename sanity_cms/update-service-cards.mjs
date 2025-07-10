@@ -48,8 +48,7 @@ const updatedServiceCardSection = {
           "price": 800,
           "stylistName": "Jenny"
         }
-      ],
-      "link": "#book-now"
+      ]
     },
     {
       "_key": "83c1cd2b4356",
@@ -79,8 +78,7 @@ const updatedServiceCardSection = {
           "price": 2000,
           "stylistName": "Jenny"
         }
-      ],
-      "link": "#book-now"
+      ]
     },
     {
       "_key": "e7cb4353f428",
@@ -110,8 +108,7 @@ const updatedServiceCardSection = {
           "price": 1500,
           "stylistName": "Jenny"
         }
-      ],
-      "link": "#book-now"
+      ]
     }
   ]
 }

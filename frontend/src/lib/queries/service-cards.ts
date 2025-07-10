@@ -15,8 +15,7 @@ export const serviceCardSectionFragment = `
           "url": asset->url,
           "alt": alt
         }
-      },
-      link
+      }
     }
   }
 `

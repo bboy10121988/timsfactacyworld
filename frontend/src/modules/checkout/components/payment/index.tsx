@@ -9,6 +9,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import PaymentContainer, {
   StripeCardContainer,
 } from "@modules/checkout/components/payment-container"
+import EcpayPayment from "@modules/checkout/components/ecpay-payment"
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -136,33 +137,51 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
-          {!paidByGiftcard && availablePaymentMethods?.length && (
+          {!paidByGiftcard && (
             <>
-              <RadioGroup
-                value={selectedPaymentMethod}
-                onChange={(value: string) => setPaymentMethod(value)}
-              >
-                {availablePaymentMethods.map((paymentMethod) => (
-                  <div key={paymentMethod.id}>
-                    {isStripeFunc(paymentMethod.id) ? (
-                      <StripeCardContainer
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                        paymentInfoMap={paymentInfoMap}
-                        setCardBrand={setCardBrand}
-                        setError={setError}
-                        setCardComplete={setCardComplete}
-                      />
-                    ) : (
-                      <PaymentContainer
-                        paymentInfoMap={paymentInfoMap}
-                        paymentProviderId={paymentMethod.id}
-                        selectedPaymentOptionId={selectedPaymentMethod}
-                      />
-                    )}
-                  </div>
-                ))}
-              </RadioGroup>
+              {/* 綠界金流選項 */}
+              <div className="mb-6">
+                <EcpayPayment 
+                  cart={cart}
+                  onPaymentMethodChange={setPaymentMethod}
+                  selectedPaymentMethod={selectedPaymentMethod}
+                />
+              </div>
+
+              {/* 原有的其他支付方法 */}
+              {availablePaymentMethods?.length > 0 && (
+                <>
+                  <Divider className="my-6" />
+                  <Heading level="h3" className="text-base font-medium mb-4">
+                    其他支付方式
+                  </Heading>
+                  <RadioGroup
+                    value={selectedPaymentMethod}
+                    onChange={(value: string) => setPaymentMethod(value)}
+                  >
+                    {availablePaymentMethods.map((paymentMethod) => (
+                      <div key={paymentMethod.id}>
+                        {isStripeFunc(paymentMethod.id) ? (
+                          <StripeCardContainer
+                            paymentProviderId={paymentMethod.id}
+                            selectedPaymentOptionId={selectedPaymentMethod}
+                            paymentInfoMap={paymentInfoMap}
+                            setCardBrand={setCardBrand}
+                            setError={setError}
+                            setCardComplete={setCardComplete}
+                          />
+                        ) : (
+                          <PaymentContainer
+                            paymentInfoMap={paymentInfoMap}
+                            paymentProviderId={paymentMethod.id}
+                            selectedPaymentOptionId={selectedPaymentMethod}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </>
+              )}
             </>
           )}
 
@@ -198,7 +217,11 @@ const Payment = ({
           >
             {!activeSession && isStripeFunc(selectedPaymentMethod)
               ? "輸入信用卡資料"
-              : "繼續檢視訂單"}
+              : selectedPaymentMethod === "ecpay_credit_card"
+                ? "繼續到綠界付款"
+                : selectedPaymentMethod === "ecpay_store_payment"
+                  ? "確認超商取貨付款"
+                  : "繼續檢視訂單"}
           </Button>
         </div>
 

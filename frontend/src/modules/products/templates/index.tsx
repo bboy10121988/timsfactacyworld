@@ -32,19 +32,19 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   return (
     <div className="bg-white">
       {/* 麵包屑導航 - 簡潔風格 */}
-      <div className="content-container py-4 text-xs">
-        <nav className="flex" aria-label="Breadcrumb">
+      <div className="px-6 md:px-12 max-w-[1440px] mx-auto pt-6 pb-4">
+        <nav className="flex text-sm" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-2">
             <li key="home" className="inline-flex items-center">
-              <a href="/" className="text-gray-500 hover:text-black uppercase tracking-wide">
+              <a href="/" className="text-sm text-gray-500 hover:text-black uppercase tracking-wide">
                 首頁
               </a>
             </li>
             {product.collection && (
               <li key={`collection-${product.collection.id}`}>
                 <div className="flex items-center">
-                  <span className="mx-2 text-gray-400">/</span>
-                  <a href={`/collections/${product.collection.handle}`} className="text-gray-500 hover:text-black uppercase tracking-wide">
+                  <span className="mx-2 text-sm text-gray-400">/</span>
+                  <a href={`/collections/${product.collection.handle}`} className="text-sm text-gray-500 hover:text-black uppercase tracking-wide">
                     {product.collection.title}
                   </a>
                 </div>
@@ -52,8 +52,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             )}
             <li key={`product-${product.id}`}>
               <div className="flex items-center">
-                <span className="mx-2 text-gray-400">/</span>
-                <span className="text-gray-800 uppercase tracking-wide" aria-current="page">
+                <span className="mx-2 text-sm text-gray-400">/</span>
+                <span className="text-sm text-gray-800 uppercase tracking-wide" aria-current="page">
                   {product.title}
                 </span>
               </div>
@@ -63,7 +63,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       </div>
 
       {/* 主要商品區塊 - 優化配置 */}
-      <div className="content-container max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 py-6 px-4" data-testid="product-container">
+      <div className="px-6 md:px-12 max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 py-6" data-testid="product-container">
         {/* 左側：圖片區塊 */}
         <div className="md:sticky md:top-24 self-start">
           <ImageGallery images={product?.images || []} />
@@ -107,7 +107,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
       {/* 相關商品 */}
       <div className="bg-gray-50 py-12">
-        <div className="content-container" data-testid="related-products-container">
+        <div className="px-6 md:px-12 max-w-[1440px] mx-auto" data-testid="related-products-container">
           <h2 className="text-xl font-medium mb-6 text-center">你可能也會喜歡</h2>
           <Suspense fallback={<SkeletonRelatedProducts />}>
             <RelatedProducts product={product} countryCode={countryCode} />

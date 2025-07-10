@@ -498,7 +498,7 @@ export default function ProductActions({
             <Button
               onClick={handleBuyNow}
               variant="primary"
-              className="w-full h-12 uppercase tracking-wide text-sm font-light bg-black hover:bg-gray-800"
+              className="w-full h-12 uppercase tracking-wide text-sm font-light bg-gray-900 hover:bg-gray-800"
               disabled={variantStockStatus.isSoldOut || !!disabled || isAdding}
               isLoading={isAdding}
               data-testid="add-product-button"

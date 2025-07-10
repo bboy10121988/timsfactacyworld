@@ -7,8 +7,8 @@ import Link from "next/link"
 
 type Slide = {
   heading: string
-  subheading: string
   backgroundImage: string
+  backgroundImageAlt?: string
   buttonText: string
   buttonLink: string
 }
@@ -68,7 +68,7 @@ const Hero = ({ slides, settings }: HeroProps) => {
             {slideItem.backgroundImage && (
               <Image
                 src={slideItem.backgroundImage}
-                alt={`${slideItem.heading} - ${slideItem.subheading}`}
+                alt={slideItem.backgroundImageAlt || slideItem.heading || `輪播圖片 ${index + 1}`}
                 fill
                 className="object-cover object-center"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 100vw"
@@ -95,18 +95,6 @@ const Hero = ({ slides, settings }: HeroProps) => {
           >
             {slide.heading}
           </Heading>
-          {slide.subheading && (
-            <Heading
-              level="h2"
-              className="text-heading-2 text-white/95 text-sm sm:text-xl md:text-2xl lg:text-3xl font-light mb-4 sm:mb-10"
-              style={{
-                textShadow: "0 1px 2px rgba(0,0,0,0.3)",
-                letterSpacing: "var(--letter-spacing-wide)"
-              }}
-            >
-              {slide.subheading}
-            </Heading>
-          )}
           {slide.buttonText && slide.buttonLink && (
             <Button asChild variant="secondary" 
               className="btn bg-white hover:bg-white/90 text-gray-900 px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base md:text-lg font-medium rounded-lg 

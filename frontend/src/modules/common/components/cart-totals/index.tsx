@@ -28,67 +28,71 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals }) => {
   } = totals
 
   return (
-    <div>
-      <div className="flex flex-col gap-y-2 txt-medium text-ui-fg-subtle ">
+    <div className="space-y-4">
+      {/* Subtotal and discounts */}
+      <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between">
-          <span className="flex gap-x-1 items-center">
-            小計 (不含運費和稅金)
-          </span>
-          <span data-testid="cart-subtotal" data-value={subtotal || 0}>
+          <span className="text-gray-600">小計</span>
+          <span className="font-medium text-gray-900" data-testid="cart-subtotal" data-value={subtotal || 0}>
             {convertToLocale({ amount: subtotal ?? 0, currency_code })}
           </span>
         </div>
+        
         {!!discount_total && (
           <div className="flex items-center justify-between">
-            <span>折扣</span>
+            <span className="text-gray-600">優惠折扣</span>
             <span
-              className="text-ui-fg-interactive"
+              className="font-medium text-green-600"
               data-testid="cart-discount"
               data-value={discount_total || 0}
             >
-              -{" "}
-              {convertToLocale({ amount: discount_total ?? 0, currency_code })}
+              -{convertToLocale({ amount: discount_total ?? 0, currency_code })}
             </span>
           </div>
         )}
+        
         <div className="flex items-center justify-between">
-          <span>運費</span>
-          <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+          <span className="text-gray-600">運費</span>
+          <span className="font-medium text-gray-900" data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
+            {shipping_subtotal === 0 ? "免費" : convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
           </span>
         </div>
-        <div className="flex justify-between">
-          <span className="flex gap-x-1 items-center ">稅金</span>
-          <span data-testid="cart-taxes" data-value={tax_total || 0}>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">稅金</span>
+          <span className="font-medium text-gray-900" data-testid="cart-taxes" data-value={tax_total || 0}>
             {convertToLocale({ amount: tax_total ?? 0, currency_code })}
           </span>
         </div>
+        
         {!!gift_card_total && (
           <div className="flex items-center justify-between">
-            <span>禮品卡</span>
+            <span className="text-gray-600">禮品卡</span>
             <span
-              className="text-ui-fg-interactive"
+              className="font-medium text-green-600"
               data-testid="cart-gift-card-amount"
               data-value={gift_card_total || 0}
             >
-              -{" "}
-              {convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
+              -{convertToLocale({ amount: gift_card_total ?? 0, currency_code })}
             </span>
           </div>
         )}
       </div>
-      <div className="h-px w-full border-b border-gray-200 my-4" />
-      <div className="flex items-center justify-between text-ui-fg-base mb-2 txt-medium ">
-        <span>總計</span>
+      
+      {/* Divider */}
+      <div className="border-t border-gray-200"></div>
+      
+      {/* Total */}
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-semibold text-gray-900">總計</span>
         <span
-          className="txt-xlarge-plus"
+          className="text-xl font-bold text-gray-900"
           data-testid="cart-total"
           data-value={total || 0}
         >
           {convertToLocale({ amount: total ?? 0, currency_code })}
         </span>
       </div>
-      <div className="h-px w-full border-b border-gray-200 mt-4" />
     </div>
   )
 }

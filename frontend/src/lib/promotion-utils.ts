@@ -18,6 +18,7 @@ export type PromotionLabelType =
   | 'preorder'           // 預訂
   | 'sold-out'           // 售完
   | 'bundle'             // 組合優惠
+  | 'buy-x-get-y'        // 買X送Y
   | 'flash-sale'         // 限時搶購
   | 'clearance'          // 清倉
   | 'exclusive'          // 獨家
@@ -39,17 +40,18 @@ const LABEL_PRIORITIES: Record<PromotionLabelType, number> = {
   'clearance': 5,
   'campaign': 6,
   'bundle': 7,
-  'exclusive': 8,
-  'limited': 9,
-  'promotion': 10,
-  'special-event': 11,
-  'discount-code': 12,
-  'preorder': 13,
-  'new': 14,
-  'hot': 15,
-  'bestseller': 16,
-  'featured': 17,
-  'sale': 18,
+  'buy-x-get-y': 8,
+  'exclusive': 9,
+  'limited': 10,
+  'promotion': 11,
+  'special-event': 12,
+  'discount-code': 13,
+  'preorder': 14,
+  'new': 15,
+  'hot': 16,
+  'bestseller': 17,
+  'featured': 18,
+  'sale': 19,
 }
 
 // 標籤文字對照表
@@ -69,10 +71,14 @@ const LABEL_TEXTS: Record<PromotionLabelType, string> = {
   'preorder': '預訂',
   'sold-out': '售完',
   'bundle': '組合優惠',
+  'buy-x-get-y': '送禮',
   'flash-sale': '限時搶購',
   'clearance': '清倉特價',
   'exclusive': '獨家',
 }
+
+// 統一的金幣樣式類別
+const GOLD_COIN_STYLE = 'px-4 py-2 text-xs font-bold rounded-full shadow-2xl border-2 bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 text-amber-900 border-yellow-200 backdrop-blur-sm gold-shimmer gold-rivet-label transform hover:scale-105 transition-all duration-200'
 
 // 計算商品折扣資訊
 export function calculateProductDiscount(product: HttpTypes.StoreProduct) {
@@ -289,6 +295,25 @@ function getMetadataLabels(product: HttpTypes.StoreProduct): PromotionLabel[] {
     })
   }
 
+  // 買X送Y標籤
+  const buyXGetY = metadata.buy_x_get_y || metadata.buyXGetY
+  if (buyXGetY && typeof buyXGetY === 'string' && buyXGetY.trim()) {
+    labels.push({
+      type: 'buy-x-get-y',
+      text: buyXGetY.trim(),
+      priority: LABEL_PRIORITIES['buy-x-get-y'],
+      className: 'product-label buy-x-get-y'
+    })
+  } else if (buyXGetY && (buyXGetY === 'true' || buyXGetY === true)) {
+    // 如果只是標記為 true，使用預設文字
+    labels.push({
+      type: 'buy-x-get-y',
+      text: LABEL_TEXTS['buy-x-get-y'],
+      priority: LABEL_PRIORITIES['buy-x-get-y'],
+      className: 'product-label buy-x-get-y'
+    })
+  }
+
   return labels
 }
 
@@ -318,49 +343,108 @@ export function getPromotionLabels(product: HttpTypes.StoreProduct): PromotionLa
       className: 'product-label preorder'
     })
   }
+  
+  // 如果商品已售完，不顯示其他促銷標籤
+  if (stockStatus.isSoldOut) {
+    return labels
+  }
 
-  // 檢查是否使用假資料模式
-  if (shouldUseMockLabels()) {
-    // 假資料模式：生成假標籤但不覆蓋真實庫存狀態
-    const mockLabels = generateMockPromotionLabels(product.id)
-    // 過濾掉與真實庫存狀態衝突的假標籤
-    const filteredMockLabels = mockLabels.filter(label => {
-      // 如果已經有售完標籤，不要添加其他促銷標籤
-      if (stockStatus.isSoldOut && ['sale', 'discount', 'flash-sale'].includes(label.type)) {
-        return false
-      }
-      return true
-    })
-    labels.push(...filteredMockLabels)
-  } else {
-    // 正常模式：使用真實的促銷邏輯
+  // 2. 自動計算的折扣標籤（基於 Medusa 真實價格計算）
+  if (discountInfo.hasDiscount && discountInfo.discountPercentage > 0) {
+    const taiwanDiscount = (100 - discountInfo.discountPercentage) / 10 // 轉換成台灣折扣表示法
+    const discountText = taiwanDiscount === Math.floor(taiwanDiscount) 
+      ? `${taiwanDiscount}折` 
+      : `${taiwanDiscount.toFixed(1)}折`
     
-    // 2. 自動計算的折扣標籤
-    if (discountInfo.hasDiscount && discountInfo.discountPercentage > 0) {
-      labels.push({
-        type: 'auto-discount',
-        text: `${discountInfo.discountPercentage}% OFF`,
-        priority: LABEL_PRIORITIES['auto-discount'],
-        className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white',
-        isDiscount: true
-      })
-    }
-
-    // 3. 從 metadata 獲取標籤（只有在沒有自動折扣時才加入手動折扣）
-    const metadataLabels = getMetadataLabels(product)
-    metadataLabels.forEach(label => {
-      // 如果已經有自動折扣，跳過手動折扣標籤
-      if (label.type === 'manual-discount' && discountInfo.hasDiscount) {
-        return
-      }
-      labels.push(label)
+    labels.push({
+      type: 'auto-discount',
+      text: discountText,
+      priority: LABEL_PRIORITIES['auto-discount'],
+      className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white',
+      isDiscount: true
     })
   }
 
-  // 按優先級排序並限制顯示數量
+  // 3. 從 metadata 獲取促銷標籤
+  const metadataLabels = getMetadataLabels(product)
+  metadataLabels.forEach(label => {
+    // 如果已經有自動折扣，跳過手動折扣標籤以避免重複
+    if (label.type === 'manual-discount' && discountInfo.hasDiscount) {
+      return
+    }
+    labels.push(label)
+  })
+
+  // 4. 從產品標籤 (tags) 中提取促銷資訊
+  if (product.tags && product.tags.length > 0) {
+    const tagValues = product.tags.map((tag: any) => tag.value?.toLowerCase() || "")
+    
+    // 新品標籤
+    if (tagValues.includes("new") || tagValues.includes("新品")) {
+      labels.push({
+        type: 'new',
+        text: LABEL_TEXTS['new'],
+        priority: LABEL_PRIORITIES['new'],
+        className: 'product-label new'
+      })
+    }
+    
+    // 熱銷標籤
+    if (tagValues.includes("hot") || tagValues.includes("熱銷")) {
+      labels.push({
+        type: 'hot',
+        text: LABEL_TEXTS['hot'],
+        priority: LABEL_PRIORITIES['hot'],
+        className: 'product-label hot'
+      })
+    }
+    
+    // 限量標籤
+    if (tagValues.includes("limited") || tagValues.includes("限量")) {
+      labels.push({
+        type: 'limited',
+        text: LABEL_TEXTS['limited'],
+        priority: LABEL_PRIORITIES['limited'],
+        className: 'product-label limited'
+      })
+    }
+    
+    // 暢銷標籤
+    if (tagValues.includes("bestseller") || tagValues.includes("暢銷")) {
+      labels.push({
+        type: 'bestseller',
+        text: LABEL_TEXTS['bestseller'],
+        priority: LABEL_PRIORITIES['bestseller'],
+        className: 'product-label bestseller'
+      })
+    }
+    
+    // 精選標籤
+    if (tagValues.includes("featured") || tagValues.includes("精選")) {
+      labels.push({
+        type: 'featured',
+        text: LABEL_TEXTS['featured'],
+        priority: LABEL_PRIORITIES['featured'],
+        className: 'product-label featured'
+      })
+    }
+    
+    // 買X送Y標籤
+    if (tagValues.includes("buy-x-get-y") || tagValues.includes("buyxgety") || 
+        tagValues.includes("買送") || tagValues.includes("贈品") ||
+        tagValues.includes("買1送1") || tagValues.includes("買2送1") || tagValues.includes("買3送1")) {
+      labels.push({
+        type: 'buy-x-get-y',
+        text: LABEL_TEXTS['buy-x-get-y'],
+        priority: LABEL_PRIORITIES['buy-x-get-y'],
+        className: 'product-label buy-x-get-y'
+      })
+    }
+  }
+
+  // 按優先級排序（無數量限制）
   return labels
     .sort((a, b) => a.priority - b.priority)
-    .slice(0, 3) // 最多顯示3個標籤
 }
 
 // 為了除錯，提供詳細的標籤分析
@@ -442,28 +526,30 @@ export function generateMockPromotionLabels(productId?: string): PromotionLabel[
     className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
   })
   
-  // 5. Buy X Get Y (買X送Y優惠) - 使用光澤金色效果
+  // 5. Buy X Get Y (買X送Y優惠) - 只顯示「送Y」部分
   const buyXGetYOptions = [
-    // 數量型 (安全通用，適用所有商品)
-    '買2送1',
-    '買3送1', 
-    '買1送1',
-    '買4送2',
+    // 以「送」為主的表達方式
+    '送禮品',      // 送贈品
+    '送好禮',      // 送好禮
+    '加碼送',      // 加碼贈送
+    '限量送',      // 限量贈送
+    '滿額送',      // 滿額贈送
+    '買就送',      // 購買即送
+    '送驚喜',      // 送驚喜禮品
+    '送配件',      // 送配件
     
-    // 通用表達 (不涉及具體商品名稱)
-    '買就送',      // 購買即有贈品
-    '加碼贈送',    // 額外贈送商品
-    '組合優惠',    // 套裝組合優惠
-    '多買多送',    // 買越多送越多
-    '滿件贈品',    // 滿一定數量就送
-    '加購好禮'     // 加購即可獲得好禮
+    // 具體數量的表達（重點在「送」）
+    '送1件',       // 買X送1件
+    '送2件',       // 買X送2件
+    '加送1',       // 加送1件
+    '多送1',       // 多送1件
   ]
   
   const selectedBuyXGetY = buyXGetYOptions[Math.floor(randomValue * buyXGetYOptions.length)]
   mockLabels.push({
-    type: 'bundle',
+    type: 'buy-x-get-y',
     text: selectedBuyXGetY,
-    priority: LABEL_PRIORITIES['bundle'],
+    priority: LABEL_PRIORITIES['buy-x-get-y'],
     className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
   })
   
@@ -620,6 +706,20 @@ export async function getRealPromotionLabels(
       })
     }
 
+    // 買X送Y標籤（從 metadata 或後端資料檢查）
+    if (promotionData.buyXGetY) {
+      const buyXGetYText = typeof promotionData.buyXGetY === 'string' 
+        ? promotionData.buyXGetY 
+        : LABEL_TEXTS['buy-x-get-y']
+      
+      labels.push({
+        type: 'buy-x-get-y',
+        text: buyXGetYText,
+        priority: LABEL_PRIORITIES['buy-x-get-y'],
+        className: 'product-label buy-x-get-y'
+      })
+    }
+
     // 庫存狀態標籤
     if (inventoryData.isOutOfStock) {
       labels.push({
@@ -649,7 +749,7 @@ export async function getRealPromotionLabels(
 
 /**
  * 統一的促銷標籤獲取函數
- * 根據環境變數決定使用真實 API 或假資料
+ * 根據環境變數決定使用真實 API 或本地計算
  */
 export async function getPromotionLabelsAsync(
   product: HttpTypes.StoreProduct,
@@ -668,27 +768,19 @@ export async function getPromotionLabelsAsync(
       // 如果沒有主動促銷，回退到原方法
       return await getRealPromotionLabels(product, regionId)
     } catch (error) {
-      console.error('Real API failed, falling back to mock/local data:', error)
+      console.error('Real API failed, falling back to local data:', error)
       // API 失敗時回退到本地邏輯
-      if (shouldUseMockLabels()) {
-        return generateMockPromotionLabels(product.id)
-      } else {
-        return getPromotionLabels(product)
-      }
-    }
-  } else {
-    // 使用現有的同步方法
-    if (shouldUseMockLabels()) {
-      return generateMockPromotionLabels(product.id)
-    } else {
       return getPromotionLabels(product)
     }
+  } else {
+    // 使用本地計算方法
+    return getPromotionLabels(product)
   }
 }
 
-// 切換假資料模式的環境變數檢查
+// 切換假資料模式的環境變數檢查（已棄用，保留向後相容）
 export function shouldUseMockLabels(): boolean {
-  return process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS === 'true'
+  return false // 不再使用假資料模式
 }
 
 /**
@@ -707,22 +799,23 @@ export async function getActivePromotionLabels(
     // 使用 Next.js API 路由代理來避免 CORS 問題
     const baseUrl = '/api/medusa'
     
-    // 檢查後端是否可用
+    // 檢查後端是否可用 - 使用不需要身份驗證的端點
     try {
-      const healthCheck = await fetch(`${baseUrl}/store/auth`, {
+      const healthCheck = await fetch(`${baseUrl}/store/regions`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || '',
         },
       })
       
       if (!healthCheck.ok) {
-        console.warn('Medusa backend not available, using fallback')
         throw new Error('Backend unavailable')
       }
     } catch (error) {
-      console.warn('Backend health check failed:', error)
-      throw new Error('Backend unavailable')
+      console.warn('Backend health check failed')
+      // 後端不可用時，不顯示任何標籤
+      return labels
     }
     
     // 創建一個測試購物車來檢查促銷活動
@@ -764,7 +857,10 @@ export async function getActivePromotionLabels(
     })
 
     if (!addItemResponse.ok) {
-      throw new Error('Failed to add item to cart')
+      const errorText = await addItemResponse.text()
+      console.error(`❌ [${product.title}] 添加商品失敗: ${addItemResponse.status}`, errorText)
+      // 添加商品失敗時，返回空標籤而不是拋出錯誤
+      return labels
     }
 
     const cartWithItem = await addItemResponse.json()
@@ -784,7 +880,33 @@ export async function getActivePromotionLabels(
           const method = promotion.application_method
           const code = promotion.code || ''
           
-          if (method.type === 'percentage') {
+          // 檢查是否為「買X送Y」類型促銷
+          if (code.toLowerCase().includes('buy') && code.toLowerCase().includes('get') ||
+              code.toLowerCase().includes('買') && code.toLowerCase().includes('送') ||
+              method.type === 'buy_x_get_y' ||
+              promotion.type === 'buy_x_get_y') {
+            
+            // 根據促銷代碼生成合適的顯示文字，只顯示「送Y」部分
+            let buyXGetYText = '送禮'
+            if (code.toLowerCase().includes('buy2get1') || code.toLowerCase().includes('買2送1')) {
+              buyXGetYText = '送1件'
+            } else if (code.toLowerCase().includes('buy3get1') || code.toLowerCase().includes('買3送1')) {
+              buyXGetYText = '送1件'
+            } else if (code.toLowerCase().includes('buy1get1') || code.toLowerCase().includes('買1送1')) {
+              buyXGetYText = '送1件'
+            } else if (code.toLowerCase().includes('gift') || code.toLowerCase().includes('贈')) {
+              buyXGetYText = '送禮品'
+            } else if (code.toLowerCase().includes('free') || code.toLowerCase().includes('免費')) {
+              buyXGetYText = '送好禮'
+            }
+            
+            labels.push({
+              type: 'buy-x-get-y',
+              text: buyXGetYText,
+              priority: LABEL_PRIORITIES['buy-x-get-y'],
+              className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
+            })
+          } else if (method.type === 'percentage') {
             // 百分比折扣
             const discountPercent = method.value
             const taiwanDiscount = (100 - discountPercent) / 10
@@ -864,7 +986,7 @@ export async function getActivePromotionLabels(
       })
     }
 
-    // 清理測試購物車（可選）
+    // 清理測試購物車
     try {
       await fetch(`${baseUrl}/store/carts/${cartId}`, {
         method: 'DELETE',
@@ -873,10 +995,12 @@ export async function getActivePromotionLabels(
       console.warn('Failed to cleanup test cart:', error)
     }
 
+    // 如果沒有找到任何促銷，返回空陣列
     return labels.sort((a, b) => a.priority - b.priority)
 
   } catch (error) {
-    console.error('Error fetching active promotion labels:', error)
+    console.error('Error fetching Medusa API promotion labels:', error)
+    // 出錯時不顯示任何標籤
     return []
   }
 }

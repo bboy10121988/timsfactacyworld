@@ -1,0 +1,67 @@
+"use client"
+
+import { listCartShippingMethods } from "@lib/data/fulfillment"
+import { listCartPaymentMethods } from "@lib/data/payment"
+import { HttpTypes } from "@medusajs/types"
+import { useState } from "react"
+import Addresses from "@modules/checkout/components/addresses"
+import Payment from "@modules/checkout/components/payment"
+import Review from "@modules/checkout/components/review"
+import Shipping from "@modules/checkout/components/shipping"
+
+type CheckoutFormProps = {
+  cart: HttpTypes.StoreCart
+  availableShippingMethods: HttpTypes.StoreCartShippingOption[]
+  customer?: HttpTypes.StoreCustomer | null
+}
+
+const CheckoutForm = ({
+  cart,
+  availableShippingMethods,
+  customer,
+}: CheckoutFormProps) => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Left Side - Form */}
+      <div className="space-y-8">
+        {/* Customer Information */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            客戶資訊
+          </h2>
+          <Addresses cart={cart} customer={customer} />
+        </div>
+
+        {/* Shipping Method */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            配送方式
+          </h2>
+          <Shipping cart={cart} availableShippingMethods={availableShippingMethods} />
+        </div>
+
+        {/* Payment Method */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            付款方式
+          </h2>
+          <Payment cart={cart} />
+        </div>
+      </div>
+
+      {/* Right Side - Order Summary */}
+      <div className="lg:sticky lg:top-8">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            訂單摘要
+          </h2>
+          <Review cart={cart} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CheckoutForm

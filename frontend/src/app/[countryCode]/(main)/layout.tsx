@@ -28,16 +28,17 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   // 獲取 header 資料來計算動態高度
   const headerData = await getHeader() as SanityHeader
   
-  // 精確計算：讓影片剛好接觸第二導覽列底部
-  const marqueeHeight = 36 // h-9
-  const mainNavHeight = 48 // h-12 (更合理的固定高度)
-  const separatorHeight = 1 // border-t
-  const categoryNavHeight = 30 // py-2 (16px) + text-sm (14px) = 30px
+  // 整合後的導航高度計算：所有部分都在同一個 sticky 容器內
+  const marqueeHeight = 36 // h-9 跑馬燈
+  const mobileNavHeight = 48 // h-12 主導覽（手機）
+  const desktopNavHeight = 64 // lg:h-16 主導覽（桌機）
+  const categoryNavHeight = 38 // 分類導覽列（py-2 + 文字高度）
   
-  // 小螢幕：跑馬燈 + 主導覽
-  const smallScreenHeight = marqueeHeight + mainNavHeight
-  // 大螢幕：跑馬燈 + 主導覽 + 分隔線 + 分類導覽
-  const largeScreenHeight = marqueeHeight + mainNavHeight + separatorHeight + categoryNavHeight
+  // 整合容器的總高度
+  // 手機：跑馬燈 + 主導覽（分類列隱藏）
+  const mobileIntegratedHeight = marqueeHeight + mobileNavHeight
+  // 桌機：跑馬燈 + 主導覽 + 分類導覽
+  const desktopIntegratedHeight = marqueeHeight + desktopNavHeight + categoryNavHeight
 
   return (
     <>

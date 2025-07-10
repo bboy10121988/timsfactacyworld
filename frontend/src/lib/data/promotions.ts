@@ -25,6 +25,7 @@ export const getProductPromotions = async (
   bundleDiscount?: number
   isExclusive?: boolean
   hasDiscountCode?: string
+  buyXGetY?: string | boolean
 }> => {
   try {
     // 獲取產品詳細信息包含價格
@@ -84,6 +85,7 @@ export const getProductPromotions = async (
       specialEvent: metadata.special_event || null,
       hasDiscountCode: metadata.discount_code || null,
       bundleDiscount: metadata.bundle_discount ? parseInt(metadata.bundle_discount) : null,
+      buyXGetY: metadata.buy_x_get_y || metadata.buyXGetY || null,
     }
 
     // 檢查產品標籤 (tags) 中的促銷信息

@@ -46,6 +46,7 @@ interface ImageTextBlockType {
   rightImage?: SanityImage
   leftContent?: string
   rightContent?: string
+  hideTitle?: boolean
 }
 
 interface FeaturedProductsSection {
@@ -87,7 +88,6 @@ interface ServiceCards {
   _type: "serviceCardSection"
   isActive: boolean
   heading?: string
-  subheading?: string
   cardsPerRow: number
   cards: Array<{
     title: string
@@ -104,7 +104,6 @@ interface ServiceCards {
       price: number
       stylistName?: string
     }>
-    link?: string
   }>
 }
 
@@ -232,6 +231,7 @@ export default function PageRenderer({ pageData }: PageRendererProps) {
                       rightImage={imageBlock.rightImage}
                       leftContent={imageBlock.leftContent}
                       rightContent={imageBlock.rightContent}
+                      hideTitle={imageBlock.hideTitle}
                     />
                   </div>
                 )

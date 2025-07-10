@@ -17,7 +17,7 @@ const mainBannerFragment = `
     isActive,
     "slides": slides[] {
       heading,
-      subheading,
+
       "backgroundImage": backgroundImage.asset->url,
       buttonText,
       buttonLink
@@ -35,6 +35,7 @@ const imageTextBlockFragment = `
   _type == "imageTextBlock" => {
     isActive,
     heading,
+    hideTitle,
     content,
     "image": image {
       "url": asset->url,
@@ -57,7 +58,6 @@ const imageTextBlockFragment = `
 const featuredProductsFragment = `
   _type == "featuredProducts" => {
     heading,
-    subheading,
     showHeading,
     showSubheading,
     collection_id,
@@ -79,7 +79,6 @@ const serviceCardSectionFragment = `
   _type == "serviceCardSection" => {
     isActive,
     heading,
-    subheading,
     cardsPerRow,
     "cards": cards[]-> {
       title,

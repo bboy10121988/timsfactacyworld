@@ -17,6 +17,7 @@ interface ImageTextBlockProps {
   rightImage?: ImageConfig
   leftContent?: string
   rightContent?: string
+  hideTitle?: boolean
 }
 
 const ImageTextBlock = ({
@@ -27,26 +28,38 @@ const ImageTextBlock = ({
   leftImage,
   rightImage,
   leftContent,
-  rightContent
+  rightContent,
+  hideTitle = false
 }: ImageTextBlockProps) => {
+  // 檢查是否真的有標題內容
+  const hasTitle = !hideTitle && heading && heading.trim().length > 0
+  
   return (
-    <div className="w-full max-w-[1440px] mx-auto">
+    <div className={cn(
+      "w-full max-w-[1440px] mx-auto",
+      hasTitle ? "py-12 md:py-20" : "py-8 md:py-12"
+    )}>
       {/* 左圖右文布局 */}
       {layout === 'imageLeft' && image && (
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             <Image
               src={image.url || ''}
-              alt={image.alt || ''}
+              alt={image.alt || '區塊圖片'}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
-          <div className="flex flex-col justify-center space-y-6 px-4 md:px-8">
-            <h2 className="h1 mb-4">
-              {heading}
-            </h2>
+          <div className={cn(
+            "flex flex-col justify-center px-4 md:px-8",
+            hasTitle ? "space-y-8" : "space-y-4"
+          )}>
+            {hasTitle && (
+              <h2 className="h1 mb-6">
+                {heading}
+              </h2>
+            )}
             <div 
               className="text-content"
               dangerouslySetInnerHTML={{ __html: content }}
@@ -58,10 +71,15 @@ const ImageTextBlock = ({
       {/* 右圖左文布局 */}
       {layout === 'imageRight' && image && (
         <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="flex flex-col justify-center space-y-6 px-4 md:px-8 order-2 md:order-1">
-            <h2 className="h1 mb-4">
-              {heading}
-            </h2>
+          <div className={cn(
+            "flex flex-col justify-center px-4 md:px-8 order-2 md:order-1",
+            hasTitle ? "space-y-8" : "space-y-4"
+          )}>
+            {hasTitle && (
+              <h2 className="h1 mb-6">
+                {heading}
+              </h2>
+            )}
             <div 
               className="text-content"
               dangerouslySetInnerHTML={{ __html: content }}
@@ -70,7 +88,7 @@ const ImageTextBlock = ({
           <div className="relative aspect-[4/3] w-full overflow-hidden order-1 md:order-2">
             <Image
               src={image.url || ''}
-              alt={image.alt || ''}
+              alt={image.alt || '區塊圖片'}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -82,10 +100,15 @@ const ImageTextBlock = ({
       {/* 中間文字布局 */}
       {layout === 'centerText' && (
         <div className="max-w-4xl mx-auto px-4 md:px-8">
-          <div className="space-y-6 text-center">
-            <h2 className="h1 mb-4">
-              {heading}
-            </h2>
+          <div className={cn(
+            "text-center",
+            hasTitle ? "space-y-8" : "space-y-4"
+          )}>
+            {hasTitle && (
+              <h2 className="h1 mb-6">
+                {heading}
+              </h2>
+            )}
             <div 
               className="text-content"
               dangerouslySetInnerHTML={{ __html: content }}
@@ -96,11 +119,16 @@ const ImageTextBlock = ({
 
       {/* 雙圖布局 */}
       {layout === 'imageLeftImageRight' && (
-        <div className="space-y-8 px-4 md:px-8">
+        <div className={cn(
+          "px-4 md:px-8",
+          hasTitle ? "space-y-10" : "space-y-6"
+        )}>
           <div className="text-center max-w-4xl mx-auto">
-            <h2 className="h1 mb-6">
-              {heading}
-            </h2>
+            {hasTitle && (
+              <h2 className="h1 mb-8">
+                {heading}
+              </h2>
+            )}
             {content && (
               <div 
                 className="text-content"
@@ -113,7 +141,7 @@ const ImageTextBlock = ({
               <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <Image
                   src={leftImage.url || ''}
-                  alt={leftImage.alt || ''}
+                  alt={leftImage.alt || '左側圖片'}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -124,7 +152,7 @@ const ImageTextBlock = ({
               <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <Image
                   src={rightImage.url || ''}
-                  alt={rightImage.alt || ''}
+                  alt={rightImage.alt || '右側圖片'}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -137,11 +165,16 @@ const ImageTextBlock = ({
 
       {/* 雙文布局 */}
       {layout === 'textLeftTextRight' && (
-        <div className="space-y-8 px-4 md:px-8">
+        <div className={cn(
+          "px-4 md:px-8",
+          hasTitle ? "space-y-8" : "space-y-4"
+        )}>
           <div className="text-center max-w-4xl mx-auto">
-            <h2 className="h1 mb-6">
-              {heading}
-            </h2>
+            {hasTitle && (
+              <h2 className="h1 mb-6">
+                {heading}
+              </h2>
+            )}
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             {leftContent && (

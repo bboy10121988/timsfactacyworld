@@ -33,17 +33,14 @@ export default function FeaturedProducts({
 
   const renderTitle = (settings?: FeaturedProductsSection) => {
     if (!settings) return null
-    const { showHeading, heading, showSubheading, subheading } = settings
+    const { showHeading, heading } = settings
 
-    if (!showHeading && !showSubheading) return null
+    if (!showHeading) return null
 
     return (
       <div className="mb-16 text-center px-4 md:px-8">
         {showHeading && heading && (
           <h1 className="h1">{heading}</h1>
-        )}
-        {showSubheading && subheading && (
-          <h3 className="h3">{subheading}</h3>
         )}
       </div>
     )
@@ -54,7 +51,7 @@ export default function FeaturedProducts({
       {collections.map((collection) => (
         <section 
           key={collection.id} 
-          className="py-16"
+          className={settings?.showHeading ? "py-8 md:py-12" : "py-0"}
         >
           <div className="w-full">
             <div className="container mx-auto">

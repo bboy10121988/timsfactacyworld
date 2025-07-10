@@ -147,7 +147,18 @@ export async function signup(_currentState: unknown, formData: FormData) {
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
 
-    await transferCart()
+    // 嘗試轉移購物車，如果失敗則處理
+    try {
+      await transferCart()
+    } catch (error: any) {
+      console.error("註冊後購物車轉移錯誤:", error)
+      // 嘗試確保購物車關聯
+      try {
+        await ensureCartAssociation()
+      } catch (associationError) {
+        console.error("購物車關聯失敗:", associationError)
+      }
+    }
 
     return createdCustomer
   } catch (error: any) {
@@ -258,7 +269,13 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     console.error("購物車轉移錯誤:", error)
-    // 購物車轉移失敗不應該阻止登入成功，只記錄錯誤
+    // 購物車轉移失敗時，嘗試創建新的購物車關聯
+    try {
+      await ensureCartAssociation()
+    } catch (associationError) {
+      console.error("購物車關聯失敗:", associationError)
+      // 即使購物車處理失敗，也不應該阻止登入成功
+    }
   }
 }
 
@@ -279,18 +296,36 @@ export async function signout(countryCode: string) {
 }
 
 export async function transferCart() {
-  const cartId = await getCartId()
+  try {
+    const cartId = await getCartId()
 
-  if (!cartId) {
-    return
+    if (!cartId) {
+      return
+    }
+
+    const headers = await getAuthHeaders()
+    
+    if (!headers) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('🔐 transferCart: 無驗證 headers，跳過轉移')
+      }
+      return
+    }
+
+    await sdk.store.cart.transferCart(cartId, {}, headers)
+
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ transferCart: 購物車轉移成功')
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ transferCart 失敗:', error)
+    }
+    // 不重新拋出錯誤，避免影響用戶體驗
   }
-
-  const headers = await getAuthHeaders()
-
-  await sdk.store.cart.transferCart(cartId, {}, headers)
-
-  const cartCacheTag = await getCacheTag("carts")
-  revalidateTag(cartCacheTag)
 }
 
 export const addCustomerAddress = async (
@@ -393,4 +428,47 @@ export const updateCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+/**
+ * 確保購物車與用戶正確關聯
+ * 如果轉移失敗，嘗試重新創建關聯
+ */
+async function ensureCartAssociation() {
+  const cartId = await getCartId()
+  const headers = await getAuthHeaders()
+  
+  if (!cartId || !headers) {
+    return
+  }
+
+  try {
+    // 嘗試獲取當前購物車
+    const cart = await sdk.client.fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}`, {
+      method: "GET",
+      headers,
+    })
+
+    // 如果購物車已經有 customer_id，就不需要處理
+    if (cart.cart.customer_id) {
+      return
+    }
+
+    // 嘗試再次轉移購物車
+    await sdk.store.cart.transferCart(cartId, {}, headers)
+    
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+    
+    console.log("購物車重新轉移成功")
+  } catch (error) {
+    console.error("購物車重新轉移失敗:", error)
+    // 如果還是失敗，清除本地購物車 ID，讓系統創建新的
+    await removeCartId()
+    
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+    
+    console.log("已清除本地購物車，系統將創建新的購物車")
+  }
 }

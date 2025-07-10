@@ -38,11 +38,11 @@ export default function CategoryTemplate({
 
   return (
     <div
-      className="flex flex-col pt-16 pb-6 content-container"
+      className="flex flex-col pt-0 pb-8 content-container"
       data-testid="category-container"
     >
       {/* 分類麵包屑和標題 */}
-      <div className="flex flex-col mb-8 text-center">
+      <div className="flex flex-col mb-12 pt-8 text-center">
         <div className="flex flex-row justify-center">
           {parents &&
             parents.map((parent) => (

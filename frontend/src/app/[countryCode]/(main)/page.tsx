@@ -16,7 +16,7 @@ import type { FeaturedProductsSection } from '@lib/types/page-sections'
 import type { BlogSection } from '@lib/types/page-sections'
 import type { YoutubeSection as YoutubeSectionType } from '@lib/types/page-sections'
 import type { ServiceCards } from '@lib/types/service-cards'
-import type { ContentSection as ContentSectionType } from '@lib/types/page-sections'
+import type { ContentSection as ContentSectionType } from '@lib/types/sections'
 import { getStoreName } from "@lib/store-name"
 
 
@@ -80,7 +80,6 @@ export default async function Home(props: {
                   <ServiceCardsSection
                     key={index}
                     heading={serviceSection.heading}
-                    subheading={serviceSection.subheading}
                     cardsPerRow={serviceSection.cardsPerRow}
                     cards={serviceSection.cards}
                   />
@@ -112,6 +111,7 @@ export default async function Home(props: {
                     rightImage={imageBlock.rightImage}
                     leftContent={imageBlock.leftContent}
                     rightContent={imageBlock.rightContent}
+                    hideTitle={imageBlock.hideTitle}
                   />
                 )
               }
@@ -142,10 +142,11 @@ export default async function Home(props: {
                 return (
                   <BlogPosts 
                     key={index}
-                    title={blogSection.title || "最新文章"}
+                    title={blogSection.title}
                     category={blogSection.category}
-                    limit={blogSection.limit || 6}
+                    limit={blogSection.limit || 2}
                     postsPerRow={blogSection.postsPerRow || 3}
+                    showTitle={!!blogSection.title}
                   />
                 )
               }
@@ -172,7 +173,7 @@ export default async function Home(props: {
                 return (
                   <ContentSection
                     key={index}
-                    heading={contentBlock.heading}
+                    heading={contentBlock.heading || ""}
                     content={contentBlock.content}
                   />
                 )
@@ -188,7 +189,7 @@ export default async function Home(props: {
         }) || null}
 
       {/* 添加 Google Maps iframe */}
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "0" }}>
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d9025.597972804986!2d121.51735723134998!3d25.031793426603716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a9446e13fa69%3A0x3e9b9e89bc90f145!2zVGlt4oCZcyBmYW50YXN5IFdvcmxkIOeUt-Wjq-eQhumrruW7sw!5e0!3m2!1szh-TW!2stw!4v1749469703866!5m2!1szh-TW!2stw"
           width="100%"

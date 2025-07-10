@@ -28,12 +28,40 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: 'logoSize',
+      title: 'Logo Size Settings',
+      type: 'object',
+      description: 'Set different logo heights for desktop and mobile devices',
+      fields: [
+        defineField({
+          name: 'desktop',
+          title: 'Desktop Logo Height (px)',
+          type: 'number',
+          description: 'Logo height for desktop screens (24-64px recommended)',
+          validation: Rule => Rule.min(24).max(64),
+          initialValue: 36,
+        }),
+        defineField({
+          name: 'mobile',
+          title: 'Mobile Logo Height (px)',
+          type: 'number',
+          description: 'Logo height for mobile screens (20-48px recommended)',
+          validation: Rule => Rule.min(20).max(48),
+          initialValue: 28,
+        })
+      ],
+      options: {
+        collapsible: false
+      }
+    }),
+    defineField({
       name: 'logoHeight',
-      title: 'Logo Height (px)',
+      title: 'Logo Height (px) - Legacy',
       type: 'number',
-      description: 'Set the height of the logo in pixels (24-64px recommended)',
+      description: 'Legacy field - use Logo Size Settings above for responsive control',
       validation: Rule => Rule.min(24).max(64),
       initialValue: 36,
+      hidden: ({ document }: any) => !!(document?.logoSize?.desktop || document?.logoSize?.mobile)
     }),
     defineField({
       name: 'navigation',

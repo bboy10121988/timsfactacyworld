@@ -48,6 +48,15 @@ export default {
       title: '封面圖片',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        {
+          name: 'alt',
+          title: '替代文字',
+          type: 'string',
+          description: '封面圖片的替代文字，用於無障礙和 SEO 優化',
+          validation: (Rule: any) => Rule.required().error('封面圖片的替代文字為必填欄位')
+        }
+      ]
     },
     {
       name: 'categories',

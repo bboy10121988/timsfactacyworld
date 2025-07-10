@@ -54,18 +54,22 @@ export default {
               type: 'image',
               options: {
                 hotspot: true
-              }
+              },
+              fields: [
+                {
+                  name: 'alt',
+                  title: '替代文字',
+                  type: 'string',
+                  description: '背景圖片的替代文字，用於無障礙和 SEO 優化'
+                }
+              ]
             },
             {
               name: 'heading',
               title: '標題',
               type: 'string'
             },
-            {
-              name: 'subheading',
-              title: '副標題',
-              type: 'string'
-            },
+
             {
               name: 'buttonText',
               title: '按鈕文字',
@@ -86,7 +90,7 @@ export default {
       title: 'slides.0.title',
       media: 'slides.0.image'
     },
-    prepare({title, media}) {
+    prepare({title, media}: {title?: string, media?: any}) {
       return {
         title: title || '主橫幅區塊',
         media

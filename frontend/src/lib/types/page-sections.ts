@@ -2,8 +2,8 @@ import type { SanityImage } from './sanity'
 
 export type BannerSlide = {
   heading: string
-  subheading: string
   backgroundImage: string
+  backgroundImageAlt?: string
   buttonText?: string
   buttonLink?: string
 }
@@ -38,6 +38,7 @@ export type ImageTextBlock = {
   rightImage?: ImageConfig
   leftContent?: string
   rightContent?: string
+  hideTitle?: boolean
 }
 
 export type BlogSection = {
@@ -52,7 +53,6 @@ export type BlogSection = {
 export type FeaturedProductsSection = {
   _type: "featuredProducts"
   heading: string
-  subheading?: string
   showHeading: boolean
   showSubheading: boolean
   collection_id: string

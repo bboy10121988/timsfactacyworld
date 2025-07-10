@@ -63,8 +63,9 @@ export default async function Nav() {
 
   return (
     <>
-      {/* 1. 跑馬燈 - 最上層，非 sticky */}
-      <div className="relative z-0">
+      {/* 整合的導航容器：跑馬燈 + 主選單 + 分類列 */}
+      <div className="sticky top-0 inset-x-0 z-[100] group transition-all duration-300">
+        {/* 1. 跑馬燈部分 */}
         {(headerData?.marquee?.enabled && textCount > 0) ? (
           <div className="bg-gray-900 text-white overflow-hidden h-9">
             <div className="relative h-full">
@@ -126,10 +127,8 @@ export default async function Nav() {
             </div>
           </div>
         )}
-      </div>
 
-      {/* 2. 主選單導覽列 - 中間層，Sticky top-0 */}
-      <div className="sticky top-0 inset-x-0 z-[100] group transition-all duration-300">
+        {/* 2. 主選單導覽列 */}
         <header 
           className="relative mx-auto border-b bg-white border-ui-border-base shadow-sm"
           style={{
@@ -202,10 +201,11 @@ export default async function Nav() {
                       src={headerData.logo.url}
                       alt={headerData.logo.alt || "Store logo"}
                       width={200}
-                      height={200}
-                      className="w-auto h-auto object-contain transition-all duration-300"
+                      height={headerData?.logoHeight || 36}
+                      className="w-auto object-contain transition-all duration-300"
                       style={{ 
-                        maxHeight: `${headerData?.logoHeight || 36}px`
+                        height: `${headerData?.logoHeight || 36}px`,
+                        width: 'auto'
                       }}
                     />
                   ) : (
@@ -242,29 +242,24 @@ export default async function Nav() {
             </div>
           </nav>
         </header>
-      </div>
 
-      {/* 3. 分類導覽列 - 下層，Sticky 在主導覽列下方 */}
-      <div 
-        className="sticky inset-x-0 z-[90] hidden xsmall:block border-b border-ui-border-base bg-white shadow-sm"
-        style={{
-          top: `${mainNavHeight}px`
-        }}
-      >
-        <div className="px-4 md:px-8 flex justify-between items-center py-2 text-sm text-neutral-600">
-          <div className="flex items-center gap-x-6">
-            {categories?.map((category: {id: string; handle: string; name: string}) => (
-              <LocalizedClientLink
-                key={category.id}
-                href={`/categories/${category.handle}`}
-                className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
-              >
-                <span className="!text-[13px] !font-medium !leading-none">{category.name}</span>
-              </LocalizedClientLink>
-            ))}
-          </div>
-          <div className="relative group flex items-center">
-            <SearchBarClient />
+        {/* 3. 分類導覽列 */}
+        <div className="hidden xsmall:block border-b border-ui-border-base bg-white shadow-sm">
+          <div className="px-6 md:px-12 max-w-[1440px] mx-auto flex justify-between items-center py-2 text-sm text-neutral-600">
+            <div className="flex items-center gap-x-6">
+              {categories?.map((category: {id: string; handle: string; name: string}) => (
+                <LocalizedClientLink
+                  key={category.id}
+                  href={`/categories/${category.handle}`}
+                  className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
+                >
+                  <span className="!text-[13px] !font-medium !leading-none">{category.name}</span>
+                </LocalizedClientLink>
+              ))}
+            </div>
+            <div className="relative group flex items-center">
+              <SearchBarClient />
+            </div>
           </div>
         </div>
       </div>

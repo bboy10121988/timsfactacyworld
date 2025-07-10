@@ -179,7 +179,7 @@ export default async function BlogPost({
             <article className="bg-white">
               <div className="max-w-4xl mx-auto p-8 md:p-12">
                 {post.mainImage && (
-                  <div className="aspect-[16/9] relative mb-10 rounded-xl overflow-hidden shadow-lg">
+                  <div className="aspect-[4/3] relative mb-10 rounded-xl overflow-hidden shadow-lg">
                     <Image 
                       src={post.mainImage} 
                       alt={post.title || "文章封面圖片"}

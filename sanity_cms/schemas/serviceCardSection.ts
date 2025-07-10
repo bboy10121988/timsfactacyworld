@@ -148,12 +148,6 @@ export default {
                   }
                 }
               ]
-            },
-            {
-              name: 'link',
-              title: '連結',
-              type: 'string',
-              description: '點擊卡片時的連結網址'
             }
           ],
           preview: {

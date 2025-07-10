@@ -21,7 +21,6 @@ interface Card {
   title: string
   englishTitle: string
   stylists?: Stylist[]
-  link?: string
 }
 
 interface ServiceCardProps {
@@ -82,7 +81,7 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
 
   const getCardImage = (): { url: string; alt: string } => {
     try {
-      // 如果選擇了特定設計師，使用該設計師的專用圖片
+      // 優先級 1: 如果選擇了特定設計師，使用該設計師的專用圖片
       if (selectedDesigner !== "all" && Array.isArray(card?.stylists) && card.stylists.length) {
         const stylist = card.stylists.find((s) => s?.stylistName === selectedDesigner)
         if (stylist?.cardImage?.url) {
@@ -93,29 +92,47 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
         }
       }
       
-      // 當選擇 "all" 或沒有選擇設計師時，使用標示為預設的設計師圖片
-      if (selectedDesigner === "all" && Array.isArray(card?.stylists) && card.stylists.length > 0) {
+      // 優先級 2: 當選擇 "all" 時，使用標示為預設的設計師圖片
+      if (Array.isArray(card?.stylists) && card.stylists.length > 0) {
         const defaultStylist = card.stylists.find(s => s.isDefault === true)
         if (defaultStylist?.cardImage?.url) {
           return {
             url: defaultStylist.cardImage.url,
-            alt: defaultStylist.cardImage.alt ?? `${defaultStylist.stylistName} - ${card.title}`
+            alt: defaultStylist.cardImage.alt ?? `${defaultStylist.stylistName || '預設設計師'} - ${card.title}`
           }
         }
       }
       
-      // 如果沒有預設設計師圖片，使用第一位設計師的圖片作為備用
+      // 優先級 3: 使用第一位有圖片的設計師（排除通用標籤）
       if (Array.isArray(card?.stylists) && card.stylists.length > 0) {
-        const firstStylist = card.stylists[0]
-        if (firstStylist?.cardImage?.url) {
+        const stylistWithImage = card.stylists.find(s => {
+          const hasImage = s?.cardImage?.url
+          const isNotGeneric = s?.stylistName && 
+            !s.stylistName.toLowerCase().includes('all') &&
+            !s.stylistName.toLowerCase().includes('指定')
+          return hasImage && isNotGeneric
+        })
+        
+        if (stylistWithImage?.cardImage?.url) {
           return {
-            url: firstStylist.cardImage.url,
-            alt: firstStylist.cardImage.alt ?? card.title
+            url: stylistWithImage.cardImage.url,
+            alt: stylistWithImage.cardImage.alt ?? `${stylistWithImage.stylistName} - ${card.title}`
           }
         }
       }
       
-      // 如果都沒有圖片，使用預設的服務圖片 URL
+      // 優先級 4: 使用任意有圖片的設計師（包含通用）
+      if (Array.isArray(card?.stylists) && card.stylists.length > 0) {
+        const anyWithImage = card.stylists.find(s => s?.cardImage?.url)
+        if (anyWithImage?.cardImage?.url) {
+          return {
+            url: anyWithImage.cardImage.url,
+            alt: anyWithImage.cardImage.alt ?? card.title
+          }
+        }
+      }
+      
+      // 最後備選：使用預設圖片
       const defaultImageUrl = getDefaultServiceImage(card.title)
       return {
         url: defaultImageUrl,
@@ -141,9 +158,22 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
       if (!Array.isArray(card?.stylists) || !card.stylists.length) return null
       
       if (selectedDesigner === "all") {
-        // 當選擇 "all" 時，使用標示為預設的設計師名稱
+        // 當選擇 "all" 時，優先使用標示為預設的設計師名稱
         const defaultStylist = card.stylists.find(s => s.isDefault === true)
-        return defaultStylist?.stylistName ?? null
+        if (defaultStylist?.stylistName) {
+          // 排除通用標籤
+          const name = defaultStylist.stylistName
+          if (!name.toLowerCase().includes('all') && !name.toLowerCase().includes('指定')) {
+            return name
+          }
+        }
+        
+        // 如果沒有適合的預設設計師，找第一個非通用的設計師
+        const specificStylist = card.stylists.find(s => {
+          const name = s?.stylistName
+          return name && !name.toLowerCase().includes('all') && !name.toLowerCase().includes('指定')
+        })
+        return specificStylist?.stylistName ?? null
       }
       
       const stylist = card.stylists.find((s) => s?.stylistName === selectedDesigner)
@@ -173,8 +203,8 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
 
             {/* 等級標籤 - 簡約設計 */}
             {getSelectedStylistLevel() && (
-              <div className="absolute top-6 left-6 transform group-hover:scale-105 transition-transform duration-300">
-                <div className="bg-stone-800/90 text-white px-4 py-2 shadow-sm text-xs font-medium tracking-widest uppercase">
+              <div className="absolute top-3 left-3 md:top-6 md:left-6 transform group-hover:scale-105 transition-transform duration-300">
+                <div className="bg-stone-800/90 text-white px-2 py-1 shadow-sm text-[10px] md:text-xs font-medium tracking-widest uppercase inline-block">
                   {getSelectedStylistLevel()}
                 </div>
               </div>
@@ -197,68 +227,38 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
       })()}
 
       {/* 卡片內容區域 - Kitsuné 風格 */}
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-4 md:space-y-6">
         {/* 服務標題區域 - 添加價格到右側 */}
         <div className="flex justify-between items-start">
-          <div className="space-y-2 flex-1">
-            <h3 className="text-xl font-light text-stone-900 group-hover:text-stone-700 transition-colors duration-300 leading-tight tracking-wide">
+          <div className="space-y-1 md:space-y-2 flex-1">
+            <h3 className="text-lg md:text-xl font-light text-stone-900 group-hover:text-stone-700 transition-colors duration-300 leading-tight tracking-wide">
               {card.title}
             </h3>
             {card.englishTitle && (
-              <p className="text-xs text-stone-500 font-light tracking-[0.2em] uppercase">
+              <p className="text-[10px] md:text-xs text-stone-500 font-light tracking-[0.2em] uppercase">
                 {card.englishTitle}
               </p>
             )}
           </div>
           {/* 價格區域 - 右側對齊 */}
-          <div className="ml-4 text-right">
-            <span className="text-lg font-medium text-stone-800 tracking-wide">
+          <div className="ml-2 md:ml-4 text-right">
+            <span className="text-sm md:text-lg font-medium text-stone-800 tracking-wide">
               {getCardPrice(card)}
             </span>
           </div>
         </div>
 
-        {/* 設計師資訊 - 簡約設計 */}
-        {(selectedDesigner && selectedDesigner !== "all" && getSelectedStylistName()) || 
-         (selectedDesigner === "all" && getSelectedStylistName()) ? (
-          <div className="space-y-4 p-5 bg-stone-50/50 border border-stone-100/50">
-            {getSelectedStylistName() && (
-              <div className="flex items-center space-x-3">
-                <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span className="text-sm font-medium text-stone-700 tracking-wide">
-                  {getSelectedStylistName()}
-                </span>
-              </div>
-            )}
-            {getSelectedStylistLevel() && (
-              <div className="flex items-center">
-                <span className="text-xs bg-stone-200/80 text-stone-700 px-4 py-2 font-medium tracking-wide">
-                  {getSelectedStylistLevel()}
-                </span>
-              </div>
-            )}
-          </div>
-        ) : null}
-        
-        {/* 預約按鈕 - 直角設計 */}
-        <button 
-          className="w-full bg-stone-900 hover:bg-stone-800 text-white font-light py-4 px-8 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] group relative overflow-hidden tracking-wide"
-          onClick={() => {
-            console.log('Book now clicked for:', card.title)
-          }}
-        >
-          {/* 按鈕內部光澤效果 */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-          
-          <span className="flex items-center justify-center space-x-3 relative z-10 text-white">
-            <span className="text-sm tracking-[0.1em] uppercase text-white">立即預約</span>
-            <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+        {/* 設計師資訊 - 簡約設計，始終顯示 */}
+        <div className="space-y-2 md:space-y-4 p-3 md:p-5 bg-stone-50/50 border border-stone-100/50">
+          <div className="flex items-center space-x-2 md:space-x-3">
+            <svg className="w-3 h-3 md:w-4 md:h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-          </span>
-        </button>
+            <span className="text-xs md:text-sm font-medium text-stone-700 tracking-wide">
+              {getSelectedStylistName() || "所有設計師"}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* 底部微光效果 - 更簡約 */}
@@ -269,14 +269,12 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
 
 interface ServiceCardsSectionProps {
   heading?: string
-  subheading?: string
   cardsPerRow?: number
   cards?: Card[]
 }
 
 export default function ServiceCardsSection({
   heading,
-  subheading,
   cardsPerRow = 4,
   cards = [],
 }: ServiceCardsSectionProps) {
@@ -299,9 +297,10 @@ export default function ServiceCardsSection({
             .map(s => s.stylistName!)
             .filter(name => {
               const lowercaseName = name.toLowerCase()
-              // 過濾掉通用設計師標籤
+              // 過濾掉通用設計師標籤（包含更多變體）
               return !lowercaseName.includes('all stylists') && 
                      !lowercaseName.includes('all stylist') && 
+                     !lowercaseName.includes('指定') &&
                      lowercaseName !== 'all' &&
                      name.trim().length > 0
             })
@@ -314,16 +313,11 @@ export default function ServiceCardsSection({
   }
 
   return (
-    <section className="py-20 bg-stone-50/30">
+    <section className={heading ? "py-8 md:py-12 bg-stone-50/30" : "py-0 bg-stone-50/30"}>
       <div className="max-w-[1440px] mx-auto w-full">
-        {(heading || subheading) && (
+        {heading && (
           <div className="mb-20 text-center">
-            {heading && (
-              <h1 className="text-3xl md:text-4xl font-light text-stone-900 mb-4 tracking-wide">{heading}</h1>
-            )}
-            {subheading && (
-              <h3 className="text-lg font-light text-stone-600 max-w-2xl mx-auto leading-relaxed tracking-wide">{subheading}</h3>
-            )}
+            <h1 className="text-3xl md:text-4xl font-light text-stone-900 mb-4 tracking-wide">{heading}</h1>
           </div>
         )}
         
@@ -358,9 +352,9 @@ export default function ServiceCardsSection({
         )}
 
         <div className={clsx(
-          "grid grid-cols-1 gap-0 w-full",
-          cardsPerRow === 3 && "sm:grid-cols-2 lg:grid-cols-3",
-          cardsPerRow === 4 && "sm:grid-cols-2 lg:grid-cols-4"
+          "grid grid-cols-2 gap-0 w-full",
+          cardsPerRow === 3 && "lg:grid-cols-3",
+          cardsPerRow === 4 && "lg:grid-cols-4"
         )}>
           {validCards.map((card, idx) => (
             <div key={`${selectedDesigner}-${idx}`} className="w-full">

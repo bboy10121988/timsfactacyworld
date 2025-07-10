@@ -1,7 +1,7 @@
 "use client"
 
 import Hero from "../hero"
-import type { MainBanner } from "@lib/sanity"
+import type { MainBanner, BannerSlide } from "@lib/types/page-sections"
 
 type HeroSectionProps = {
   banner: MainBanner
@@ -16,10 +16,10 @@ const HeroSection = ({ banner }: HeroSectionProps) => {
     <section className="w-full">
       <div className="mb-4 last:mb-0">
         <Hero
-          slides={banner.slides.map(slide => ({
+          slides={banner.slides.map((slide: BannerSlide) => ({
             heading: slide.heading,
-            subheading: slide.subheading || "",
             backgroundImage: slide.backgroundImage,
+            backgroundImageAlt: slide.backgroundImageAlt,
             buttonText: slide.buttonText || "",
             buttonLink: slide.buttonLink || ""
           }))}

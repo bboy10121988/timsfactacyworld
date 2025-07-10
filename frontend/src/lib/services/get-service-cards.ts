@@ -12,7 +12,6 @@ export type ServiceCardType = {
       alt?: string
     }
   }[]
-  link?: string
 }
 
 export type ServiceCardsType = {
@@ -44,8 +43,7 @@ export async function getServiceCards(): Promise<ServiceCardsType | null> {
               "url": asset->url,
               "alt": alt
             }
-          },
-          link
+          }
         }
       }
     }

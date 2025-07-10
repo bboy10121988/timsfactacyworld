@@ -35,8 +35,7 @@ const serviceCardUpdate = {
         "price": 800,
         "stylistName": "Jenny"
       }
-    ],
-    "link": "#book-now"
+    ]
   },
   "cards[1]": {
     "title": "染髮服務",
@@ -62,8 +61,7 @@ const serviceCardUpdate = {
         "price": 2000,
         "stylistName": "Jenny"
       }
-    ],
-    "link": "#book-now"
+    ]
   },
   "cards[2]": {
     "title": "燙髮造型",
@@ -89,8 +87,7 @@ const serviceCardUpdate = {
         "price": 1500,
         "stylistName": "Jenny"
       }
-    ],
-    "link": "#book-now"
+    ]
   }
 }
 

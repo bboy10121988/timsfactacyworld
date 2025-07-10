@@ -15,9 +15,11 @@ export default {
       type: 'string'
     },
     {
-      name: 'subtitle',
-      title: '副標題',
-      type: 'string'
+      name: 'hideTitle',
+      title: '隱藏標題',
+      type: 'boolean',
+      description: '若勾選則隱藏標題，同時調整上下間距',
+      initialValue: false
     },
     {
       name: 'content',
@@ -34,7 +36,7 @@ export default {
     select: {
       title: 'title'
     },
-    prepare({title}) {
+    prepare({title}: {title?: string}) {
       return {
         title: title || '一般內容區塊'
       }

@@ -29,7 +29,11 @@ export type SanityHeader = {
     alt: string
   }
   storeName?: string
-  logoHeight?: number
+  logoHeight?: number // 向後兼容的舊欄位
+  logoSize?: {
+    desktop?: number
+    mobile?: number
+  }
   navigation?: {
     name: string
     href: string

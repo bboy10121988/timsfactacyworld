@@ -15,6 +15,13 @@ export default {
       type: 'string'
     },
     {
+      name: 'hideTitle',
+      title: '隱藏標題',
+      type: 'boolean',
+      description: '若勾選則隱藏標題，同時調整上下間距',
+      initialValue: false
+    },
+    {
       name: 'content',
       title: '內文',
       type: 'text',
@@ -41,6 +48,14 @@ export default {
       options: {
         hotspot: true
       },
+      fields: [
+        {
+          name: 'alt',
+          title: '替代文字',
+          type: 'string',
+          description: '圖片的替代文字，用於無障礙和 SEO 優化'
+        }
+      ],
       hidden: ({parent}: any) => parent?.layout === 'textLeftTextRight' || parent?.layout === 'centerText' || parent?.layout === 'imageLeftImageRight'
     },
     {
@@ -50,6 +65,14 @@ export default {
       options: {
         hotspot: true
       },
+      fields: [
+        {
+          name: 'alt',
+          title: '替代文字',
+          type: 'string',
+          description: '左側圖片的替代文字，用於無障礙和 SEO 優化'
+        }
+      ],
       hidden: ({parent}: any) => parent?.layout !== 'imageLeftImageRight'
     },
     {
@@ -59,6 +82,14 @@ export default {
       options: {
         hotspot: true
       },
+      fields: [
+        {
+          name: 'alt',
+          title: '替代文字',
+          type: 'string',
+          description: '右側圖片的替代文字，用於無障礙和 SEO 優化'
+        }
+      ],
       hidden: ({parent}: any) => parent?.layout !== 'imageLeftImageRight'
     },
     {

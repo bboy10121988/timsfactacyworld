@@ -2,6 +2,13 @@ const checkEnvVariables = require("./check-env-variables")
 
 checkEnvVariables()
 
+// 動態獲取後端URL
+const getBackendUrl = () => {
+  return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
+         process.env.MEDUSA_BACKEND_URL || 
+         'http://localhost:9000'
+}
+
 /**
  * @type {import('next').NextConfig}
  */
@@ -18,24 +25,52 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  
+  // 配置CORS和API代理
+  async headers() {
+    return [
+      {
+        // 為所有API路由設置CORS headers
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*", // 在生產環境中應該設置具體的域名
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization, X-Requested-With",
+          },
+        ],
+      },
+    ]
+  },
+  
   // 修復跨域和 fetch 問題
   async rewrites() {
+    const backendUrl = getBackendUrl()
+    
     return [
       // 代理 Medusa API 請求到後端
       {
         source: "/api/medusa/:path*",
-        destination: `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000'}/:path*`,
+        destination: `${backendUrl}/:path*`,
       },
       // 代理圖片請求到 Medusa 後端
       {
         source: "/static/:path*",
-        destination: `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000'}/static/:path*`,
+        destination: `${backendUrl}/static/:path*`,
       },
     ]
   },
   // 配置允許的圖片來源
   images: {
     remotePatterns: [
+      // 本地開發
       {
         protocol: "http",
         hostname: "localhost",
@@ -46,6 +81,11 @@ const nextConfig = {
         protocol: "http",
         hostname: "localhost",
       },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      // AWS S3 圖片
       {
         protocol: "https",
         hostname: "medusa-public-images.s3.eu-west-1.amazonaws.com",
@@ -58,16 +98,33 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
+      // Sanity CDN
       {
         protocol: "https",
         hostname: "cdn.sanity.io",
       },
+      // 生產環境後端域名 (動態)
+      ...(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL 
+        ? [{
+            protocol: new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL).protocol.slice(0, -1),
+            hostname: new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL).hostname,
+            ...(new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL).port 
+              ? { port: new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL).port }
+              : {}),
+            pathname: "/static/**",
+          }]
+        : []),
     ],
     domains: [
       "localhost",
+      "127.0.0.1",
       "images.unsplash.com",
       "plus.unsplash.com",
       "cdn.sanity.io",
+      // 動態添加生產環境域名
+      ...(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL 
+        ? [new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL).hostname]
+        : []),
     ],
   },
 }

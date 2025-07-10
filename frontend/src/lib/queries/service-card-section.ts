@@ -16,8 +16,7 @@ export const serviceCardSectionFragment = `
         "alt": coalesce(alt, title),
         "caption": caption
       },
-      "stylists": coalesce(stylists, []),
-      link
+      "stylists": coalesce(stylists, [])
     }
   }
 `

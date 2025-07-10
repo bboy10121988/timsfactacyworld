@@ -1,4 +1,4 @@
- "use client"
+"use client"
 
 import { Text } from "@medusajs/ui"
 import { getProductPrice } from "@lib/util/get-product-price"
@@ -8,7 +8,7 @@ import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
 import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
-import { getPromotionLabels, debugPromotionLabels, getProductStockStatus, generateMockPromotionLabels, shouldUseMockLabels, getPromotionLabelsAsync, PromotionLabel } from "@lib/promotion-utils"
+import { getActivePromotionLabels, PromotionLabel } from "@lib/simple-promotion-utils"
 
 type ProductOption = {
   title: string
@@ -37,64 +37,20 @@ export default function ProductPreview({
     const loadPromotionLabels = async () => {
       setIsLoadingPromotions(true)
       try {
-        // 檢查是否使用真實 API
-        const useRealAPI = process.env.NEXT_PUBLIC_USE_REAL_PROMOTION_API === 'true'
-        const useMockLabels = process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS === 'true'
-        
-        // 調試日誌（僅在詳細調試模式開啟時）
-        if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-          console.log('🔧 Environment variables:', {
-            NEXT_PUBLIC_USE_REAL_PROMOTION_API: process.env.NEXT_PUBLIC_USE_REAL_PROMOTION_API,
-            NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS: process.env.NEXT_PUBLIC_USE_MOCK_PROMOTION_LABELS,
-            useRealAPI,
-            useMockLabels
-          })
-        }
-        
-        let labels: PromotionLabel[] = []
-        
-        if (useRealAPI) {
-          if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-            console.log('📡 Attempting to use real API for promotion labels')
-          }
-          // 優先使用真實的促銷 API 獲取標籤，有自動回退機制
-          labels = await getPromotionLabelsAsync(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
-        } else {
-          if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-            console.log('🎭 Using fallback method for promotion labels')
-          }
-          // 使用同步方法獲取標籤（避免 API 調用）
-          if (shouldUseMockLabels()) {
-            if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-              console.log('🎨 Generating mock labels')
-            }
-            labels = generateMockPromotionLabels(product.id)
-          } else {
-            if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-              console.log('🏷️ Using product-based labels')
-            }
-            labels = getPromotionLabels(product)
-          }
-        }
-        
+        // 只使用 Medusa API 獲取促銷標籤
+        const labels = await getActivePromotionLabels(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
         setPromotionLabels(labels)
         
-        // 開發環境下顯示調試資訊（只在開發模式且詳細調試開啟時）
-        if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-          console.log(`【${product.title}】促銷標籤:`, labels)
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`【${product.title}】Medusa API 促銷標籤:`, labels)
           console.log(`【${product.title}】標籤數量:`, labels.length)
-          console.log(`【${product.title}】過濾後標籤:`, labels.filter(label => label.type !== 'sold-out' && label.type !== 'preorder'))
         }
       } catch (error) {
-        console.error('Failed to load promotion labels:', error)
-        // 如果 API 失敗，回退到最安全的模式
-        if (process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-          console.log('🚨 API failed, using safest fallback')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to load Medusa API promotion labels:', error)
         }
-        const fallbackLabels = shouldUseMockLabels() 
-          ? generateMockPromotionLabels(product.id)
-          : getPromotionLabels(product)
-        setPromotionLabels(fallbackLabels)
+        // 如果 Medusa API 失敗，不顯示任何標籤
+        setPromotionLabels([])
       } finally {
         setIsLoadingPromotions(false)
       }
@@ -103,21 +59,28 @@ export default function ProductPreview({
     loadPromotionLabels()
   }, [product]) // 使用整個 product 物件作為依賴
 
-  // 獲取庫存狀態
+  // 簡化的庫存狀態檢查
   const productStockStatus = useMemo(() => {
-    return getProductStockStatus(product)
+    if (!product.variants || product.variants.length === 0) {
+      return { isSoldOut: false, canPreorder: false }
+    }
+
+    const allVariantsOutOfStock = product.variants.every(variant => {
+      return variant.manage_inventory && (variant.inventory_quantity || 0) === 0
+    })
+
+    const canPreorder = product.variants.some(variant => {
+      return variant.allow_backorder === true
+    })
+
+    return {
+      isSoldOut: allVariantsOutOfStock && !canPreorder,
+      canPreorder: allVariantsOutOfStock && canPreorder
+    }
   }, [product])
 
   // 為了向後相容，保留 isProductSoldOut
   const isProductSoldOut = productStockStatus.isSoldOut
-
-  // 除錯資訊（僅在詳細調試模式開啟時）
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG_PROMOTION_LABELS === 'true') {
-      const debugInfo = debugPromotionLabels(product)
-      console.log(`【${product.title}】促銷標籤分析:`, debugInfo)
-    }
-  }, [product])
 
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({})
   const [isAdding, setIsAdding] = useState(false)
@@ -229,8 +192,6 @@ export default function ProductPreview({
     }
   }, [autoSelectSingleOptions])
 
-  // ...existing code...
-
   // 根據選擇的選項找到對應的變體
   const findVariantId = (selectedOpts: SelectedOptions): string | undefined => {
     if (!product.variants || product.variants.length === 0) {
@@ -335,6 +296,25 @@ export default function ProductPreview({
     }
   }
 
+  // 手機版按鈕點擊處理
+  const handleMobileButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // 檢查是否需要選擇選項
+    const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
+    const variantId = findVariantId(selectedOptions)
+
+    if (hasMultipleOptions && !variantId) {
+      // 如果有多個選項且沒有選擇，跳轉到商品詳細頁面
+      window.location.href = `/products/${product.handle}`
+      return
+    }
+
+    // 否則直接加入購物車
+    handleAddToCart(e)
+  }
+
   return (
     <div className={`product-preview relative group w-full ${isFeatured ? 'featured-product-card' : ''}`}>
       {/* 成功提示彈窗 */}
@@ -425,11 +405,10 @@ export default function ProductPreview({
                 {/* 顯示促銷折扣標籤，優先顯示有折扣的標籤 */}
                 {promotionLabels
                   .filter(label => label.type !== 'sold-out' && label.type !== 'preorder')
-                  .slice(0, 4) // 增加到最多顯示4個促銷標籤，確保固定金額折扣能顯示
                   .map((label, index) => (
                   <div 
                     key={`${label.type}-${index}`} 
-                    className={label.className || 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-gray-800 text-white border-white'}
+                    className={label.className || 'gold-badge-circle'}
                   >
                     {label.text}
                   </div>
@@ -457,11 +436,60 @@ export default function ProductPreview({
             )}
           </LocalizedClientLink>
 
-          {/* 選項和加入購物車區塊 - 在 Link 外面 */}
+          {/* 手機版錯誤提示 */}
+          {error && (
+            <div className="md:hidden absolute bottom-0 left-0 right-0 bg-red-500 text-white text-xs text-center py-2 z-20">
+              {error}
+            </div>
+          )}
+
+          {/* 手機版 - 浮動加入購物車按鈕 (黑底正方形) */}
           {!isProductSoldOut && (
-            <div className="absolute bottom-0 left-0 right-0 
-                          md:opacity-0 md:group-hover:opacity-100 md:transition-all md:duration-200 md:ease-in-out md:transform md:translate-y-full md:group-hover:translate-y-0
-                          opacity-100 translate-y-0">
+            <button
+              onClick={handleMobileButtonClick}
+              disabled={isAdding}
+              className="md:hidden absolute bottom-3 right-3 z-30 w-10 h-10 bg-black text-white rounded shadow-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed group/btn"
+              aria-label={
+                (() => {
+                  if (isAdding) return "處理中..."
+                  const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
+                  const variantId = findVariantId(selectedOptions)
+                  if (hasMultipleOptions && !variantId) return "選擇選項"
+                  return productStockStatus.canPreorder ? "預訂" : "加入購物車"
+                })()
+              }
+            >
+              {isAdding ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                (() => {
+                  const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
+                  const variantId = findVariantId(selectedOptions)
+                  
+                  if (hasMultipleOptions && !variantId) {
+                    // 顯示選項圖標
+                    return (
+                      <svg className="w-5 h-5 group-hover/btn:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                      </svg>
+                    )
+                  } else {
+                    // 顯示購物車圖標
+                    return (
+                      <svg className="w-5 h-5 group-hover/btn:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd"/>
+                      </svg>
+                    )
+                  }
+                })()
+              )}
+            </button>
+          )}
+
+          {/* 桌機版 - 選項和加入購物車區塊 (hover 顯示) */}
+          {!isProductSoldOut && (
+            <div className="hidden md:block absolute bottom-0 left-0 right-0 
+                          opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out transform translate-y-full group-hover:translate-y-0">
               <div className="w-full bg-white/95 backdrop-blur-[2px]">
                 {productOptions
                   .filter(option => option.values.length > 1) // 只顯示有多個選擇的選項
@@ -495,7 +523,7 @@ export default function ProductPreview({
                   </div>
                 ))}
                 
-                {/* 購物車按鈕 - 無論是否有選項都顯示 */}
+                {/* 桌機版購物車按鈕 */}
                 <div>
                   <button
                     onClick={handleAddToCart}
@@ -507,7 +535,7 @@ export default function ProductPreview({
                   </button>
                 </div>
                 {error && (
-                  <div className="text-red-500 text-xs text-center">
+                  <div className="text-red-500 text-xs text-center p-2">
                     {error}
                   </div>
                 )}
@@ -518,12 +546,12 @@ export default function ProductPreview({
 
         {/* 商品資訊區塊 */}
         <LocalizedClientLink href={`/products/${product.handle}`}>
-          <div className="px-2 md:px-8 mt-4">
+          <div className="px-2 md:px-8 py-3 mt-2">
             <h3 className="text-xs" data-testid="product-title">
               {product.title}
             </h3>
             {cheapestPrice && (
-              <div className="mt-1">
+              <div className="mt-0.5">
                 <PreviewPrice price={cheapestPrice} />
               </div>
             )}

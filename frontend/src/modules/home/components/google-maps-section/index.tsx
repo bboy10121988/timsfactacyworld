@@ -12,7 +12,7 @@ const GoogleMapsSection: React.FC<GoogleMapsSectionProps> = ({
   description = "歡迎蒞臨參觀",
 }) => {
   return (
-    <div className="bg-white py-16">
+    <div className={heading ? "bg-white py-8 md:py-12" : "bg-white py-0"}>
       <div className="container mx-auto px-4">
         {heading && (
           <div className="text-center mb-8">
