@@ -1,24 +1,11 @@
 "use client"
 
 import { listCartShippingMethods } from "@lib/data/fulfillment"
-import { listCartPaymentMethods } from "@lib/data/payment"
 import { HttpTypes } from "@medusajs/types"
-import { useState } from "react"
-import Addresses from "@modules/checkout/components/addresses"
-import Payment from "@modules/checkout/components/payment"
-import Review from "@modules/checkout/components/review"
-import Shipping from "@modules/checkout/components/shipping"
+import { useState, useEffect } from "react"
+import { Button } from "@medusajs/ui"
 import EnhancedShipping from "@modules/checkout/components/enhanced-shipping"
-import StoreSelector from "@modules/checkout/components/store-selector"
 import DeliveryAddressForm from "@modules/checkout/components/delivery-address-form"
-
-type ConvenienceStore = {
-  id: string
-  name: string
-  address: string
-  distance: number
-  type: '7-11' | '全家' | 'OK' | '萊爾富'
-}
 
 export default function CheckoutForm({
   cart,
@@ -27,28 +14,33 @@ export default function CheckoutForm({
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) {
-  const [selectedShippingType, setSelectedShippingType] = useState<'home_delivery' | 'convenience_store' | 'pickup' | null>(null)
+  const [selectedShippingType, setSelectedShippingType] = useState<'home_delivery' | 'convenience_store' | null>(null)
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("")
   const [currentStep, setCurrentStep] = useState(1)
-  const [selectedStore, setSelectedStore] = useState<ConvenienceStore | null>(null)
   const [addressData, setAddressData] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 載入儲存的收件資訊
+  useEffect(() => {
+    const storedData = localStorage.getItem("delivery_address_data")
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData)
+        setAddressData(parsedData)
+      } catch (e) {
+        console.error('無法解析儲存的收件資訊:', e)
+      }
+    }
+  }, [])
 
   if (!cart) {
     return null
   }
 
-  // 處理物流方式選擇（僅設定狀態，不自動進入下一步）
+  // 處理物流方式選擇
   const handleShippingMethodSelect = (methodId: string) => {
     setSelectedShippingMethod(methodId)
-    
-    // 根據 methodId 決定 shipping type
-    if (methodId.includes('convenience')) {
-      setSelectedShippingType('convenience_store')
-    } else if (methodId.includes('pickup')) {
-      setSelectedShippingType('pickup')
-    } else {
-      setSelectedShippingType('home_delivery')
-    }
+    setSelectedShippingType(methodId.includes('convenience') ? 'convenience_store' : 'home_delivery')
   }
 
   // 確認物流選擇並進入下一步
@@ -58,29 +50,28 @@ export default function CheckoutForm({
     }
   }
 
-  // 處理資料填寫完成
-  const handleDataComplete = () => {
-    setCurrentStep(3) // 進入付款步驟
-  }
-
-  // 處理超商門市選擇
-  const handleStoreSelect = (store: ConvenienceStore) => {
-    setSelectedStore(store)
-    // 選擇門市後自動進入下一步
-    setTimeout(() => {
-      handleDataComplete()
-    }, 500) // 稍微延遲讓用戶看到選擇結果
-  }
-
-  // 處理地址表單提交
-  const handleAddressSubmit = (formData: any) => {
-    setAddressData(formData)
-    handleDataComplete()
+  // 處理資料提交
+  const handleSubmit = async (data: any) => {
+    setAddressData(data)
+    setIsSubmitting(true)
+    
+    try {
+      // TODO: 實作前往付款邏輯
+      console.log('前往付款', {
+        cart,
+        shippingMethod: selectedShippingMethod,
+        addressData: data
+      })
+    } catch (error) {
+      console.error('前往付款失敗:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="space-y-8">
-      {/* 3-step progress */}
+      {/* 2-step progress */}
       <div className="bg-white p-6 border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-3">
@@ -95,135 +86,113 @@ export default function CheckoutForm({
               currentStep >= 2 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
             }`}>2</div>
             <span className={`${currentStep >= 2 ? 'font-medium text-gray-900' : 'text-gray-500'}`}>
-              {selectedShippingType === 'convenience_store' ? '選擇門市' : 
-               selectedShippingType === 'pickup' ? '確認門市' : '填寫地址'}
+              填寫資料
             </span>
-          </div>
-          <div className={`w-16 h-px ${currentStep >= 3 ? 'bg-blue-300' : 'bg-gray-200'}`}></div>
-          <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
-              currentStep >= 3 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
-            }`}>3</div>
-            <span className={`${currentStep >= 3 ? 'font-medium text-gray-900' : 'text-gray-500'}`}>選擇付款</span>
           </div>
         </div>
       </div>
 
       {/* Step 1: 選擇物流 */}
-      <div className="bg-white border border-gray-100 shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-8 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-0">步驟 1：選擇物流方式</h3>
-        </div>
-        <div className="p-8">
-          <EnhancedShipping 
-            cart={cart} 
+      {currentStep === 1 && (
+        <div className="bg-white border border-gray-100 shadow-sm p-6">
+          <EnhancedShipping
+            cart={cart}
             selectedShippingMethod={selectedShippingMethod}
             onShippingMethodChange={handleShippingMethodSelect}
           />
-          
-          {/* 確認選擇按鈕 */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleConfirmShipping}
+          <div className="mt-6">
+            <Button
+              className="w-full"
               disabled={!selectedShippingMethod}
-              className="w-full font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-white bg-gray-900 hover:bg-gray-800"
+              onClick={handleConfirmShipping}
             >
-              <span>確認選擇</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Step 2: 填寫資料 - 根據物流方式顯示不同內容 */}
-      {selectedShippingType && currentStep >= 2 && (
-        <div className="bg-white border border-gray-100 shadow-sm overflow-hidden">
-          <div className="bg-gray-50 px-8 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-0">
-              步驟 2：
-              {selectedShippingType === 'convenience_store' && '選擇超商門市'}
-              {selectedShippingType === 'pickup' && '確認取貨門市'}
-              {selectedShippingType === 'home_delivery' && '填寫收件地址'}
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              {selectedShippingType === 'convenience_store' && '請選擇您要取貨的超商門市'}
-              {selectedShippingType === 'pickup' && '請確認門市資訊與聯絡方式'}
-              {selectedShippingType === 'home_delivery' && '請填寫完整的收件資訊'}
-            </p>
-          </div>
-          <div className="p-8">
-            {selectedShippingType === 'convenience_store' && (
-              <div className="space-y-4">
-                <StoreSelector 
-                  onStoreSelect={handleStoreSelect}
-                  selectedStore={selectedStore}
-                />
-                {selectedStore && (
-                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-800">
-                      ✓ 已選擇取貨門市：{selectedStore.name}
-                    </p>
-                    <p className="text-xs text-green-600 mt-1">
-                      系統將自動進入下一步驟
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-            {selectedShippingType === 'pickup' && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">門市資訊</h4>
-                  <p className="text-sm text-blue-800">台北旗艦店</p>
-                  <p className="text-sm text-blue-700">台北市大安區忠孝東路四段1號</p>
-                  <p className="text-sm text-blue-700">營業時間：週一至週日 10:00-22:00</p>
-                  <p className="text-sm text-blue-700">聯絡電話：(02) 1234-5678</p>
-                </div>
-                <button 
-                  onClick={handleDataComplete}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-                >
-                  確認門市資訊
-                </button>
-              </div>
-            )}
-            {selectedShippingType === 'home_delivery' && (
-              <div className="space-y-4">
-                <DeliveryAddressForm onAddressSubmit={handleAddressSubmit} />
-                {addressData && (
-                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-800">
-                      ✓ 收件資訊已填寫完成
-                    </p>
-                    <div className="text-xs text-green-600 mt-2 space-y-1">
-                      <p>收件人：{addressData.first_name}</p>
-                      <p>地址：{addressData.city} {addressData.address_1}</p>
-                      <p>電話：{addressData.phone}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+              下一步
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Step 3: 付款方式 */}
-      {currentStep >= 3 && (
-        <>
-          <div className="bg-white border border-gray-100 shadow-sm overflow-hidden">
-            <div className="bg-gray-50 px-8 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-0">步驟 3：選擇付款方式</h3>
-            </div>
-            <Payment cart={cart} availablePaymentMethods={[]} />
-          </div>
+      {/* Step 2: 填寫資料 */}
+      {currentStep === 2 && (
+        <div className="bg-white border border-gray-100 shadow-sm p-6">
+          <DeliveryAddressForm 
+            onSubmit={handleSubmit}
+            initialData={addressData}
+          />
+          
+          {/* 收件資訊確認區塊 */}
+          {addressData && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">收件資訊確認</h3>
+              <div className="space-y-2">
+                <div className="flex">
+                  <span className="text-gray-500 w-24">收件人：</span>
+                  <span className="text-gray-900">{addressData.first_name}</span>
+                </div>
+                <div className="flex">
+                  <span className="text-gray-500 w-24">聯絡電話：</span>
+                  <span className="text-gray-900">{addressData.phone}</span>
+                </div>
+                <div className="flex">
+                  <span className="text-gray-500 w-24">收件地址：</span>
+                  <span className="text-gray-900">
+                    {addressData.city} {addressData.postal_code}
+                    <br />
+                    {addressData.address_1}
+                    {addressData.address_2 && <span> {addressData.address_2}</span>}
+                  </span>
+                </div>
+              </div>
 
-          <div className="bg-white border border-gray-100 shadow-sm overflow-hidden">
-            <Review cart={cart} />
+              {/* 訂單資訊確認區塊 */}
+              {cart && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">訂單資訊確認</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">商品小計</span>
+                      <span className="text-gray-900">NT$ {cart.subtotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">運費</span>
+                      <span className="text-gray-900">NT$ {cart.shipping_total}</span>
+                    </div>
+                    {cart.discount_total > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>折扣金額</span>
+                        <span>- NT$ {cart.discount_total}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium pt-4 border-t border-gray-200">
+                      <span className="text-gray-900">應付金額</span>
+                      <span className="text-gray-900">NT$ {cart.total}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="mt-6">
+            <Button
+              className="w-full"
+              disabled={isSubmitting}
+              onClick={() => addressData && handleSubmit(addressData)}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  處理中...
+                </>
+              ) : (
+                '前往付款'
+              )}
+            </Button>
           </div>
-        </>
+        </div>
       )}
     </div>
   )

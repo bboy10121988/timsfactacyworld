@@ -3,13 +3,14 @@
 import { RadioGroup } from "@headlessui/react"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 import { CheckCircleSolid, TruckFast } from "@medusajs/icons"
+import { ReactNode } from "react"
 
 type ShippingOption = {
   id: string
   name: string
   description: string
   price: number
-  type: 'home_delivery' | 'convenience_store' | 'pickup'
+  type: 'home_delivery' | 'convenience_store'
 }
 
 type EnhancedShippingProps = {
@@ -18,11 +19,11 @@ type EnhancedShippingProps = {
   selectedShippingMethod?: string
 }
 
-const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
+const EnhancedShipping = ({
   cart,
   onShippingMethodChange,
   selectedShippingMethod = ""
-}) => {
+}: EnhancedShippingProps): ReactNode => {
 
   // 模擬配送選項 - 實際會從 Medusa API 取得
   const shippingOptions: ShippingOption[] = [
@@ -39,13 +40,6 @@ const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
       description: "3-5個工作天到店，7天內取貨",
       price: 60,
       type: "convenience_store"
-    },
-    {
-      id: "store_pickup",
-      name: "門市自取",
-      description: "到實體門市取貨，免運費",
-      price: 0,
-      type: "pickup"
     }
   ]
 
@@ -55,8 +49,6 @@ const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
         return <TruckFast className="w-5 h-5" />
       case "convenience_store":
         return <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">超</div>
-      case "pickup":
-        return <div className="w-5 h-5 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">取</div>
       default:
         return <TruckFast className="w-5 h-5" />
     }
@@ -151,18 +143,6 @@ const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
             • 配送時間：3-5個工作天到店<br />
             • 取貨期限：商品到店後7天內<br />
             • 請攜帶身分證件及取貨簡訊
-          </Text>
-        </div>
-      )}
-
-      {/* 門市自取說明 */}
-      {selectedShippingMethod === "store_pickup" && (
-        <div className="bg-green-50 p-4 rounded-lg">
-          <Text className="text-sm text-green-800">
-            <strong>門市自取：</strong><br />
-            • 地址：台北市中正區館前路8號1樓<br />
-            • 營業時間：週一至週日 10:00-22:00<br />
-            • 商品備妥後會通知您前來取貨
           </Text>
         </div>
       )}

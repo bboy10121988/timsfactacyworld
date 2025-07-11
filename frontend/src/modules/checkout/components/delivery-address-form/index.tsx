@@ -1,14 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button, Input, Label, Select } from "@medusajs/ui"
 
 type DeliveryAddressFormProps = {
-  onAddressSubmit: (addressData: any) => void
+  onSubmit: (addressData: any) => void
+  initialData?: {
+    first_name?: string
+    last_name?: string
+    phone?: string
+    address_1?: string
+    address_2?: string
+    city?: string
+    postal_code?: string
+    country_code?: string
+  }
 }
 
+const STORAGE_KEY = "delivery_address_data"
+
 const DeliveryAddressForm: React.FC<DeliveryAddressFormProps> = ({ 
-  onAddressSubmit 
+  onSubmit,
+  initialData = {} 
 }) => {
   const [formData, setFormData] = useState({
     first_name: "",
@@ -30,6 +43,37 @@ const DeliveryAddressForm: React.FC<DeliveryAddressFormProps> = ({
     "澎湖縣", "金門縣", "連江縣"
   ]
 
+  // 從 localStorage 載入儲存的資料
+  useEffect(() => {
+    const storedData = localStorage.getItem(STORAGE_KEY)
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData)
+        setFormData(prev => ({
+          ...prev,
+          ...parsedData,
+          ...initialData // 優先使用傳入的初始資料
+        }))
+      } catch (e) {
+        console.error('無法解析儲存的收件資訊:', e)
+      }
+    } else if (Object.keys(initialData).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData
+      }))
+    }
+  }, [initialData])
+
+  // 儲存資料到 localStorage
+  const saveToStorage = (data: typeof formData) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    } catch (e) {
+      console.error('無法儲存收件資訊:', e)
+    }
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
@@ -45,13 +89,30 @@ const DeliveryAddressForm: React.FC<DeliveryAddressFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validateForm()) {
-      onAddressSubmit(formData)
+    
+    // 驗證表單
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.first_name) newErrors.first_name = "請輸入姓氏"
+    if (!formData.phone) newErrors.phone = "請輸入聯絡電話"
+    if (!formData.address_1) newErrors.address_1 = "請輸入地址"
+    if (!formData.city) newErrors.city = "請選擇縣市"
+    if (!formData.postal_code) newErrors.postal_code = "請輸入郵遞區號"
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
     }
+    
+    // 清除錯誤並儲存資料
+    setErrors({})
+    saveToStorage(formData) // 儲存到 localStorage
+    onSubmit(formData)
   }
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    const newData = { ...formData, [field]: value }
+    setFormData(newData)
     // 清除該欄位的錯誤
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }))
