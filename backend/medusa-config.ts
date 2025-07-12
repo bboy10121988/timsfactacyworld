@@ -61,7 +61,7 @@ const productionCors = {
 // 選擇適當的CORS設置
 const corsConfig = isDevelopment ? developmentCors : productionCors
 
-module.exports = defineConfig({
+const config = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {
@@ -77,5 +77,23 @@ module.exports = defineConfig({
     // 庫存模組也是內建的，無需額外配置
     // 所有核心商務模組都會自動載入和配置
   },
-  plugins: []
+  plugins: [
+    {
+      resolve: "@medusajs/file-local",
+      options: {
+        upload_dir: "uploads"
+      }
+    }
+    // 完全移除 ECPay 插件，避免啟動問題
+  ],
+  services: {
+    ecpay: {
+      resolve: "src/services/ecpay",
+      container: {
+        resolve: "ecpayService",
+      },
+    },
+  },
 })
+
+export default config

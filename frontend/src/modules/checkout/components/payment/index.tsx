@@ -14,6 +14,11 @@ import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
+// 檢查是否為綠界支付方式
+const isEcpay = (providerId: string | undefined) => {
+  return providerId?.includes("ecpay_")
+}
+
 const Payment = ({
   cart,
   availablePaymentMethods,
@@ -40,11 +45,16 @@ const Payment = ({
   const isOpen = searchParams.get("step") === "payment"
 
   const isStripe = isStripeFunc(selectedPaymentMethod)
+  const isEcpayMethod = isEcpay(selectedPaymentMethod)
 
   const setPaymentMethod = async (method: string) => {
     setError(null)
     setSelectedPaymentMethod(method)
     if (isStripeFunc(method)) {
+      await initiatePaymentSession(cart, {
+        provider_id: method,
+      })
+    } else if (isEcpay(method)) {
       await initiatePaymentSession(cart, {
         provider_id: method,
       })
@@ -88,6 +98,18 @@ const Payment = ({
         })
       }
 
+      // 處理綠界支付方式
+      if (isEcpayMethod) {
+        // 對於綠界，我們會跳轉到完成訂單頁面，因為支付會在完成訂單後處理
+        return router.push(
+          pathname + "?" + createQueryString("step", "review"),
+          {
+            scroll: false,
+          }
+        )
+      }
+
+      // 處理 Stripe 等其他支付方式
       if (!shouldInputCard) {
         return router.push(
           pathname + "?" + createQueryString("step", "review"),
@@ -149,7 +171,7 @@ const Payment = ({
               </div>
 
               {/* 原有的其他支付方法 */}
-              {availablePaymentMethods?.length > 0 && (
+              {availablePaymentMethods?.filter(pm => pm.id !== "ecpay")?.length > 0 && (
                 <>
                   <Divider className="my-6" />
                   <Heading level="h3" className="text-base font-medium mb-4">
@@ -159,26 +181,29 @@ const Payment = ({
                     value={selectedPaymentMethod}
                     onChange={(value: string) => setPaymentMethod(value)}
                   >
-                    {availablePaymentMethods.map((paymentMethod) => (
-                      <div key={paymentMethod.id}>
-                        {isStripeFunc(paymentMethod.id) ? (
-                          <StripeCardContainer
-                            paymentProviderId={paymentMethod.id}
-                            selectedPaymentOptionId={selectedPaymentMethod}
-                            paymentInfoMap={paymentInfoMap}
-                            setCardBrand={setCardBrand}
-                            setError={setError}
-                            setCardComplete={setCardComplete}
-                          />
-                        ) : (
-                          <PaymentContainer
-                            paymentInfoMap={paymentInfoMap}
-                            paymentProviderId={paymentMethod.id}
-                            selectedPaymentOptionId={selectedPaymentMethod}
-                          />
-                        )}
-                      </div>
-                    ))}
+                    {availablePaymentMethods
+                      .filter(pm => pm.id !== "ecpay")
+                      .map((paymentMethod) => (
+                        <div key={paymentMethod.id}>
+                          {isStripeFunc(paymentMethod.id) ? (
+                            <StripeCardContainer
+                              paymentProviderId={paymentMethod.id}
+                              selectedPaymentOptionId={selectedPaymentMethod}
+                              paymentInfoMap={paymentInfoMap}
+                              setCardBrand={setCardBrand}
+                              setError={setError}
+                              setCardComplete={setCardComplete}
+                            />
+                          ) : (
+                            <PaymentContainer
+                              paymentInfoMap={paymentInfoMap}
+                              paymentProviderId={paymentMethod.id}
+                              selectedPaymentOptionId={selectedPaymentMethod}
+                            />
+                          )}
+                        </div>
+                      ))
+                    }
                   </RadioGroup>
                 </>
               )}

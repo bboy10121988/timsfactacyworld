@@ -5,6 +5,7 @@ import ClientArea from "@modules/layout/components/client-area"
 import SanityFooter from "@modules/layout/templates/footer/sanity-footer"
 import { getStoreName } from "@lib/store-name"
 import { getHeader } from "@lib/sanity"
+import ToasterProvider from "@/providers/toast-provider"
 
 // 字體配置
 const notoSansTC = Noto_Sans_TC({
@@ -109,6 +110,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="zh-TW" data-mode="light" suppressHydrationWarning className={`${notoSansTC.variable}`}>
       <body suppressHydrationWarning className="font-sans">
+        <ToasterProvider />
         <ClientArea>
           {children}
         </ClientArea>

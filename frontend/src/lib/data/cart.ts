@@ -299,23 +299,32 @@ export async function applyPromotions(codes: string[]) {
   const cartId = await getCartId()
 
   if (!cartId) {
-    throw new Error("No existing cart found")
+    throw new Error("無法獲取購物車 ID，請先添加商品到購物車")
   }
+
+  // 確保 codes 是有效的字符串數組
+  const validCodes = codes.filter(code => typeof code === 'string' && code.trim() !== '')
+  
+  console.log(`嘗試應用優惠碼到購物車 ${cartId}:`, validCodes)
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
   return sdk.store.cart
-    .update(cartId, { promo_codes: codes }, {}, headers)
+    .update(cartId, { promo_codes: validCodes }, {}, headers)
     .then(async () => {
+      console.log("優惠碼應用成功:", validCodes)
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
 
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fulfillmentCacheTag)
     })
-    .catch(medusaError)
+    .catch((error) => {
+      console.error("應用優惠碼失敗:", error)
+      throw medusaError(error)
+    })
 }
 
 export async function applyGiftCard(code: string) {

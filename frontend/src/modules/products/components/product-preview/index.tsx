@@ -9,6 +9,7 @@ import PreviewPrice from "./price"
 import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
 import { getActivePromotionLabels, PromotionLabel } from "@lib/simple-promotion-utils"
+import MobileVariantSelector from "../mobile-variant-selector"
 
 type ProductOption = {
   title: string
@@ -90,6 +91,7 @@ export default function ProductPreview({
   const [promotionLabels, setPromotionLabels] = useState<any[]>([])
   const [isLoadingPromotions, setIsLoadingPromotions] = useState(true)
   const [isImageTransitioning, setIsImageTransitioning] = useState(false)
+  const [showVariantSelector, setShowVariantSelector] = useState(false)
 
   // 獲取所有可用圖片
   const allImages = useMemo(() => {
@@ -306,8 +308,8 @@ export default function ProductPreview({
     const variantId = findVariantId(selectedOptions)
 
     if (hasMultipleOptions && !variantId) {
-      // 如果有多個選項且沒有選擇，跳轉到商品詳細頁面
-      window.location.href = `/products/${product.handle}`
+      // 如果有多個選項且沒有選擇，打開選項選擇器
+      setShowVariantSelector(true)
       return
     }
 
@@ -443,49 +445,6 @@ export default function ProductPreview({
             </div>
           )}
 
-          {/* 手機版 - 浮動加入購物車按鈕 (黑底正方形) */}
-          {!isProductSoldOut && (
-            <button
-              onClick={handleMobileButtonClick}
-              disabled={isAdding}
-              className="md:hidden absolute bottom-3 right-3 z-30 w-10 h-10 bg-black text-white rounded shadow-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed group/btn"
-              aria-label={
-                (() => {
-                  if (isAdding) return "處理中..."
-                  const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
-                  const variantId = findVariantId(selectedOptions)
-                  if (hasMultipleOptions && !variantId) return "選擇選項"
-                  return productStockStatus.canPreorder ? "預訂" : "加入購物車"
-                })()
-              }
-            >
-              {isAdding ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                (() => {
-                  const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
-                  const variantId = findVariantId(selectedOptions)
-                  
-                  if (hasMultipleOptions && !variantId) {
-                    // 顯示選項圖標
-                    return (
-                      <svg className="w-5 h-5 group-hover/btn:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                      </svg>
-                    )
-                  } else {
-                    // 顯示購物車圖標
-                    return (
-                      <svg className="w-5 h-5 group-hover/btn:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd"/>
-                      </svg>
-                    )
-                  }
-                })()
-              )}
-            </button>
-          )}
-
           {/* 桌機版 - 選項和加入購物車區塊 (hover 顯示) */}
           {!isProductSoldOut && (
             <div className="hidden md:block absolute bottom-0 left-0 right-0 
@@ -551,13 +510,65 @@ export default function ProductPreview({
               {product.title}
             </h3>
             {cheapestPrice && (
-              <div className="mt-0.5">
-                <PreviewPrice price={cheapestPrice} />
+              <div className="flex items-center justify-between mt-0.5">
+                <div className="flex-grow">
+                  <PreviewPrice price={cheapestPrice} />
+                </div>
+                {/* 手機版 - 價格右側的加入購物車按鈕 */}
+                {!isProductSoldOut && (
+                  <button
+                    onClick={(e) => handleMobileButtonClick(e)}
+                    disabled={isAdding}
+                    className="md:hidden w-8 h-8 bg-black text-white rounded-sm shadow-sm hover:bg-gray-800 transition-all duration-200 flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed group/mbtn"
+                    aria-label={
+                      (() => {
+                        if (isAdding) return "處理中..."
+                        const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
+                        const variantId = findVariantId(selectedOptions)
+                        if (hasMultipleOptions && !variantId) return "選擇選項"
+                        return productStockStatus.canPreorder ? "預訂" : "加入購物車"
+                      })()
+                    }
+                  >
+                    {isAdding ? (
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      (() => {
+                        const hasMultipleOptions = productOptions.filter(option => option.values.length > 1).length > 0
+                        const variantId = findVariantId(selectedOptions)
+                        
+                        if (hasMultipleOptions && !variantId) {
+                          // 顯示選項圖標
+                          return (
+                            <svg className="w-4 h-4 group-hover/mbtn:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                            </svg>
+                          )
+                        } else {
+                          // 顯示購物車圖標
+                          return (
+                            <svg className="w-4 h-4 group-hover/mbtn:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                              <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd"/>
+                            </svg>
+                          )
+                        }
+                      })()
+                    )}
+                  </button>
+                )}
               </div>
             )}
           </div>
         </LocalizedClientLink>
       </div>
+      
+      {/* 手機版規格選擇彈窗 */}
+      <MobileVariantSelector 
+        product={product}
+        isOpen={showVariantSelector}
+        onClose={() => setShowVariantSelector(false)}
+        countryCode={countryCode}
+      />
     </div>
   )
 }
