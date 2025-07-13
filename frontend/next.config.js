@@ -30,6 +30,19 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // 配置 webpack 別名解析
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    const path = require('path')
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      '@lib': path.resolve(__dirname, 'src/lib'),
+      '@modules': path.resolve(__dirname, 'src/modules'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
+    }
+    return config
+  },
+  
   // 配置CORS和API代理
   async headers() {
     return [
