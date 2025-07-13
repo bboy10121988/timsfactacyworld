@@ -18,9 +18,9 @@
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
-    "deploy:setup": "echo 'Please read DEPLOYMENT.md for setup instructions'",
-    "deploy:frontend": "cd frontend && npm run build && npm run export",
-    "deploy:backend": "echo 'Backend deploys automatically via Vercel'"
+    "deploy:setup": "echo '請先在 Vercel 和 GitHub Pages 設定部署環境，詳情請參考 DEPLOYMENT.md'",
+    "deploy:frontend": "cd frontend && npm run build",
+    "deploy:backend": "echo '後端自動部署到 Vercel，請確認環境變數已設定'"
   },
   "dependencies": {
     "ecpay_aio_nodejs": "^1.2.2"

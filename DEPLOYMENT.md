@@ -2,8 +2,8 @@
 
 ## 前後端分離部署架構
 
-- **前端 (Next.js)**: GitHub Pages
-- **後端 (Medusa)**: Vercel
+- **前端 (Next.js)**: GitHub Pages (靜態網站)
+- **後端 (Medusa)**: Vercel (Serverless Functions)
 
 ## 🚀 部署步驟
 
@@ -11,7 +11,7 @@
 
 1. 訪問 [Vercel Dashboard](https://vercel.com/dashboard)
 2. 點擊 "New Project"
-3. 選擇你的 GitHub 倉庫
+3. 選擇你的 GitHub 倉庫 `bboy10121988/timsfactacyworld`
 4. 配置設置：
    - **Framework Preset**: Other
    - **Root Directory**: `./` (根目錄)
@@ -22,10 +22,12 @@
 5. 在 Environment Variables 中添加：
    ```
    DATABASE_URL=your-postgres-database-url
-   JWT_SECRET=your-jwt-secret
-   COOKIE_SECRET=your-cookie-secret
-   STORE_CORS=https://yourusername.github.io/repository-name
+   JWT_SECRET=your-jwt-secret-key
+   COOKIE_SECRET=your-cookie-secret-key
+   MEDUSA_ADMIN_ONBOARDING_TYPE=nextjs
+   STORE_CORS=https://bboy10121988.github.io/timsfactacyworld
    ADMIN_CORS=https://your-project.vercel.app
+   NODE_ENV=production
    ```
 
 6. 部署完成後，記下 Vercel 給你的 URL (例如: `https://your-project.vercel.app`)
@@ -34,12 +36,12 @@
 
 1. 在 GitHub 倉庫中，進入 Settings > Pages
 2. 選擇 Source: "GitHub Actions"
-3. 在你的倉庫中創建 `.env.production` 文件：
+3. 確認 `frontend/.env.production` 文件包含正確的後端 URL：
    ```
    NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://your-project.vercel.app
-   NEXT_PUBLIC_BASE_URL=https://yourusername.github.io/repository-name
+   NEXT_PUBLIC_BASE_URL=https://bboy10121988.github.io/timsfactacyworld
    ```
-4. 推送代碼到 main 分支，GitHub Actions 會自動部署
+4. 推送代碼到 main 分支，GitHub Actions 會自動部署前端到 GitHub Pages
 
 ## 🔧 本地開發
 

@@ -6,30 +6,30 @@
   "installCommand": "cd backend && yarn install",
   "framework": null,
   "functions": {
-    "backend/dist/api/**/*.js": {
+    "api/index.js": {
       "runtime": "nodejs20.x"
     }
   },
   "routes": [
     {
       "src": "/admin/(.*)",
-      "dest": "/api/admin/$1"
+      "dest": "/api?admin=$1"
     },
     {
       "src": "/store/(.*)", 
-      "dest": "/api/store/$1"
+      "dest": "/api?store=$1"
     },
     {
       "src": "/auth/(.*)",
-      "dest": "/api/auth/$1"
+      "dest": "/api?auth=$1"
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "/static/$1"
+      "dest": "/api?uploads=$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api?path=$1"
     }
   ],
   "env": {
