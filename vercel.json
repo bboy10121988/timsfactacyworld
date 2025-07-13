@@ -3,7 +3,7 @@
   "name": "medusa-backend",
   "buildCommand": "cd backend && yarn build",
   "outputDirectory": "backend/dist",
-  "installCommand": "cd backend && yarn install",
+  "installCommand": "yarn install --frozen-lockfile && cd backend && yarn install --frozen-lockfile",
   "framework": null,
   "functions": {
     "api/index.js": {
