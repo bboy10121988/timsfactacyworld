@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "name": "medusa-backend",
+  "buildCommand": "cd backend && yarn build",
+  "outputDirectory": "backend/dist",
+  "installCommand": "cd backend && yarn install",
+  "framework": null,
+  "functions": {
+    "backend/dist/api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/admin/(.*)",
+      "dest": "/api/admin/$1"
+    },
+    {
+      "src": "/store/(.*)", 
+      "dest": "/api/store/$1"
+    },
+    {
+      "src": "/auth/(.*)",
+      "dest": "/api/auth/$1"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

@@ -17,7 +17,10 @@
     "dev:frontend": "cd frontend && npm run dev",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build"
+    "build:frontend": "cd frontend && npm run build",
+    "deploy:setup": "echo 'Please read DEPLOYMENT.md for setup instructions'",
+    "deploy:frontend": "cd frontend && npm run build && npm run export",
+    "deploy:backend": "echo 'Backend deploys automatically via Vercel'"
   },
   "dependencies": {
     "ecpay_aio_nodejs": "^1.2.2"
