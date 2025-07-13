@@ -138,9 +138,10 @@ export default async function Nav() {
           <nav 
             className="px-6 md:px-12 max-w-[1440px] mx-auto h-full flex items-center"
           >
-            <div className="flex justify-between items-center w-full">
-              {/* 左側區塊 */}
-              <div className="flex items-center gap-x-8">
+            {/* 三等份布局容器 */}
+            <div className="w-full grid grid-cols-3 items-center">
+              {/* 左側區塊 - 1/3 */}
+              <div className="flex items-center justify-start gap-x-6">
                 <MobileMenu 
                   regions={regions} 
                   navigation={headerData?.navigation}
@@ -148,7 +149,23 @@ export default async function Nav() {
                   headerData={headerData}
                 />
                 <div className="hidden xsmall:flex items-center gap-x-6">
-                  {headerData?.navigation?.map(({ name, href }: {name: string; href: string}, index: number) => {
+                  {headerData?.navigation?.filter((item: {name: string; href: string}, index: number) => {
+                    // 擴展的左側項目關鍵字：首頁、商品、Blog、關於我們等
+                    const leftSideItems = [
+                      'home', 'homes', '首頁', '主頁',
+                      'product', 'products', 'shop', 'shopping', '商品', '產品', '購物',
+                      'blog', 'blogs', 'article', 'articles', 'news', '部落格', '文章', '新聞', '資訊',
+                      'about', 'about-us', 'aboutus', '關於', '關於我們', '公司簡介'
+                    ];
+                    
+                    const name = item.name.toLowerCase();
+                    const href = item.href.toLowerCase();
+                    
+                    return leftSideItems.some(keyword => 
+                      name.includes(keyword.toLowerCase()) ||
+                      href.includes(keyword.toLowerCase())
+                    );
+                  }).map(({ name, href }: {name: string; href: string}, index: number) => {
                     if (typeof name !== 'string' || typeof href !== 'string') {
                       return null
                     }
@@ -163,7 +180,7 @@ export default async function Nav() {
                           ? href 
                           : `/${href}`
 
-                    const uniqueKey = `nav-${index}-${name.replace(/[^a-zA-Z0-9]/g, '')}`
+                    const uniqueKey = `nav-left-${index}-${name.replace(/[^a-zA-Z0-9]/g, '')}`
 
                     return isExternal ? (
                       <a
@@ -189,7 +206,7 @@ export default async function Nav() {
                 </div>
               </div>
 
-              {/* 中間區塊 - Logo */}
+              {/* 中間區塊 - Logo 完全居中 - 1/3 */}
               <div className="flex items-center justify-center">
                 <LocalizedClientLink
                   href="/"
@@ -214,9 +231,83 @@ export default async function Nav() {
                 </LocalizedClientLink>
               </div>
               
-              {/* 右側區塊 */}
+              {/* 右側區塊 - 1/3 */}
               <div className="flex items-center justify-end gap-x-6">
-                <div className="hidden xsmall:flex items-center gap-x-6">
+                <div className="hidden xsmall:flex items-center gap-x-4">
+                  {/* 剩餘的導航項目 - 右側項目 */}
+                  {headerData?.navigation?.filter((item: {name: string; href: string}, index: number) => {
+                    // 擴展的左側項目關鍵字（需要與上面保持一致）
+                    const leftSideItems = [
+                      'home', 'homes', '首頁', '主頁',
+                      'product', 'products', 'shop', 'shopping', '商品', '產品', '購物',
+                      'blog', 'blogs', 'article', 'articles', 'news', '部落格', '文章', '新聞', '資訊',
+                      'about', 'about-us', 'aboutus', '關於', '關於我們', '公司簡介'
+                    ];
+                    
+                    // 右側項目關鍵字：服務、聯絡、幫助等
+                    const rightSideItems = [
+                      'service', 'services', '服務', '服務項目',
+                      'contact', 'contact-us', 'contactus', '聯絡', '聯絡我們', '聯繫',
+                      'help', 'support', 'faq', '幫助', '支援', '客服', '常見問題'
+                    ];
+                    
+                    const name = item.name.toLowerCase();
+                    const href = item.href.toLowerCase();
+                    
+                    // 檢查是否為左側項目
+                    const isLeftSideItem = leftSideItems.some(keyword => 
+                      name.includes(keyword.toLowerCase()) ||
+                      href.includes(keyword.toLowerCase())
+                    );
+                    
+                    // 檢查是否為明確的右側項目
+                    const isRightSideItem = rightSideItems.some(keyword => 
+                      name.includes(keyword.toLowerCase()) ||
+                      href.includes(keyword.toLowerCase())
+                    );
+                    
+                    // 返回右側項目：明確的右側項目，或者不是左側項目的其他項目
+                    return isRightSideItem || (!isLeftSideItem && !isRightSideItem);
+                  }).map(({ name, href }: {name: string; href: string}, index: number) => {
+                    if (typeof name !== 'string' || typeof href !== 'string') {
+                      return null
+                    }
+
+                    const isExternal = /^(http|https|www)/.test(href)
+                    const isHome = href === '/' || href === '/home'
+                    const processedHref = isExternal 
+                      ? href 
+                      : isHome 
+                        ? '/' 
+                        : href.startsWith('/') 
+                          ? href 
+                          : `/${href}`
+
+                    const uniqueKey = `nav-right-${index}-${name.replace(/[^a-zA-Z0-9]/g, '')}`
+
+                    return isExternal ? (
+                      <a
+                        key={uniqueKey}
+                        href={processedHref}
+                        className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="!text-[13px] !font-medium !leading-none">{name}</span>
+                      </a>
+                    ) : (
+                      <LocalizedClientLink
+                        key={uniqueKey}
+                        href={processedHref}
+                        className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200"
+                        data-testid={`${name.toLowerCase()}-link`}
+                      >
+                        <span className="!text-[13px] !font-medium !leading-none">{name}</span>
+                      </LocalizedClientLink>
+                    )
+                  })}
+                  
+                  {/* 功能按鈕 */}
                   {regions && <CountrySelect regions={regions} />}
                   <AccountButton />
                   <Suspense

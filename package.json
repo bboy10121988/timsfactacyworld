@@ -5,18 +5,16 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend",
-    "sanity_cms"
+    "frontend"
   ],
   "scripts": {
-    "install:all": "npm install && npm run install:backend && npm run install:frontend && npm run install:sanity",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
     "install:backend": "cd backend && npm install",
-    "install:frontend": "cd frontend && npm install", 
-    "install:sanity": "cd sanity_cms && npm install",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:sanity\"",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:integrated": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:sanity": "cd sanity_cms && npm run dev",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build"
@@ -29,5 +27,6 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

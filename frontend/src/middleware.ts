@@ -9,6 +9,16 @@ export async function middleware(request: NextRequest) {
     // 直接使用 "tw" 作為預設區域
     const countryCode = "tw"
     
+    // 排除特殊路徑（CMS, API 等）
+    const excludedPaths = ['/cms', '/cms-info', '/integration-test', '/api', '/_next', '/favicon.ico']
+    const isExcludedPath = excludedPaths.some(path => 
+      request.nextUrl.pathname.startsWith(path)
+    )
+    
+    if (isExcludedPath) {
+      return NextResponse.next()
+    }
+    
     // 檢查 URL 中是否已經包含國家代碼
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
     const validCountryCodes = ["tw", "us"] // 支持的國家代碼
@@ -39,9 +49,9 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-// 定義 middleware 應用的路徑
+// 定義 middleware 應用的路徑 - 排除 CMS 相關路徑
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|images|assets|png|svg|jpg|jpeg|gif|webp|cms|cms-info|integration-test).*)",
   ],
 }

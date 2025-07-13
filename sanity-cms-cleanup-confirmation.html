@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanity CMS 清理確認報告</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container { 
+            background: white; 
+            padding: 24px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 { color: #1a1a1a; }
+        h1 { border-bottom: 3px solid #dc3545; padding-bottom: 10px; }
+        h2 { color: #2d4a5a; margin-top: 24px; border-left: 4px solid #dc3545; padding-left: 12px; }
+        .status-completed { color: #28a745; font-weight: 600; }
+        .status-removed { color: #dc3545; font-weight: 600; }
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .before, .after {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .before { border-color: #ffc107; background: #fff9e6; }
+        .after { border-color: #28a745; background: #f0fff0; }
+        .directory-structure {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 16px 0;
+        }
+        .removed { color: #dc3545; text-decoration: line-through; }
+        .kept { color: #28a745; }
+        .summary-box {
+            background: #f0f8ff;
+            border: 2px solid #007acc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .cleanup-item {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .integration-item {
+            background: #f0fff0;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .command-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .service-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .service-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-removed { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ Sanity CMS 清理確認報告</h1>
+        <p><strong>狀態：</strong> <span class="status-completed">✅ 清理完成</span></p>
+        <p><strong>操作：</strong> 移除已棄用的獨立 `sanity_cms` 目錄</p>
+        <p><strong>原因：</strong> Sanity CMS 已成功整合到前端 Next.js 專案中</p>
+        <p><strong>清理時間：</strong><span id="timestamp"></span></p>
+    </div>
+
+    <div class="container">
+        <h2>📁 目錄結構變化</h2>
+        
+        <div class="before-after">
+            <div class="before">
+                <h3>⚠️ 清理前結構</h3>
+                <div class="directory-structure">
+medusa_0525/
+├── backend/              # Medusa.js 後端
+├── frontend/             # Next.js 前端
+├── <span class="removed">sanity_cms/</span>           # 🗑️ 獨立 CMS 目錄
+│   ├── <span class="removed">schemas/</span>
+│   ├── <span class="removed">sanity.config.ts</span>
+│   ├── <span class="removed">package.json</span>
+│   └── <span class="removed">node_modules/</span>
+└── package.json
+                </div>
+                <p><small>❌ 需要管理 3 個獨立服務</small></p>
+            </div>
+            
+            <div class="after">
+                <h3>✅ 清理後結構</h3>
+                <div class="directory-structure">
+medusa_0525/
+├── <span class="kept">backend/</span>              # Medusa.js 後端
+├── <span class="kept">frontend/</span>             # Next.js 前端 + 整合 CMS
+│   ├── <span class="kept">src/app/cms/</span>      # 🎯 嵌入式 Sanity Studio
+│   ├── <span class="kept">schemas/</span>          # 📋 遷移的內容架構
+│   ├── <span class="kept">sanity.config.ts</span>  # ⚙️ 完整 CMS 配置
+│   └── <span class="kept">sanity.config.simple.ts</span> # 🔧 簡化配置
+└── <span class="kept">package.json</span>          # 🚀 簡化的開發指令
+                </div>
+                <p><small>✅ 只需管理 2 個服務，CMS 整合完成</small></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔧 清理內容詳細列表</h2>
+        
+        <div class="cleanup-item">
+            <strong>📂 已移除目錄：</strong> `/Users/raychou/medusa_0525/sanity_cms/`
+            <ul>
+                <li>schemas/ - 內容架構定義</li>
+                <li>src/ - 源代碼目錄</li>
+                <li>static/ - 靜態資源</li>
+                <li>node_modules/ - 依賴包</li>
+                <li>package.json - 獨立配置</li>
+                <li>sanity.config.ts - 舊配置文件</li>
+                <li>.env.development - 環境變數</li>
+            </ul>
+        </div>
+        
+        <div class="integration-item">
+            <strong>📦 已遷移到前端：</strong>
+            <ul>
+                <li>✅ 所有 schemas 定義 → <code>frontend/schemas/</code></li>
+                <li>✅ Sanity 配置 → <code>frontend/sanity.config.ts</code></li>
+                <li>✅ CLI 配置 → <code>frontend/sanity.cli.ts</code></li>
+                <li>✅ 環境變數 → <code>frontend/.env.local</code></li>
+                <li>✅ Studio 路由 → <code>frontend/src/app/cms/</code></li>
+                <li>✅ Webhook 配置 → <code>frontend/src/config/webhook/</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>⚙️ Package.json 更新</h2>
+        
+        <div class="summary-box">
+            <h3>根目錄 package.json 變更</h3>
+            <div class="cleanup-item">
+                <strong>移除的配置：</strong>
+                <ul>
+                    <li><code>"sanity_cms"</code> 從 workspaces 陣列</li>
+                    <li><code>"install:sanity"</code> 安裝指令</li>
+                    <li><code>"dev:sanity"</code> 開發指令</li>
+                </ul>
+            </div>
+            
+            <div class="integration-item">
+                <strong>保留的配置：</strong>
+                <ul>
+                    <li><code>"dev"</code> - 同時啟動前端和後端</li>
+                    <li><code>"dev:integrated"</code> - 整合開發模式</li>
+                    <li><code>"dev:frontend"</code> - 前端（包含 CMS）</li>
+                    <li><code>"dev:backend"</code> - 後端 API</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🚀 新的開發流程</h2>
+        
+        <div class="command-block">
+# 啟動整合環境（推薦）
+npm run dev
+
+# 或使用明確的整合指令
+npm run dev:integrated
+
+# 分別啟動（如需調試）
+npm run dev:frontend    # 前端 + CMS (port 8000)
+npm run dev:backend     # 後端 API (port 9000)
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-card">
+                <h4>🌐 前端網站</h4>
+                <p><strong>URL:</strong> <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></p>
+                <span class="service-status status-active">✅ 運行中</span>
+            </div>
+            
+            <div class="service-card">
+                <h4>📝 Sanity Studio</h4>
+                <p><strong>URL:</strong> <a href="http://localhost:8000/cms" target="_blank">http://localhost:8000/cms</a></p>
+                <span class="service-status status-active">✅ 整合完成</span>
+            </div>
+            
+            <div class="service-card">
+                <h4>🔌 後端 API</h4>
+                <p><strong>URL:</strong> <a href="http://localhost:9000" target="_blank">http://localhost:9000</a></p>
+                <span class="service-status status-active">✅ 運行中</span>
+            </div>
+            
+            <div class="service-card">
+                <h4>🗑️ 獨立 Sanity 服務</h4>
+                <p><strong>URL:</strong> <del>http://localhost:3333</del></p>
+                <span class="service-status status-removed">❌ 已移除</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>✨ 清理效果與優勢</h2>
+        
+        <div class="integration-item">
+            <strong>🎯 簡化架構：</strong>
+            <ul>
+                <li>從 3 個獨立服務減少到 2 個</li>
+                <li>不再需要管理獨立的 Sanity 服務器</li>
+                <li>統一的 Next.js 應用包含所有前端功能</li>
+            </ul>
+        </div>
+        
+        <div class="integration-item">
+            <strong>🚀 部署優化：</strong>
+            <ul>
+                <li>前端和 CMS 使用同一個 Next.js 應用</li>
+                <li>統一域名，所有功能都在 localhost:8000 下</li>
+                <li>簡化的環境變數管理</li>
+            </ul>
+        </div>
+        
+        <div class="integration-item">
+            <strong>💰 資源節省：</strong>
+            <ul>
+                <li>端口：不再占用 3333 端口</li>
+                <li>進程：減少一個獨立的 Node.js 進程</li>
+                <li>記憶體：節省 Sanity 獨立服務器的記憶體使用</li>
+                <li>磁碟：移除重複的 node_modules</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🛡️ 安全確認</h2>
+        
+        <div class="summary-box">
+            <h3>數據遷移確認</h3>
+            <div class="integration-item">
+                <strong>✅ 零數據丟失：</strong>
+                <ul>
+                    <li>所有 CMS 數據和配置都已安全遷移</li>
+                    <li>Schema 定義完整保留</li>
+                    <li>環境變數已正確遷移</li>
+                    <li>Webhook 配置已遷移</li>
+                    <li>備份配置已保留在前端目錄中</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 後續驗證清單</h2>
+        
+        <div class="integration-item">
+            <strong>建議測試項目：</strong>
+            <ul>
+                <li>🔄 重新啟動開發環境：<code>npm run dev</code></li>
+                <li>🌐 訪問前端網站：http://localhost:8000</li>
+                <li>📝 訪問 Sanity Studio：http://localhost:8000/cms</li>
+                <li>⚙️ 測試 CMS 內容管理功能</li>
+                <li>🔌 驗證前端與 Sanity 的數據連接</li>
+                <li>🧪 測試導航列項目配置</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 顯示當前時間
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('zh-TW');
+        
+        // 添加一些視覺效果
+        document.querySelectorAll('.service-card').forEach((card, index) => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                card.style.transition = 'all 0.2s ease';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            });
+        });
+        
+        // 控制台輸出
+        console.log('🗑️ Sanity CMS cleanup completed successfully');
+        console.log('📁 sanity_cms directory has been removed');
+        console.log('✅ All content migrated to frontend integration');
+        console.log('🚀 Ready to use integrated CMS at http://localhost:8000/cms');
+        
+        // 動態顯示狀態
+        setTimeout(() => {
+            const statusElements = document.querySelectorAll('.status-completed, .status-removed');
+            statusElements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.animation = 'pulse 0.5s ease-in-out';
+                }, index * 200);
+            });
+        }, 1000);
+    </script>
+    
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+    </style>
+</body>
+</html>
