@@ -18,6 +18,13 @@ const nextConfig = {
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   // distDir: 'out', // 移除自定義輸出目錄
+  
+  // 優化資源預加載
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@medusajs/ui', '@medusajs/icons'],
+  },
+  
   logging: {
     fetches: {
       fullUrl: true,
@@ -28,6 +35,12 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  
+  // 改善錯誤處理
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   },
   
   // 配置 webpack 別名解析

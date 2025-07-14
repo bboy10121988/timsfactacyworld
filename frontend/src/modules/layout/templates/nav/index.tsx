@@ -150,10 +150,11 @@ export default async function Nav() {
                 />
                 <div className="hidden xsmall:flex items-center gap-x-6">
                   {headerData?.navigation?.filter((item: {name: string; href: string}, index: number) => {
-                    // 擴展的左側項目關鍵字：首頁、商品、Blog、關於我們等
+                    // 擴展的左側項目關鍵字：首頁、商品、Blog、關於我們、Store等
                     const leftSideItems = [
                       'home', 'homes', '首頁', '主頁',
                       'product', 'products', 'shop', 'shopping', '商品', '產品', '購物',
+                      'store', 'stores', '商店', '店舖', '門市',
                       'blog', 'blogs', 'article', 'articles', 'news', '部落格', '文章', '新聞', '資訊',
                       'about', 'about-us', 'aboutus', '關於', '關於我們', '公司簡介'
                     ];
@@ -240,6 +241,7 @@ export default async function Nav() {
                     const leftSideItems = [
                       'home', 'homes', '首頁', '主頁',
                       'product', 'products', 'shop', 'shopping', '商品', '產品', '購物',
+                      'store', 'stores', '商店', '店舖', '門市',
                       'blog', 'blogs', 'article', 'articles', 'news', '部落格', '文章', '新聞', '資訊',
                       'about', 'about-us', 'aboutus', '關於', '關於我們', '公司簡介'
                     ];

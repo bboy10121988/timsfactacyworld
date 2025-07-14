@@ -324,9 +324,6 @@ export default function ServiceCardsSection({
         {allStylists.length > 0 && (
           <div className="mb-16">
             <div className="w-full max-w-[280px] mx-auto">
-              <div className="text-center text-sm font-light text-stone-700 mb-4 tracking-[0.15em] uppercase">
-                選擇設計師
-              </div>
               <Select 
                 value={selectedDesigner}
                 onValueChange={setSelectedDesigner}

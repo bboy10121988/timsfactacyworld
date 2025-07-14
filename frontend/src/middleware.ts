@@ -19,18 +19,26 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
     
+    // 添加安全性標頭
+    const response = NextResponse.next()
+    
+    // 設置資源提示和安全標頭
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+    
     // 檢查 URL 中是否已經包含國家代碼
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
     const validCountryCodes = ["tw", "us"] // 支持的國家代碼
     
     // 如果 URL 路徑已包含有效的國家代碼，直接繼續
     if (validCountryCodes.includes(urlCountryCode)) {
-      return NextResponse.next()
+      return response
     }
     
     // 如果是靜態資源，直接處理
     if (request.nextUrl.pathname.includes(".")) {
-      return NextResponse.next()
+      return response
     }
     
     // 如果 URL 不包含國家代碼，重定向到帶有國家代碼的 URL

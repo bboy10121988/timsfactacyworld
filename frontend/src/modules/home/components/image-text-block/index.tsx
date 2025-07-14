@@ -35,10 +35,7 @@ const ImageTextBlock = ({
   const hasTitle = !hideTitle && heading && heading.trim().length > 0
   
   return (
-    <div className={cn(
-      "w-full max-w-[1440px] mx-auto",
-      hasTitle ? "py-12 md:py-20" : "py-8 md:py-12"
-    )}>
+    <div className="w-full max-w-[1440px] mx-auto">
       {/* 左圖右文布局 */}
       {layout === 'imageLeft' && image && (
         <div className="grid md:grid-cols-2 gap-8 items-center">

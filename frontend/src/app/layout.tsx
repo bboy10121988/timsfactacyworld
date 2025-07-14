@@ -1,19 +1,21 @@
 import { Metadata } from "next"
 import { Noto_Sans_TC } from "next/font/google"
 import "styles/globals.css"
+import "@/lib/error-tracking"
 import ClientArea from "@modules/layout/components/client-area"
 import SanityFooter from "@modules/layout/templates/footer/sanity-footer"
 import { getStoreName } from "@lib/store-name"
 import { getHeader } from "@lib/sanity"
 import ToasterProvider from "@/providers/toast-provider"
 
-// 字體配置
+// 字體配置 - 優化預加載
 const notoSansTC = Noto_Sans_TC({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
   preload: true,
   display: 'swap',
   variable: '--font-noto-sans-tc',
+  fallback: ['system-ui', 'arial'],
 })
 
 // 獲取店名和 Logo 用於元數據
@@ -109,6 +111,15 @@ export const generateMetadata = async (): Promise<Metadata> => {
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="zh-TW" data-mode="light" suppressHydrationWarning className={`${notoSansTC.variable}`}>
+      <head>
+        {/* 優化資源提示 */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.sanity.io" />
+        {/* DNS 預取 */}
+        <link rel="dns-prefetch" href="https://medusa-backend-demo.medusajs.com" />
+        <link rel="dns-prefetch" href="https://vercel.app" />
+      </head>
       <body suppressHydrationWarning className="font-sans">
         <ToasterProvider />
         <ClientArea>
