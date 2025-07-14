@@ -26,13 +26,14 @@ export async function GET() {
       }, { status: 500 })
     }
     
-    const data = await response.json()
+    // Medusa health endpoint returns plain text "OK", not JSON
+    const healthText = await response.text()
     
     return NextResponse.json({
       status: "success",
       message: "Connected to Medusa backend",
       medusaStatus: response.status,
-      medusaHealth: data,
+      medusaHealth: healthText,
       medusaUrl: baseUrl
     })
   } catch (error) {
