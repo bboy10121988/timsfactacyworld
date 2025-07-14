@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑馬燈測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 從 globals.css 複製的跑馬燈動畫定義 */
+        @keyframes marquee {
+            0% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-25%);
+            }
+            45% {
+                transform: translateY(-25%);
+            }
+            50% {
+                transform: translateY(-50%);
+            }
+            70% {
+                transform: translateY(-50%);
+            }
+            75% {
+                transform: translateY(-75%);
+            }
+            95% {
+                transform: translateY(-75%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes marquee-1 {
+            0%, 100% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes marquee-2 {
+            0%, 40% {
+                transform: translateY(0);
+            }
+            50%, 90% {
+                transform: translateY(-50%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes marquee-3 {
+            0%, 28% {
+                transform: translateY(0);
+            }
+            33%, 61% {
+                transform: translateY(-33.333%);
+            }
+            66%, 94% {
+                transform: translateY(-66.666%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 9s ease-in-out infinite;
+        }
+
+        .animate-marquee-1 {
+            animation: marquee-1 var(--marquee-duration, 6s) linear infinite;
+        }
+
+        .animate-marquee-2 {
+            animation: marquee-2 var(--marquee-duration, 6s) ease-in-out infinite;
+        }
+
+        .animate-marquee-3 {
+            animation: marquee-3 var(--marquee-duration, 9s) ease-in-out infinite;
+        }
+
+        .hover\:animation-paused:hover {
+            animation-play-state: paused !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-6xl mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">跑馬燈測試頁面</h1>
+        
+        <!-- 用戶提供的範例 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">用戶提供的範例（參考）</h2>
+            <div class="bg-gray-900 text-white overflow-hidden py-3 px-6">
+                <div class="h-6 flex items-center justify-center">
+                    <div class="animate-pulse">新會員首購享85折</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 目前實作測試 - 單一項目 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">目前實作 - 單一項目（應該靜止）</h2>
+            <div class="bg-gray-900 text-white overflow-hidden py-3 px-6">
+                <div class="relative h-6">
+                    <div 
+                        class="absolute inset-x-0 flex flex-col animate-marquee-1"
+                        style="--marquee-duration: 6s"
+                    >
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            新會員首購享85折
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 目前實作測試 - 雙項目 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">目前實作 - 雙項目（應該輪流）</h2>
+            <div class="bg-gray-900 text-white overflow-hidden py-3 px-6">
+                <div class="relative h-6">
+                    <div 
+                        class="absolute inset-x-0 flex flex-col animate-marquee-2"
+                        style="--marquee-duration: 6s"
+                    >
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            新會員首購享85折
+                        </div>
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            全館消費滿$2000免運
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 目前實作測試 - 三項目 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">目前實作 - 三項目（應該輪流）</h2>
+            <div class="bg-gray-900 text-white overflow-hidden py-3 px-6">
+                <div class="relative h-6">
+                    <div 
+                        class="absolute inset-x-0 flex flex-col animate-marquee-3 hover:animation-paused"
+                        style="--marquee-duration: 9s"
+                    >
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            新會員首購享85折
+                        </div>
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            全館消費滿$2000免運
+                        </div>
+                        <div class="flex-none h-6 flex items-center justify-center text-sm font-medium text-white">
+                            會員點數最高30倍送
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">（滑鼠移入會暫停動畫）</p>
+        </div>
+
+        <!-- 問題診斷：高度問題 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">問題診斷 - 容器高度設定</h2>
+            <div class="bg-gray-900 text-white overflow-hidden py-3 px-6 border-2 border-red-500">
+                <div class="relative" style="height: 24px; border: 1px dashed yellow;">
+                    <div 
+                        class="absolute inset-x-0 flex flex-col animate-marquee-2"
+                        style="--marquee-duration: 6s; border: 1px dashed cyan;"
+                    >
+                        <div class="flex-none" style="height: 24px; border: 1px dashed green; display: flex; align-items: center; justify-content: center;">
+                            <span class="text-sm font-medium text-white">第一行文字</span>
+                        </div>
+                        <div class="flex-none" style="height: 24px; border: 1px dashed green; display: flex; align-items: center; justify-content: center;">
+                            <span class="text-sm font-medium text-white">第二行文字</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">紅色外框：容器，黃色虛線：相對定位區域，青色虛線：動畫元素，綠色虛線：個別文字項目</p>
+        </div>
+
+        <!-- 修復方案測試 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">修復方案 - 改善後的跑馬燈</h2>
+            <div class="bg-gray-900 text-white overflow-hidden">
+                <div class="relative h-12 flex items-center justify-center">
+                    <div 
+                        class="absolute inset-0 flex flex-col animate-marquee-3"
+                        style="--marquee-duration: 9s"
+                    >
+                        <div class="flex-none h-12 flex items-center justify-center">
+                            <span class="text-sm font-medium text-white">新會員首購享85折</span>
+                        </div>
+                        <div class="flex-none h-12 flex items-center justify-center">
+                            <span class="text-sm font-medium text-white">全館消費滿$2000免運</span>
+                        </div>
+                        <div class="flex-none h-12 flex items-center justify-center">
+                            <span class="text-sm font-medium text-white">會員點數最高30倍送</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

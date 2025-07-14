@@ -1,0 +1,33 @@
+按鈕樣式設定 (_button.scss)：
+
+1. 基本按鈕
+padding: calc(9px + (12 - 9) * ((100vw - 320px) / (1920 - 320)));
+background-color: var(--theme-color);
+color: #ffffff;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+
+2. 按鈕大小變體
+小按鈕：padding: 8px 15px;
+中按鈕：padding: 12px 20px;
+大按鈕：padding: 15px 30px;
+
+3. 按鈕狀態
+hover: opacity: 0.8;
+active: transform: translateY(1px);
+disabled: opacity: 0.5;
+
+4. 特殊按鈕
+.close-icon {
+    width: 26px;
+    height: 26px;
+    background-color: #ffffff;
+    border: 1px solid #eeeeee;
+    font-size: 12px;
+}
+
+5. 動畫效果
+transition: all 0.5s ease;
+hover動畫
+active狀態變化

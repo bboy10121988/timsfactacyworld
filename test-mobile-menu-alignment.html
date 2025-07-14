@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手機選單對齊測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        /* 模擬跑馬燈 */
+        .marquee {
+            height: 36px; /* h-9 */
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        /* 模擬主導覽列 */
+        .main-nav {
+            height: 60px; /* 假設 logo + 24px 的結果 */
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .nav-content {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+        }
+        
+        .hamburger {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .logo {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .cart-icon {
+            text-align: right;
+        }
+        
+        /* 模擬手機選單 */
+        .mobile-menu {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
+            border-top: 1px solid #e5e7eb;
+            z-index: 110;
+            /* 計算頂部位置：跑馬燈(36px) + 主導覽(60px) = 96px */
+            top: 96px;
+            max-height: calc(100vh - 96px);
+            overflow-y: auto;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-menu.hidden {
+            transform: translateX(100%);
+        }
+        
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .menu-content {
+            padding: 16px;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 12px 0;
+            text-decoration: none;
+            color: #374151;
+            font-size: 18px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .content {
+            padding: 20px;
+            min-height: 150vh;
+        }
+        
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-info h2 {
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+        
+        .test-info ul {
+            margin-left: 20px;
+        }
+        
+        .test-info li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        /* 隱藏桌機版選單 */
+        @media (min-width: 1024px) {
+            .hamburger {
+                display: none;
+            }
+        }
+        
+        /* 手機版才顯示 */
+        @media (max-width: 1023px) {
+            .desktop-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 跑馬燈 -->
+    <div class="marquee">
+        新會員首購享85折 • 全館消費滿$2000免運 • 會員點數最高30倍送
+    </div>
+    
+    <!-- 主導覽列 -->
+    <div class="main-nav">
+        <div class="nav-content">
+            <!-- 左側：手機漢堡選單 / 桌機選單 -->
+            <div>
+                <button class="hamburger" onclick="toggleMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="desktop-nav">桌機選單項目</div>
+            </div>
+            
+            <!-- 中間：Logo -->
+            <div class="logo">LOGO</div>
+            
+            <!-- 右側：購物車 -->
+            <div class="cart-icon">🛒</div>
+        </div>
+    </div>
+    
+    <!-- 手機選單 -->
+    <div id="mobileMenu" class="mobile-menu hidden">
+        <div class="menu-header">
+            <div></div>
+            <button class="close-btn" onclick="toggleMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="menu-content">
+            <a href="#" class="menu-item">首頁</a>
+            <a href="#" class="menu-item">商品</a>
+            <a href="#" class="menu-item">關於我們</a>
+            <a href="#" class="menu-item">聯絡我們</a>
+            <a href="#" class="menu-item">會員專區</a>
+            <a href="#" class="menu-item">購物車 (0)</a>
+        </div>
+    </div>
+    
+    <!-- 頁面內容 -->
+    <div class="content">
+        <div class="test-info">
+            <h2>🎯 手機選單對齊測試</h2>
+            <ul>
+                <li><strong>跑馬燈高度：</strong>36px (h-9)</li>
+                <li><strong>主導覽高度：</strong>60px (假設 logo + 24px)</li>
+                <li><strong>選單頂部位置：</strong>96px (36 + 60)</li>
+                <li><strong>測試重點：</strong>手機選單展開後應該緊貼在主導覽列底部，無間隙</li>
+            </ul>
+        </div>
+        
+        <div class="test-info">
+            <h2>🔧 修正內容</h2>
+            <ul>
+                <li>移除了 <code>bufferHeight = 2</code> 的額外緩衝</li>
+                <li>直接使用 <code>marqueeHeight + mainNavHeight</code> 計算頂部位置</li>
+                <li>增加 <code>maxHeight</code> 和 <code>overflowY: auto</code> 確保內容可滾動</li>
+                <li>選單完全貼齊導覽列底部，無視覺間隙</li>
+            </ul>
+        </div>
+        
+        <div class="test-info">
+            <h2>📱 測試方法</h2>
+            <ul>
+                <li>在手機或縮小瀏覽器視窗至手機尺寸</li>
+                <li>點擊左上角漢堡選單按鈕</li>
+                <li>檢查選單頂部是否完美對齊主導覽列底部</li>
+                <li>滾動選單內容確認滾動功能正常</li>
+            </ul>
+        </div>
+        
+        <p>這是測試內容區域。請縮小瀏覽器視窗到手機尺寸，然後點擊左上角的漢堡選單圖示來測試選單對齊效果。</p>
+        
+        <p style="margin-top: 20px;">選單應該精確地從主導覽列底部開始，沒有任何間隙或偏移。</p>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // 點擊選單外區域關閉選單
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('mobileMenu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

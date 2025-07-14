@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>付款流程測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #e9ecef;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>綠界金流付款流程測試</h1>
+    
+    <div class="test-section">
+        <h2>🎯 測試目標</h2>
+        <ul>
+            <li>✅ 確認「前往付款」按鈕是唯一的 API 觸發點</li>
+            <li>✅ 驗證按鈕只在收件資料確認後可點擊</li>
+            <li>✅ 測試地址資料格式與 API 串接</li>
+            <li>✅ 確認沒有多餘的確認步驟</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 測試步驟</h2>
+        <ol>
+            <li>前往前端頁面：<a href="http://localhost:8000" target="_blank">http://localhost:8000</a></li>
+            <li>進入結帳頁面</li>
+            <li>選擇配送方式</li>
+            <li>填寫收件資料（應該會即時驗證並自動確認）</li>
+            <li>點擊「前往付款」按鈕</li>
+            <li>觀察是否正確跳轉到綠界付款頁面</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 API 測試</h2>
+        <button class="test-button" onclick="testFrontendAPI()">測試前端 API</button>
+        <button class="test-button" onclick="testBackendAPI()">測試後端 API</button>
+        <button class="test-button" onclick="checkServices()">檢查服務狀態</button>
+        
+        <div id="testResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 測試資料</h2>
+        <h3>模擬購物車資料：</h3>
+        <pre id="mockCart"></pre>
+        
+        <h3>模擬收件資料：</h3>
+        <pre id="mockAddress"></pre>
+    </div>
+
+    <script>
+        // 模擬測試資料
+        const mockCart = {
+            id: "cart_test123",
+            items: [
+                {
+                    title: "測試商品A",
+                    quantity: 2,
+                    unit_price: 1000
+                },
+                {
+                    title: "測試商品B", 
+                    quantity: 1,
+                    unit_price: 1500
+                }
+            ],
+            total: 3500
+        };
+
+        const mockAddress = {
+            first_name: "小明",
+            last_name: "王",
+            phone: "0912345678",
+            city: "臺北市",
+            address_1: "大安區忠孝東路四段1號",
+            postal_code: "106",
+            country_code: "TW"
+        };
+
+        const mockCustomer = {
+            id: "customer_test123",
+            email: "test@example.com"
+        };
+
+        // 顯示測試資料
+        document.getElementById('mockCart').textContent = JSON.stringify(mockCart, null, 2);
+        document.getElementById('mockAddress').textContent = JSON.stringify(mockAddress, null, 2);
+
+        function log(message, type = 'info') {
+            const result = document.getElementById('testResult');
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            
+            result.textContent += logMessage;
+            result.className = `result ${type}`;
+            result.scrollTop = result.scrollHeight;
+        }
+
+        async function checkServices() {
+            log('🔍 檢查服務狀態...');
+            
+            try {
+                // 檢查前端
+                const frontendResponse = await fetch('http://localhost:8000', { method: 'HEAD' });
+                log(`✅ 前端服務: ${frontendResponse.status === 200 ? '運行中' : '異常'}`, 
+                    frontendResponse.status === 200 ? 'success' : 'error');
+                
+                // 檢查後端
+                const backendResponse = await fetch('http://localhost:9000/health', { method: 'GET' });
+                log(`✅ 後端服務: ${backendResponse.status === 200 ? '運行中' : '異常'}`, 
+                    backendResponse.status === 200 ? 'success' : 'error');
+                    
+            } catch (error) {
+                log(`❌ 服務檢查失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFrontendAPI() {
+            log('🧪 測試前端 API...');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/ecpay/payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cart: mockCart,
+                        customer: mockCustomer,
+                        shippingAddress: mockAddress,
+                        shippingMethod: 'home_delivery'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ 前端 API 測試成功', 'success');
+                    log(`回應資料: ${JSON.stringify(data, null, 2)}`);
+                    
+                    if (data.html) {
+                        log('✅ 收到 ECPay HTML 表單');
+                    } else {
+                        log('⚠️ 未收到 HTML 表單');
+                    }
+                } else {
+                    log(`❌ 前端 API 測試失敗: ${data.message || '未知錯誤'}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ 前端 API 請求失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackendAPI() {
+            log('🧪 測試後端 API...');
+            
+            try {
+                const response = await fetch('http://localhost:9000/store/ecpay/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cart_id: mockCart.id,
+                        customer_id: mockCustomer.id,
+                        shipping_address: mockAddress,
+                        shipping_method: 'home_delivery'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ 後端 API 測試成功', 'success');
+                    log(`回應資料: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    log(`❌ 後端 API 測試失敗: ${data.error || '未知錯誤'}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ 後端 API 請求失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            log('🚀 付款流程測試頁面已載入');
+            log('請先確認前端和後端服務都已啟動');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 年最佳中英文字型系統展示</title>
+    <link rel="stylesheet" href="./styles/globals.css">
+    <style>
+        /* 現代化顏色系統 - 2025 設計趨勢 */
+        :root {
+            /* 主要顏色 */
+            --color-primary: #3b82f6;      /* Blue 500 */
+            --color-primary-dark: #1d4ed8; /* Blue 700 */
+            --color-accent: #8b5cf6;       /* Purple 500 */
+            
+            /* 文字顏色 - 提升對比度 */
+            --color-text-primary: #0f172a;    /* Slate 900 - 主要文字 */
+            --color-text-secondary: #334155;  /* Slate 700 - 次要文字 */
+            --color-text-tertiary: #64748b;   /* Slate 500 - 輔助文字 */
+            --color-text-quaternary: #94a3b8; /* Slate 400 - 說明文字 */
+            
+            /* 背景顏色 */
+            --color-bg-primary: #ffffff;      /* 主背景 */
+            --color-bg-secondary: #f8fafc;    /* 次背景 */
+            --color-bg-tertiary: #f1f5f9;     /* 卡片背景 */
+            --color-bg-code: #0f172a;         /* 代碼背景 */
+            
+            /* 邊框顏色 */
+            --color-border-light: #e2e8f0;    /* Slate 200 */
+            --color-border-medium: #cbd5e1;   /* Slate 300 */
+            
+            /* 陰影 */
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 深色模式支援 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-text-primary: #f8fafc;    /* Slate 50 */
+                --color-text-secondary: #e2e8f0;  /* Slate 200 */
+                --color-text-tertiary: #94a3b8;   /* Slate 400 */
+                --color-text-quaternary: #64748b; /* Slate 500 */
+                
+                --color-bg-primary: #0f172a;      /* Slate 900 */
+                --color-bg-secondary: #1e293b;    /* Slate 800 */
+                --color-bg-tertiary: #334155;     /* Slate 700 */
+                --color-bg-code: #000000;         /* 純黑 */
+                
+                --color-border-light: #475569;    /* Slate 600 */
+                --color-border-medium: #334155;   /* Slate 700 */
+            }
+        }
+
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .demo-section {
+            background: var(--color-bg-primary);
+            padding: 2.5rem;
+            margin: 2rem 0;
+            border-radius: 16px;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--color-border-light);
+            transition: all 0.3s ease;
+        }
+        
+        .demo-section:hover {
+            box-shadow: var(--shadow-large);
+            transform: translateY(-2px);
+        }
+        
+        .font-info {
+            font-size: 0.875rem;
+            color: var(--color-text-tertiary);
+            font-family: var(--font-mono);
+            background: var(--color-bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            border: 1px solid var(--color-border-light);
+            position: relative;
+        }
+        
+        .font-info::before {
+            content: "ℹ️";
+            position: absolute;
+            left: 0.75rem;
+            top: 0.75rem;
+        }
+        
+        .font-info {
+            padding-left: 2rem;
+        }
+        
+        .sample-text {
+            border-left: 4px solid var(--color-primary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+            background: linear-gradient(90deg, var(--color-primary)10, transparent 2px);
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .sample-text::before {
+            content: "";
+            position: absolute;
+            left: -2px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+            border-radius: 2px;
+        }
+        
+        /* 代碼區塊美化 */
+        pre {
+            font-family: var(--font-mono) !important;
+            background: var(--color-bg-code) !important;
+            color: #f8fafc !important;
+            padding: 1.5rem !important;
+            border-radius: 12px !important;
+            overflow-x: auto !important;
+            border: 1px solid #374151 !important;
+            box-shadow: var(--shadow-medium) !important;
+            position: relative;
+        }
+        
+        pre::before {
+            content: "{ }";
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            color: #6b7280;
+            font-size: 0.75rem;
+        }
+        
+        /* 網格卡片美化 */
+        .grid-card {
+            background: var(--color-bg-tertiary) !important;
+            padding: 1.5rem !important;
+            border-radius: 12px !important;
+            border: 1px solid var(--color-border-light) !important;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .grid-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+        }
+        
+        .grid-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        /* 列表樣式優化 */
+        ul {
+            padding-left: 0 !important;
+        }
+        
+        ul li {
+            position: relative;
+            padding-left: 2rem;
+            margin: 0.75rem 0;
+            list-style: none;
+        }
+        
+        ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* 強調文字 */
+        strong {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+        
+        /* 響應式優化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .demo-section {
+                padding: 1.5rem;
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-section">
+        <h1 class="h1">2025 年最佳中英文字型系統 Font System Showcase</h1>
+        <p class="text-content">
+            基於 SystemFontStack.com、CSS-Tricks 和 MDN 的最新建議，我們實施了現代化的系統字型堆疊，
+            優先使用原生系統字體以獲得最佳性能和用戶體驗。
+        </p>
+        <div class="font-info">系統字體堆疊 - 快速載入 + 原生體驗 + 完整 Unicode 支援</div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">標題系統展示 Heading System</h2>
+        
+        <h1 class="h1">H1 主標題 Main Heading</h1>
+        <div class="font-info">SF Pro Display (macOS), Segoe UI Variable (Windows), 中文使用 Noto Sans TC</div>
+        
+        <h2 class="h2">H2 副標題 Secondary Heading</h2>
+        <div class="font-info">系統字體優先，自動顏色為 gray-500</div>
+        
+        <h3 class="h3">H3 三級標題 Tertiary Heading</h3>
+        <div class="font-info">標題字體堆疊，字距調整 0.1em</div>
+        
+        <h4 class="h4">H4 小標題 Small Heading</h4>
+        <div class="font-info">內文字體堆疊，權重 500</div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">標題組合間距展示 Heading Combinations</h2>
+        
+        <h1 class="h1">主標題與副標題組合</h1>
+        <h2 class="h2">這是配套的副標題，間距會自動調整</h2>
+        
+        <h2 class="h2">二級標題與三級標題組合</h2>
+        <h3 class="h3">配套的三級標題，緊密排列</h3>
+        
+        <h3 class="h3">卡片標題</h3>
+        <h4 class="h4">配套的小標題，完美間距</h4>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">內文系統展示 Body Text System</h2>
+        
+        <div class="sample-text">
+            <p class="text-content">
+                響應式內文樣式 - 這是主要的內文樣式，在手機上顯示 16px，在桌面上顯示 18px。
+                使用系統字體確保最佳的跨平台顯示效果。支援中英文混排，字距經過優化。
+                Responsive body text with optimal readability across all devices and languages.
+            </p>
+        </div>
+        
+        <div class="sample-text">
+            <p class="text-body">
+                標準內文樣式 - Standard body text with 16px size, optimized line-height and letter-spacing.
+                使用現代字型堆疊確保在所有設備上都有良好的顯示效果。
+            </p>
+        </div>
+        
+        <div class="sample-text">
+            <p class="text-body-large">
+                大號內文樣式 - Large body text at 18px for better readability in important content areas.
+                適用於重要內容區域，提供更好的閱讀體驗。
+            </p>
+        </div>
+        
+        <div class="sample-text">
+            <p class="text-body-small">
+                小號內文樣式 - Small body text at 14px for secondary information, captions, and metadata.
+                用於次要資訊、圖片說明和中繼資料。
+            </p>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">系統字體特色 System Font Features</h2>
+        
+        <div class="sample-text">
+            <h3 class="h3">多語言支援 Multilingual Support</h3>
+            <p class="text-content">
+                繁體中文：完美支援繁體中文顯示，使用 Noto Sans TC 和 PingFang TC<br>
+                简体中文：同时支持简体中文显示，使用 Noto Sans SC 和 PingFang SC<br>
+                English: Perfect English typography with SF Pro Display and Segoe UI<br>
+                한국어: 한글 문자도 시스템 폰트로 완벽 지원<br>
+                日本語：日本語の文字も美しく表示されます<br>
+                العربية: دعم النص العربي والكتابة من اليمين إلى اليسار
+            </p>
+        </div>
+        
+        <div class="sample-text">
+            <h3 class="h3">表情符號支援 Emoji Support</h3>
+            <p class="text-content">
+                🎨 設計 🚀 性能 💡 創新 🌟 品質 ❤️ 用戶體驗<br>
+                🇹🇼 台灣 🇺🇸 美國 🇯🇵 日本 🇰🇷 韓國 🇨🇳 中國<br>
+                👨‍💻 開發者 👩‍🎨 設計師 🏢 企業 🛍️ 電商
+            </p>
+        </div>
+        
+        <div class="sample-text">
+            <h3 class="h3">代碼字體 Monospace Font</h3>
+            <pre style="font-family: var(--font-mono); background: #1f2937; color: #f9fafb; padding: 1rem; border-radius: 6px; overflow-x: auto;">
+/* CSS 變數定義 */
+:root {
+  --font-base: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable';
+  --font-heading: 'SF Pro Display', -apple-system, BlinkMacSystemFont;
+  --font-mono: 'SF Mono', 'Monaco', 'Menlo', 'Consolas';
+}
+
+// JavaScript 範例
+const fontStack = {
+  base: 'var(--font-base)',
+  heading: 'var(--font-heading)',
+  mono: 'var(--font-mono)'
+};
+            </pre>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">性能優化特色 Performance Features</h2>
+        
+        <ul class="text-content" style="list-style-type: disc; padding-left: 2rem;">
+            <li><strong>零網路請求</strong>：使用系統內建字體，載入速度最快</li>
+            <li><strong>避免 FOIT</strong>：設定 font-display: swap 避免文字閃爍</li>
+            <li><strong>原生體驗</strong>：使用者熟悉的系統字體，提升可讀性</li>
+            <li><strong>完整 Unicode</strong>：系統字體支援最完整的字符集</li>
+            <li><strong>自動優化</strong>：字距、連字、上下文替代自動啟用</li>
+            <li><strong>響應式設計</strong>：根據螢幕大小自動調整字體大小</li>
+            <li><strong>無障礙友好</strong>：遵循 WCAG 指南的對比度和可讀性</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="h2">瀏覽器字體對應表 Browser Font Mapping</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px;">
+                <h4 class="h4">macOS / iOS</h4>
+                <p class="text-body-small">
+                    SF Pro Display (標題)<br>
+                    SF Pro Text (內文)<br>
+                    PingFang TC (繁中)<br>
+                    PingFang SC (簡中)<br>
+                    SF Mono (代碼)
+                </p>
+            </div>
+            
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px;">
+                <h4 class="h4">Windows</h4>
+                <p class="text-body-small">
+                    Segoe UI Variable (新版)<br>
+                    Segoe UI (標準)<br>
+                    Microsoft JhengHei UI (繁中)<br>
+                    Microsoft YaHei UI (簡中)<br>
+                    Consolas (代碼)
+                </p>
+            </div>
+            
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px;">
+                <h4 class="h4">Android</h4>
+                <p class="text-body-small">
+                    Roboto (標準)<br>
+                    Noto Sans TC (繁中)<br>
+                    Noto Sans SC (簡中)<br>
+                    Roboto Mono (代碼)
+                </p>
+            </div>
+            
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 6px;">
+                <h4 class="h4">Linux</h4>
+                <p class="text-body-small">
+                    Ubuntu (Ubuntu 系統)<br>
+                    Cantarell (GNOME)<br>
+                    Liberation Sans (通用)<br>
+                    Fira Sans (Mozilla)<br>
+                    Liberation Mono (代碼)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 檢測實際使用的字體
+        function detectFont(element) {
+            const computedStyle = window.getComputedStyle(element);
+            return computedStyle.fontFamily;
+        }
+        
+        // 顯示當前使用的字體資訊
+        document.addEventListener('DOMContentLoaded', function() {
+            const h1 = document.querySelector('.h1');
+            const body = document.querySelector('.text-content');
+            const mono = document.querySelector('pre');
+            
+            console.log('標題字體：', detectFont(h1));
+            console.log('內文字體：', detectFont(body));
+            console.log('代碼字體：', detectFont(mono));
+        });
+    </script>
+</body>
+</html>

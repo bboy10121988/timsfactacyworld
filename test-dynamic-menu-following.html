@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 手機選單動態跟隨測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        /* 跑馬燈 */
+        .marquee {
+            height: 36px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .marquee.hidden {
+            height: 0;
+            opacity: 0;
+        }
+        
+        /* 主導覽列 */
+        .main-nav {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-content {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+        }
+        
+        .hamburger {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .hamburger:hover {
+            transform: scale(1.1);
+        }
+        
+        .logo {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .cart-icon {
+            text-align: right;
+        }
+        
+        /* 動態手機選單 */
+        .mobile-menu {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
+            border-top: 1px solid #e5e7eb;
+            z-index: 110;
+            transform: translateX(100%);
+            transition: transform 0.3s ease, top 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+        
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .menu-content {
+            padding: 16px;
+        }
+        
+        .menu-item {
+            display: block;
+            padding: 12px 0;
+            text-decoration: none;
+            color: #374151;
+            font-size: 18px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: color 0.2s ease;
+        }
+        
+        .menu-item:hover {
+            color: #1f2937;
+        }
+        
+        .content {
+            padding: 20px;
+            min-height: 150vh;
+        }
+        
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls h2 {
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .control-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 12px;
+            margin-bottom: 8px;
+            transition: background 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: #2563eb;
+        }
+        
+        .control-btn.danger {
+            background: #ef4444;
+        }
+        
+        .control-btn.danger:hover {
+            background: #dc2626;
+        }
+        
+        .status-display {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h3 {
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+        }
+        
+        .info-box li {
+            margin-bottom: 4px;
+            color: #0c4a6e;
+        }
+        
+        /* 隱藏桌機版選單 */
+        @media (min-width: 1024px) {
+            .hamburger {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 跑馬燈 -->
+    <div id="marquee" class="marquee">
+        🎉 新會員首購享85折 • 全館消費滿$2000免運 • 會員點數最高30倍送
+    </div>
+    
+    <!-- 主導覽列 -->
+    <div class="main-nav">
+        <div class="nav-content">
+            <!-- 左側：手機漢堡選單 -->
+            <div>
+                <button class="hamburger" onclick="openMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 中間：Logo -->
+            <div class="logo">LOGO</div>
+            
+            <!-- 右側：購物車 -->
+            <div class="cart-icon">🛒</div>
+        </div>
+    </div>
+    
+    <!-- 動態手機選單 -->
+    <div id="mobileMenu" class="mobile-menu">
+        <div class="menu-header">
+            <div></div>
+            <button class="close-btn" onclick="closeMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="menu-content">
+            <a href="#" class="menu-item">首頁</a>
+            <a href="#" class="menu-item">商品</a>
+            <a href="#" class="menu-item">關於我們</a>
+            <a href="#" class="menu-item">聯絡我們</a>
+            <a href="#" class="menu-item">會員專區</a>
+            <a href="#" class="menu-item">購物車 (0)</a>
+        </div>
+    </div>
+    
+    <!-- 測試控制面板 -->
+    <div class="content">
+        <div class="test-controls">
+            <h2>🧪 動態跟隨測試控制</h2>
+            <button class="control-btn" onclick="toggleMarquee()">切換跑馬燈顯示/隱藏</button>
+            <button class="control-btn" onclick="openMenu()">開啟手機選單</button>
+            <button class="control-btn danger" onclick="closeMenu()">關閉手機選單</button>
+            
+            <div class="status-display" id="statusDisplay">
+                跑馬燈狀態: 顯示 | 選單位置: 計算中...
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🎯 測試重點</h3>
+            <ul>
+                <li><strong>動態跟隨：</strong>手機選單會實時跟隨導覽列位置</li>
+                <li><strong>跑馬燈切換：</strong>當跑馬燈隱藏/顯示時，選單位置自動調整</li>
+                <li><strong>無縫對齊：</strong>選單上邊界始終貼齊導覽列下邊界</li>
+                <li><strong>平滑過渡：</strong>位置變化有平滑的動畫效果</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>🔧 實現方式</h3>
+            <ul>
+                <li>使用 <code>getBoundingClientRect()</code> 獲取導覽列實際位置</li>
+                <li>用 <code>MutationObserver</code> 監聽 DOM 結構變化</li>
+                <li>監聽視窗 <code>resize</code> 事件處理響應式變化</li>
+                <li>動態計算跑馬燈高度並即時更新選單位置</li>
+                <li>在選單開啟時重新計算確保位置準確</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>📱 測試步驟</h3>
+            <ul>
+                <li>1. 點擊「開啟手機選單」觀察初始位置</li>
+                <li>2. 點擊「切換跑馬燈顯示/隱藏」看選單是否跟隨</li>
+                <li>3. 重複切換跑馬燈狀態測試動態跟隨</li>
+                <li>4. 縮放瀏覽器視窗測試響應式適應</li>
+            </ul>
+        </div>
+        
+        <p>這是測試內容區域。請使用上方的控制按鈕來測試手機選單的動態跟隨效果。</p>
+        
+        <p style="margin-top: 20px;">選單位置會根據跑馬燈的顯示/隱藏狀態動態調整，始終保持與導覽列底部對齊。</p>
+    </div>
+
+    <script>
+        let menuOpen = false;
+        let marqueeVisible = true;
+        
+        function calculateMenuPosition() {
+            const marquee = document.getElementById('marquee');
+            const nav = document.querySelector('.main-nav');
+            const menu = document.getElementById('mobileMenu');
+            
+            if (nav && menu) {
+                const navRect = nav.getBoundingClientRect();
+                const marqueeHeight = marqueeVisible ? 36 : 0;
+                const navHeight = navRect.height;
+                const totalOffset = marqueeHeight + navHeight;
+                
+                menu.style.top = `${totalOffset}px`;
+                menu.style.maxHeight = `calc(100vh - ${totalOffset}px)`;
+                
+                updateStatusDisplay(marqueeHeight, navHeight, totalOffset);
+            }
+        }
+        
+        function updateStatusDisplay(marqueeHeight, navHeight, totalOffset) {
+            const status = document.getElementById('statusDisplay');
+            const marqueeStatus = marqueeVisible ? '顯示' : '隱藏';
+            status.textContent = `跑馬燈狀態: ${marqueeStatus} (${marqueeHeight}px) | 導覽高度: ${navHeight}px | 選單位置: ${totalOffset}px`;
+        }
+        
+        function openMenu() {
+            menuOpen = true;
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.add('open');
+            
+            // 延遲重新計算位置
+            setTimeout(calculateMenuPosition, 50);
+        }
+        
+        function closeMenu() {
+            menuOpen = false;
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.remove('open');
+        }
+        
+        function toggleMarquee() {
+            const marquee = document.getElementById('marquee');
+            marqueeVisible = !marqueeVisible;
+            
+            if (marqueeVisible) {
+                marquee.classList.remove('hidden');
+            } else {
+                marquee.classList.add('hidden');
+            }
+            
+            // 如果選單開啟，立即重新計算位置
+            if (menuOpen) {
+                setTimeout(calculateMenuPosition, 350); // 等待動畫完成
+            }
+        }
+        
+        // 監聽視窗大小變化
+        window.addEventListener('resize', () => {
+            if (menuOpen) {
+                calculateMenuPosition();
+            }
+        });
+        
+        // 點擊選單外區域關閉選單
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('mobileMenu');
+            const hamburger = document.querySelector('.hamburger');
+            
+            if (menuOpen && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+                closeMenu();
+            }
+        });
+        
+        // 初始計算
+        calculateMenuPosition();
+        
+        // 使用 MutationObserver 監聽跑馬燈變化
+        const observer = new MutationObserver(() => {
+            if (menuOpen) {
+                setTimeout(calculateMenuPosition, 50);
+            }
+        });
+        
+        observer.observe(document.getElementById('marquee'), {
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+    </script>
+</body>
+</html>

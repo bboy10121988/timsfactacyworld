@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>買X送Y標籤測試</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .demo-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .labels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .label-demo {
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* 促銷標籤基礎樣式 */
+        .product-label {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            border: 1px solid;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* 買X送Y標籤 */
+        .product-label.buy-x-get-y {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-color: #34d399;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-label.buy-x-get-y::before {
+            content: '🎁';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: gift-slide 2s ease-in-out infinite;
+        }
+
+        @keyframes gift-slide {
+            0%, 100% {
+                left: -20px;
+                opacity: 0;
+            }
+            50% {
+                left: calc(100% + 5px);
+                opacity: 1;
+            }
+        }
+
+        /* 您HTML中的樣式 */
+        .custom-gradient {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: 2px solid #f97316;
+            color: #7c2d12;
+        }
+
+        .gold-shimmer {
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            background-size: 300% 300%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .comparison-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>買X送Y標籤測試預覽</h1>
+        <p>以下是新實作的「買X送Y」標籤的各種樣式測試</p>
+
+        <div class="labels-grid">
+            <div class="label-demo">
+                <h3>預設樣式</h3>
+                <div class="product-label buy-x-get-y">送禮</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>送禮品</h3>
+                <div class="product-label buy-x-get-y">送禮品</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>送好禮</h3>
+                <div class="product-label buy-x-get-y">送好禮</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>加碼送</h3>
+                <div class="product-label buy-x-get-y">加碼送</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>限量送</h3>
+                <div class="product-label buy-x-get-y">限量送</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>滿額送</h3>
+                <div class="product-label buy-x-get-y">滿額送</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>買就送</h3>
+                <div class="product-label buy-x-get-y">買就送</div>
+            </div>
+
+            <div class="label-demo">
+                <h3>送1件</h3>
+                <div class="product-label buy-x-get-y">送1件</div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <h2>與現有標籤的對比</h2>
+            <p>以下是您HTML示例中的樣式vs新實作的買X送Y標籤：</p>
+            
+            <div style="display: flex; gap: 20px; align-items: center; margin: 20px 0;">
+                <div>
+                    <p><strong>原有樣式：</strong></p>
+                    <div class="product-label custom-gradient gold-shimmer">9折</div>
+                </div>
+                <div>
+                    <p><strong>新增買X送Y：</strong></p>
+                    <div class="product-label buy-x-get-y">送禮</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <h2>實作功能摘要</h2>
+            <ul>
+                <li>✅ 新增 <code>buy-x-get-y</code> 到 PromotionLabelType</li>
+                <li>✅ 設定標籤優先級為 8</li>
+                <li>✅ 預設顯示文字：「送禮」</li>
+                <li>✅ 在 getMetadataLabels 中檢查 metadata.buy_x_get_y</li>
+                <li>✅ 在 getPromotionLabels 中檢查產品 tags</li>
+                <li>✅ 在 getActivePromotionLabels 中檢查 Medusa API 促銷</li>
+                <li>✅ 在 getRealPromotionLabels 中檢查後端資料</li>
+                <li>✅ 更新 generateMockPromotionLabels 產生「送Y」標籤</li>
+                <li>✅ 新增 CSS 樣式（綠色漸層 + 禮物動畫）</li>
+                <li>✅ 支援多種顯示文字：送禮品、送好禮、加碼送等</li>
+            </ul>
+        </div>
+
+        <div class="comparison-section">
+            <h2>Medusa API 整合</h2>
+            <p>系統會在以下情況下顯示「買X送Y」標籤：</p>
+            <ul>
+                <li><strong>Metadata:</strong> 產品 metadata 中設定 <code>buy_x_get_y</code> 或 <code>buyXGetY</code></li>
+                <li><strong>Tags:</strong> 產品標籤包含「買送」、「贈品」、「買1送1」等關鍵字</li>
+                <li><strong>促銷API:</strong> Medusa 促銷代碼包含 buy/get、買/送 關鍵字</li>
+                <li><strong>促銷類型:</strong> 促銷 application_method.type 或 promotion.type 為 buy_x_get_y</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

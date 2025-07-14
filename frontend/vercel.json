@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["hkg1"],
+  "env": {
+    "NEXT_PUBLIC_MEDUSA_BACKEND_URL": "https://medusa-backend-demo.medusajs.com",
+    "NEXT_PUBLIC_BASE_URL": "https://timsfactacyworld.vercel.app",
+    "NEXT_PUBLIC_SANITY_PROJECT_ID": "m7o2mv1n",
+    "NEXT_PUBLIC_SANITY_DATASET": "production"
+  }
+}

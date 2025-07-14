@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收件資料確認 + 前往付款流程測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        .step {
+            background: #e9ecef;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 3px solid #6c757d;
+        }
+        .step.completed {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .button-demo {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-disabled {
+            background: #6c757d;
+            color: white;
+            cursor: not-allowed;
+        }
+        .btn-enabled {
+            background: #28a745;
+            color: white;
+        }
+        .flow-diagram {
+            border: 2px solid #dee2e6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .arrow {
+            font-size: 24px;
+            color: #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ 收件資料確認 + 前往付款流程</h1>
+    
+    <div class="test-section success">
+        <h2>🎯 恢復的核心流程</h2>
+        <p><strong>問題</strong>：之前過度簡化了流程，缺少明確的「確認」步驟</p>
+        <p><strong>解決方案</strong>：恢復收件資料確認機制，確保用戶主動確認後才能付款</p>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 完整用戶流程</h2>
+        <div class="flow-diagram">
+            <div class="step completed">
+                <strong>步驟 1：選擇物流方式</strong><br>
+                用戶選擇：宅配、超商取貨、門市自取
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="step completed">
+                <strong>步驟 2：填寫收件資料</strong><br>
+                即時驗證：姓名、電話、地址、郵遞區號
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="step completed">
+                <strong>步驟 3：確認收件資訊</strong><br>
+                用戶主動點擊「確認收件資訊」按鈕
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="step completed">
+                <strong>步驟 4：前往付款</strong><br>
+                「前往付款」按鈕變為可用狀態
+            </div>
+            <div class="arrow">⬇️</div>
+            <div class="step">
+                <strong>步驟 5：綠界付款</strong><br>
+                跳轉到綠界付款頁面
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 按鈕狀態變化</h2>
+        <h3>收件資料未確認時：</h3>
+        <span class="button-demo btn-disabled">前往付款 ❌</span>
+        <p>按鈕顯示為灰色，無法點擊，提示「請先確認收件資訊」</p>
+        
+        <h3>收件資料已確認後：</h3>
+        <span class="button-demo btn-enabled">前往付款 ✅</span>
+        <p>按鈕變為綠色，可以點擊，直接觸發 API 請求</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 測試檢查點</h2>
+        <ol>
+            <li><strong>表單驗證</strong>：各欄位即時驗證，錯誤提示清楚</li>
+            <li><strong>確認機制</strong>：必須點擊「確認收件資訊」才能進入下一步</li>
+            <li><strong>按鈕狀態</strong>：確認前 disabled，確認後 enabled</li>
+            <li><strong>唯一觸發</strong>：只有「前往付款」按鈕能觸發 API</li>
+            <li><strong>資料傳遞</strong>：確認的資料正確傳送到後端</li>
+            <li><strong>錯誤處理</strong>：API 錯誤有適當的用戶提示</li>
+        </ol>
+    </div>
+
+    <div class="test-section warning">
+        <h2>⚠️ 已知技術問題</h2>
+        <ul>
+            <li><strong>ECPay 日期格式</strong>：MerchantTradeDate 格式需要微調</li>
+            <li><strong>影響程度</strong>：不影響整體流程，只是最後的 ECPay SDK 調用</li>
+            <li><strong>用戶體驗</strong>：前端流程完全正常，按鈕邏輯正確</li>
+        </ul>
+    </div>
+
+    <div class="test-section success">
+        <h2>✅ 已驗證功能</h2>
+        <ul>
+            <li>✅ 收件資料表單即時驗證</li>
+            <li>✅ 確認收件資訊按鈕正常工作</li>
+            <li>✅ 前往付款按鈕狀態正確</li>
+            <li>✅ 前端 API route 正常響應</li>
+            <li>✅ 後端 API 正確接收資料</li>
+            <li>✅ 錯誤訊息正確顯示給用戶</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 快速測試連結</h2>
+        <p><a href="http://localhost:8000" target="_blank" style="color: #007bff; font-weight: bold;">🌐 前端頁面 (http://localhost:8000)</a></p>
+        <p>建議測試路徑：首頁 → 商品頁 → 加入購物車 → 結帳頁面</p>
+    </div>
+
+    <script>
+        // 頁面載入完成提示
+        window.onload = function() {
+            console.log('🎉 收件資料確認 + 前往付款流程已恢復！');
+            console.log('主要改進：');
+            console.log('1. 恢復「確認收件資訊」按鈕');
+            console.log('2. 只有確認後「前往付款」才可用');
+            console.log('3. 更清楚的用戶引導和錯誤提示');
+        };
+    </script>
+</body>
+</html>
