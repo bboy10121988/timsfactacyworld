@@ -4,7 +4,29 @@ import type { Category } from './types/sanity'
 import type { MainSection } from './types/page-sections'
 import type { PageData } from './types/pages'
 import type { Footer } from './types/footer'
-import type { FeaturedProduct, BlogPost } from './types/global'
+
+// 直接在這裡定義缺失的類型
+interface FeaturedProduct {
+  id: string
+  title: string
+  handle: string
+  images?: Array<{ url: string; alt?: string }>
+  thumbnail?: { url: string; alt?: string }
+}
+
+interface BlogPost {
+  title: string
+  slug: { current: string }
+  publishedAt: string
+  excerpt?: string
+  body?: any
+  author?: {
+    name: string
+    image?: { url: string; alt?: string }
+  }
+  mainImage?: { url: string; alt?: string }
+  categories?: Array<{ title: string }>
+}
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "m7o2mv1n",
@@ -15,27 +37,28 @@ const client = createClient({
 })
 
 export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
-  const query = `*[_type == "homePage"][0] {
-    title,
-    "mainSections": mainSections[] {
-      ...select(
-        _type == "mainBanner" => {
-          _type,
-          isActive,
-          "slides": slides[] {
-            heading,
-            "backgroundImage": backgroundImage.asset->url,
-            "backgroundImageAlt": backgroundImage.alt,
-            buttonText,
-            buttonLink
+  try {
+    const query = `*[_type == "homePage"][0] {
+      title,
+      "mainSections": mainSections[] {
+        ...select(
+          _type == "mainBanner" => {
+            _type,
+            isActive,
+            "slides": slides[] {
+              heading,
+              "backgroundImage": backgroundImage.asset->url,
+              "backgroundImageAlt": backgroundImage.alt,
+              buttonText,
+              buttonLink
+            },
+            "settings": settings {
+              autoplay,
+              autoplaySpeed,
+              showArrows,
+              showDots
+            }
           },
-          "settings": settings {
-            autoplay,
-            autoplaySpeed,
-            showArrows,
-            showDots
-          }
-        },
     _type == "imageTextBlock" => {
       _type,
       isActive,
@@ -141,6 +164,14 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
   }
   
   return result as { title: string; mainSections: MainSection[] }
+  } catch (error) {
+    console.error('Error fetching homepage data from Sanity:', error)
+    // 返回預設資料，避免頁面崩潰
+    return {
+      title: "Tim's Fantasy World",
+      mainSections: []
+    }
+  }
 }
 
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
@@ -349,7 +380,7 @@ export async function getAllPosts(category?: string, limit: number = 50): Promis
       body // 添加內文欄位
     }`
 
-    const posts = await client.fetch<BlogPost>(query)
+    const posts = await client.fetch<BlogPost[]>(query)
     return posts || []
   } catch (error) {
     console.error('[getAllPosts] 從 Sanity 獲取部落格文章時發生錯誤:', error)
