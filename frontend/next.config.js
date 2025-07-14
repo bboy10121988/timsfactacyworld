@@ -21,7 +21,7 @@ const nextConfig = {
   
   // 優化資源預加載
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false, // 暫時關閉 CSS 優化以避免 critters 錯誤
     optimizePackageImports: ['@medusajs/ui', '@medusajs/icons'],
   },
   

@@ -67,6 +67,7 @@
     "@types/react-instantsearch-dom": "^6.12.3",
     "autoprefixer": "^10.4.2",
     "babel-loader": "^8.2.3",
+    "critters": "^0.0.23",
     "es-abstract": "latest",
     "eslint": "8.10.0",
     "eslint-config-next": "15.3.1",
