@@ -4,29 +4,7 @@ import type { Category } from './types/sanity'
 import type { MainSection } from './types/page-sections'
 import type { PageData } from './types/pages'
 import type { Footer } from './types/footer'
-
-// 直接在這裡定義缺失的類型
-interface FeaturedProduct {
-  id: string
-  title: string
-  handle: string
-  images?: Array<{ url: string; alt?: string }>
-  thumbnail?: { url: string; alt?: string }
-}
-
-interface BlogPost {
-  title: string
-  slug: { current: string }
-  publishedAt: string
-  excerpt?: string
-  body?: any
-  author?: {
-    name: string
-    image?: { url: string; alt?: string }
-  }
-  mainImage?: { url: string; alt?: string }
-  categories?: Array<{ title: string }>
-}
+import type { FeaturedProduct, BlogPost } from './types/global'
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "m7o2mv1n",
@@ -59,114 +37,115 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
               showDots
             }
           },
-    _type == "imageTextBlock" => {
-      _type,
-      isActive,
-      heading,
-      hideTitle,
-      content,
-      "image": image {
-        "url": asset->url,
-        "alt": alt
-      },
-      layout,
-      "leftImage": leftImage {
-        "url": asset->url,
-        "alt": alt
-      },
-      "rightImage": rightImage {
-        "url": asset->url,
-        "alt": alt
-      },
-      leftContent,
-      rightContent
-    },
-        _type == "featuredProducts" => {
-          _type,
-          heading,
-          showHeading,
-          showSubheading,
-          collection_id,
-          isActive
+      _type == "imageTextBlock" => {
+        _type,
+        isActive,
+        heading,
+        hideTitle,
+        content,
+        "image": image {
+          "url": asset->url,
+          "alt": alt
         },
-        _type == "blogSection" => {
-          _type,
-          isActive,
-          title,
-          "category": category->title,
-          limit,
-          postsPerRow
+        layout,
+        "leftImage": leftImage {
+          "url": asset->url,
+          "alt": alt
         },
-        _type == "youtubeSection" => {
-          _type,
-          isActive,
-          heading,
-          description,
-          videoUrl,
-          fullWidth
+        "rightImage": rightImage {
+          "url": asset->url,
+          "alt": alt
         },
-        _type == "serviceCardSection" => {
-          _type,
-          isActive,
-          heading,
-          cardsPerRow,
-          "cards": cards[] {
+        leftContent,
+        rightContent
+      },
+          _type == "featuredProducts" => {
+            _type,
+            heading,
+            showHeading,
+            showSubheading,
+            collection_id,
+            isActive
+          },
+          _type == "blogSection" => {
+            _type,
+            isActive,
             title,
-            englishTitle,
-            "stylists": stylists[] {
-              levelName,
-              price,
-              priceType,
-              stylistName,
-              isDefault,
-              "cardImage": cardImage {
-                "url": asset->url,
-                "alt": alt
-              }
-            },
-            link
-          }
-        },
-        _type == "contentSection" => {
-          _type,
-          isActive,
-          heading,
-          "content": content[]{
-            ...,
-            markDefs[]{
+            "category": category->title,
+            limit,
+            postsPerRow
+          },
+          _type == "youtubeSection" => {
+            _type,
+            isActive,
+            heading,
+            description,
+            videoUrl,
+            fullWidth
+          },
+          _type == "serviceCardSection" => {
+            _type,
+            isActive,
+            heading,
+            cardsPerRow,
+            "cards": cards[] {
+              title,
+              englishTitle,
+              "stylists": stylists[] {
+                levelName,
+                price,
+                priceType,
+                stylistName,
+                isDefault,
+                "cardImage": cardImage {
+                  "url": asset->url,
+                  "alt": alt
+                }
+              },
+              link
+            }
+          },
+          _type == "contentSection" => {
+            _type,
+            isActive,
+            heading,
+            "content": content[]{
               ...,
-              _type == "internalLink" => {
-                "slug": @.reference->slug.current
+              markDefs[]{
+                ...,
+                _type == "internalLink" => {
+                  "slug": @.reference->slug.current
+                }
               }
             }
+          },
+          // Default case - 包含 _type 以便識別未處理的 section 類型
+          {
+            _type,
+            "isUnknownType": true
           }
-        },
-        // Default case - 包含 _type 以便識別未處理的 section 類型
-        {
-          _type,
-          "isUnknownType": true
-        }
-      )
-    }
-  }`
-
-  const result = await client.fetch(query)
-  
-  // 過濾掉未知類型的 sections 並記錄警告
-  if (result?.mainSections) {
-    result.mainSections = result.mainSections.filter((section: any) => {
-      if (section?.isUnknownType) {
-        console.warn('Unknown section type detected and filtered:', section._type)
-        return false
+        )
       }
-      return section?._type // 只保留有 _type 的 sections
-    })
-  }
-  
-  return result as { title: string; mainSections: MainSection[] }
+    }`
+
+    const result = await client.fetch(query)
+    
+    // 過濾掉未知類型的 sections 並記錄警告
+    if (result?.mainSections) {
+      result.mainSections = result.mainSections.filter((section: any) => {
+        if (section?.isUnknownType) {
+          console.warn('Unknown section type detected and filtered:', section._type)
+          return false
+        }
+        return section?._type // 只保留有 _type 的 sections
+      })
+    }
+    
+    return result as { title: string; mainSections: MainSection[] }
   } catch (error) {
     console.error('Error fetching homepage data from Sanity:', error)
-    // 返回預設資料，避免頁面崩潰
+    
+    // 返回錯誤回復數據結構
     return {
       title: "Tim's Fantasy World",
       mainSections: []
@@ -175,14 +154,20 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
 }
 
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
-  const query = `*[_type == "featuredProducts" && isActive == true]{
-    title,
-    handle,
-    collection_id,
-    description,
-    isActive
-  }`
-  return client.fetch(query)
+  try {
+    const query = `*[_type == "featuredProducts" && isActive == true]{
+      title,
+      handle,
+      collection_id,
+      description,
+      isActive
+    }`
+    const result = await client.fetch(query)
+    return result || []
+  } catch (error) {
+    console.error('Error fetching featured products from Sanity:', error)
+    return []
+  }
 }
 
 export async function getHeader() {

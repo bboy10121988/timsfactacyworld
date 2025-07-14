@@ -10,9 +10,36 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    // 記錄錯誤到控制台或錯誤追蹤服務
+    // 記錄錯誤到控制台
     console.error('Global error:', error)
     console.error('Error digest:', error.digest)
+    
+    // 自動發送錯誤報告到診斷 API
+    const reportError = async () => {
+      try {
+        await fetch('/api/error-diagnostics', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            error: {
+              message: error.message,
+              stack: error.stack,
+              name: error.name,
+            },
+            digest: error.digest,
+            url: window.location.href,
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString(),
+          }),
+        })
+      } catch (reportingError) {
+        console.error('Failed to report error:', reportingError)
+      }
+    }
+    
+    reportError()
   }, [error])
 
   return (

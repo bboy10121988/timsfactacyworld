@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { cn } from '@lib/util/cn'
+import { formatContentForReact } from '@/utils/formatTextContent'
 
 interface ImageConfig {
   url?: string
@@ -38,8 +39,8 @@ const ImageTextBlock = ({
     <div className="w-full max-w-[1440px] mx-auto">
       {/* 左圖右文布局 */}
       {layout === 'imageLeft' && image && (
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="grid md:grid-cols-2 items-center">
+          <div className="relative h-full w-full overflow-hidden border border-white">
             <Image
               src={image.url || ''}
               alt={image.alt || '區塊圖片'}
@@ -49,11 +50,11 @@ const ImageTextBlock = ({
             />
           </div>
           <div className={cn(
-            "flex flex-col justify-center px-4 md:px-8",
-            hasTitle ? "space-y-8" : "space-y-4"
+            "flex flex-col justify-center px-4 md:px-8 pb-4",
+            hasTitle ? "space-y-4" : "space-y-2"
           )}>
             {hasTitle && (
-              <h2 className="h1 mb-6">
+              <h2 className="h1 mb-3">
                 {heading}
               </h2>
             )}
@@ -67,13 +68,13 @@ const ImageTextBlock = ({
 
       {/* 右圖左文布局 */}
       {layout === 'imageRight' && image && (
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="grid md:grid-cols-2 items-center">
           <div className={cn(
-            "flex flex-col justify-center px-4 md:px-8 order-2 md:order-1",
-            hasTitle ? "space-y-8" : "space-y-4"
+            "flex flex-col justify-center px-4 md:px-8 pb-4 order-2 md:order-1",
+            hasTitle ? "space-y-4" : "space-y-2"
           )}>
             {hasTitle && (
-              <h2 className="h1 mb-6">
+              <h2 className="h1 mb-3">
                 {heading}
               </h2>
             )}
@@ -82,7 +83,7 @@ const ImageTextBlock = ({
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>
-          <div className="relative aspect-[4/3] w-full overflow-hidden order-1 md:order-2">
+          <div className="relative h-full w-full overflow-hidden border border-white order-1 md:order-2">
             <Image
               src={image.url || ''}
               alt={image.alt || '區塊圖片'}
@@ -96,13 +97,13 @@ const ImageTextBlock = ({
 
       {/* 中間文字布局 */}
       {layout === 'centerText' && (
-        <div className="max-w-4xl mx-auto px-4 md:px-8">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 pb-4">
           <div className={cn(
             "text-center",
             hasTitle ? "space-y-8" : "space-y-4"
           )}>
             {hasTitle && (
-              <h2 className="h1 mb-6">
+              <h2 className="h1 mb-3">
                 {heading}
               </h2>
             )}
@@ -120,7 +121,7 @@ const ImageTextBlock = ({
           "px-4 md:px-8",
           hasTitle ? "space-y-10" : "space-y-6"
         )}>
-          <div className="text-center max-w-4xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto pb-6">
             {hasTitle && (
               <h2 className="h1 mb-8">
                 {heading}
@@ -133,9 +134,9 @@ const ImageTextBlock = ({
               />
             )}
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2">
             {leftImage && (
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-[2/1] w-full overflow-hidden border border-white">
                 <Image
                   src={leftImage.url || ''}
                   alt={leftImage.alt || '左側圖片'}
@@ -146,7 +147,7 @@ const ImageTextBlock = ({
               </div>
             )}
             {rightImage && (
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-[2/1] w-full overflow-hidden border border-white">
                 <Image
                   src={rightImage.url || ''}
                   alt={rightImage.alt || '右側圖片'}
@@ -168,14 +169,14 @@ const ImageTextBlock = ({
         )}>
           <div className="text-center max-w-4xl mx-auto">
             {hasTitle && (
-              <h2 className="h1 mb-6">
+              <h2 className="h1 mb-3">
                 {heading}
               </h2>
             )}
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2">
             {leftContent && (
-              <div className="space-y-4">
+              <div className="space-y-4 pb-4">
                 <div 
                   className="text-content"
                   dangerouslySetInnerHTML={{ __html: leftContent }}
@@ -183,7 +184,7 @@ const ImageTextBlock = ({
               </div>
             )}
             {rightContent && (
-              <div className="space-y-4">
+              <div className="space-y-4 pb-4">
                 <div 
                   className="text-content"
                   dangerouslySetInnerHTML={{ __html: rightContent }}

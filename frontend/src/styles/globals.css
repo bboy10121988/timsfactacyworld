@@ -409,6 +409,55 @@ p, span, div {
   color: var(--fg-subtle, #525252);
 }
 
+/* 為 text-content 內的段落加入下間距 */
+.text-content p,
+.text-content-responsive p {
+  margin-bottom: 1rem;
+}
+
+.text-content p:last-child,
+.text-content-responsive p:last-child {
+  margin-bottom: 0;
+}
+
+/* 處理直接文字內容的換行間距 - 更強制性的方法 */
+.text-content {
+  white-space: pre-line;
+  line-height: 1.8;
+}
+
+.text-content-responsive {
+  white-space: pre-line;
+  line-height: 1.8;
+}
+
+/* 針對換行符創建段落間距的特殊處理 */
+.text-content {
+  white-space: pre-wrap !important;
+}
+
+.text-content br + br {
+  display: block !important;
+  margin-top: 1rem !important;
+}
+
+/* 使用 CSS 來模擬段落效果 */
+.text-content {
+  line-height: 1.6 !important;
+}
+
+/* 為空行創建間距 */
+.text-content::after {
+  content: '';
+  display: block;
+}
+
+/* 更直接的方法 - 使用正則表達式的效果 */
+.text-content {
+  white-space: pre-line !important;
+  word-wrap: break-word !important;
+}
+
 @media (min-width: 768px) {
   .text-content,
   .text-content-responsive {

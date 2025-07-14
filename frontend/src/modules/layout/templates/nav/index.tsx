@@ -148,7 +148,7 @@ export default async function Nav() {
                   categories={categories}
                   headerData={headerData}
                 />
-                <div className="hidden xsmall:flex items-center gap-x-6">
+                <div className="hidden lg:flex items-center gap-x-6">
                   {headerData?.navigation?.filter((item: {name: string; href: string}, index: number) => {
                     // 擴展的左側項目關鍵字：首頁、商品、Blog、關於我們、Store等
                     const leftSideItems = [
@@ -233,8 +233,9 @@ export default async function Nav() {
               </div>
               
               {/* 右側區塊 - 1/3 */}
-              <div className="flex items-center justify-end gap-x-6">
-                <div className="hidden xsmall:flex items-center gap-x-4">
+              <div className="flex items-center justify-end gap-x-4">
+                {/* 桌面版導覽項目和功能按鈕 - >= 1024px 顯示 */}
+                <div className="hidden lg:flex items-center gap-x-4">
                   {/* 剩餘的導航項目 - 右側項目 */}
                   {headerData?.navigation?.filter((item: {name: string; href: string}, index: number) => {
                     // 擴展的左側項目關鍵字（需要與上面保持一致）
@@ -312,32 +313,34 @@ export default async function Nav() {
                   {/* 功能按鈕 */}
                   {regions && <CountrySelect regions={regions} />}
                   <AccountButton />
-                  <Suspense
-                    fallback={
-                      <LocalizedClientLink
-                        className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200 flex items-center gap-2"
-                        href="/cart"
-                        data-testid="nav-cart-link"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                          <line x1="3" y1="6" x2="21" y2="6"></line>
-                          <path d="M16 10a4 4 0 0 1-8 0"></path>
-                        </svg>
-                        <span className="!text-[13px] !font-medium !leading-none">購物車 (0)</span>
-                      </LocalizedClientLink>
-                    }
-                  >
-                    <CartButton />
-                  </Suspense>
                 </div>
+                
+                {/* 購物車按鈕 - 在所有螢幕尺寸都可以使用 */}
+                <Suspense
+                  fallback={
+                    <LocalizedClientLink
+                      className="text-[13px] tracking-wider uppercase font-medium hover:text-black/70 transition-colors duration-200 flex items-center gap-2"
+                      href="/cart"
+                      data-testid="nav-cart-link"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                      </svg>
+                      <span className="!text-[13px] !font-medium !leading-none">購物車 (0)</span>
+                    </LocalizedClientLink>
+                  }
+                >
+                  <CartButton />
+                </Suspense>
               </div>
             </div>
           </nav>
         </header>
 
         {/* 3. 分類導覽列 */}
-        <div className="hidden xsmall:block border-b border-ui-border-base bg-white shadow-sm">
+        <div className="hidden lg:block border-b border-ui-border-base bg-white shadow-sm">
           <div className="px-6 md:px-12 max-w-[1440px] mx-auto flex justify-between items-center py-2 text-sm text-neutral-600">
             <div className="flex items-center gap-x-6">
               {categories?.map((category: {id: string; handle: string; name: string}) => (
