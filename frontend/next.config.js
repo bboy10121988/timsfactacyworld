@@ -21,7 +21,7 @@ const nextConfig = {
   
   // 優化資源預加載
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // 暫時關閉，避免 critters 模組問題
     optimizePackageImports: ['@medusajs/ui', '@medusajs/icons'],
   },
   
