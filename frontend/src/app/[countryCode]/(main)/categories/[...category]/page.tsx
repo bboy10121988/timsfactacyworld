@@ -17,9 +17,9 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    // Skip static generation during build if backend is not available
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://')) {
-      console.log('Skipping static params generation for categories - backend not deployed yet')
+    // Skip static generation during build for Mock API
+    if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.includes('/api/mock-medusa')) {
+      console.log('Skipping static params generation for categories - using Mock API')
       return []
     }
 
