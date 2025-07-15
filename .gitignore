@@ -74,3 +74,4 @@ test_frontend/
 *.tmp
 *.temp
 .vercel
+.env*.local
