@@ -32,10 +32,7 @@ function checkEnvVariables() {
       )
     )
 
-    // 只在開發環境中退出，生產環境繼續構建
-    if (process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
-      process.exit(1)
-    }
+    process.exit(1)
   }
 }
 

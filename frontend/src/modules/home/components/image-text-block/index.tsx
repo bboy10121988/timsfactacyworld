@@ -50,7 +50,7 @@ const ImageTextBlock = ({
             />
           </div>
           <div className={cn(
-            "flex flex-col justify-center px-4 md:px-8 pb-4",
+            "flex flex-col justify-center px-4 md:px-8",
             hasTitle ? "space-y-4" : "space-y-2"
           )}>
             {hasTitle && (
@@ -70,7 +70,7 @@ const ImageTextBlock = ({
       {layout === 'imageRight' && image && (
         <div className="grid md:grid-cols-2 items-center">
           <div className={cn(
-            "flex flex-col justify-center px-4 md:px-8 pb-4 order-2 md:order-1",
+            "flex flex-col justify-center px-4 md:px-8 order-2 md:order-1",
             hasTitle ? "space-y-4" : "space-y-2"
           )}>
             {hasTitle && (
@@ -97,7 +97,7 @@ const ImageTextBlock = ({
 
       {/* 中間文字布局 */}
       {layout === 'centerText' && (
-        <div className="max-w-4xl mx-auto px-4 md:px-8 pb-4">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
           <div className={cn(
             "text-center",
             hasTitle ? "space-y-8" : "space-y-4"
@@ -121,7 +121,7 @@ const ImageTextBlock = ({
           "px-4 md:px-8",
           hasTitle ? "space-y-10" : "space-y-6"
         )}>
-          <div className="text-center max-w-4xl mx-auto pb-6">
+          <div className="text-center max-w-4xl mx-auto">
             {hasTitle && (
               <h2 className="h1 mb-8">
                 {heading}
@@ -176,7 +176,7 @@ const ImageTextBlock = ({
           </div>
           <div className="grid md:grid-cols-2">
             {leftContent && (
-              <div className="space-y-4 pb-4">
+              <div className="space-y-4">
                 <div 
                   className="text-content"
                   dangerouslySetInnerHTML={{ __html: leftContent }}
@@ -184,7 +184,7 @@ const ImageTextBlock = ({
               </div>
             )}
             {rightContent && (
-              <div className="space-y-4 pb-4">
+              <div className="space-y-4">
                 <div 
                   className="text-content"
                   dangerouslySetInnerHTML={{ __html: rightContent }}

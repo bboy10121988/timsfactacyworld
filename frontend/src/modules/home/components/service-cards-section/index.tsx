@@ -149,23 +149,8 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
   }
 
   const getDefaultServiceImage = (serviceTitle: string): string => {
-    // 根據服務類型返回適合的預設圖片
-    const serviceIcons: { [key: string]: string } = {
-      '剪髮': '✂️',
-      '染髮': '🎨',
-      '燙髮': '💫',
-      '護髮': '✨',
-      '造型': '💇‍♀️',
-      '婚禮': '💒',
-      '指甲': '💅',
-      default: '💇‍♀️'
-    }
-    
-    const icon = Object.keys(serviceIcons).find(key => 
-      serviceTitle.includes(key)
-    ) ? serviceIcons[Object.keys(serviceIcons).find(key => serviceTitle.includes(key))!] : serviceIcons.default
-    
-    return `data:image/svg+xml,%3Csvg width="600" height="450" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3ClinearGradient id="grad" x1="0%25" y1="0%25" x2="100%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23f8fafc;stop-opacity:1"/%3E%3Cstop offset="100%25" style="stop-color:%23e2e8f0;stop-opacity:1"/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width="100%25" height="100%25" fill="url(%23grad)"/%3E%3Ctext x="50%25" y="45%25" font-family="Arial,sans-serif" font-size="40" text-anchor="middle"%3E${icon}%3C/text%3E%3Ctext x="50%25" y="60%25" font-family="Arial,sans-serif" font-size="16" fill="%236b7280" text-anchor="middle" font-weight="300"%3E${encodeURIComponent(serviceTitle)}%3C/text%3E%3C/svg%3E`
+    // 根據服務類型返回適合的預設圖片 - 暫時使用透明圖片避免 404 錯誤
+    return 'data:image/svg+xml,%3Csvg width="600" height="450" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100%25" height="100%25" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial" font-size="20" fill="%236b7280" text-anchor="middle" dy=".3em"%3E服務圖片%3C/text%3E%3C/svg%3E'
   }
 
   const getSelectedStylistName = (): string | null => {
@@ -205,7 +190,7 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
       {(() => {
         const cardImage = getCardImage()
         return cardImage.url ? (
-          <div className="h-48 md:h-64 relative overflow-hidden">
+          <div className="h-full relative overflow-hidden">
             <Image
               src={cardImage.url}
               alt={cardImage.alt}
@@ -226,7 +211,7 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
             )}
           </div>
         ) : (
-          <div className="h-48 md:h-64 relative overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center">
+          <div className="h-full relative overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100 flex items-center justify-center">
             <div className="text-stone-400 text-sm font-medium tracking-wide">
               圖片暫不可用
             </div>

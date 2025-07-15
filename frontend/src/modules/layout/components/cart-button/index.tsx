@@ -74,7 +74,7 @@ export default function CartButton() {
             </span>
           )}
         </div>
-        <span className="hidden lg:inline !text-[13px] !font-medium !leading-none">
+        <span className="!text-[13px] !font-medium !leading-none">
           購物車
         </span>
       </button>

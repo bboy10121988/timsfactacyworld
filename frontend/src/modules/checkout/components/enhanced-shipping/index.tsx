@@ -59,21 +59,13 @@ const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
   const getShippingIcon = (type: string) => {
     switch (type) {
       case "home_delivery":
-        return (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h8v1a2 2 0 002 2h5.5a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5H19m-4-4h7.5a.5.5 0 01.5.5v2a.5.5 0 01-.5.5H15v-3z" />
-          </svg>
-        )
+        // return <TruckFast className="w-5 h-5" />
       case "convenience_store":
         return <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">超</div>
       case "pickup":
         return <div className="w-5 h-5 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">取</div>
       default:
-        return (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h8v1a2 2 0 002 2h5.5a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5H19m-4-4h7.5a.5.5 0 01.5.5v2a.5.5 0 01-.5.5H15v-3z" />
-          </svg>
-        )
+        // return <TruckFast className="w-5 h-5" />
     }
   }
 
