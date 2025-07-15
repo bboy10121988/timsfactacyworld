@@ -1,24 +1,21 @@
 import { Router } from "express"
+import { MedusaRequest } from "@medusajs/framework"
 import cors from "cors"
-import { getConfigFile } from "medusa-core-utils"
-import { ConfigModule } from "@medusajs/medusa"
+// 直接從 process.env 取得 config，不用 medusa-core-utils
 
 export default (rootDirectory: string): Router | Router[] => {
   const router = Router()
-  const { configModule } = getConfigFile<ConfigModule>(rootDirectory, "medusa-config")
-  const { projectConfig } = configModule
-
   const corsOptions = {
-    origin: projectConfig.store_cors.split(","),
+    origin: (process.env.STORE_CORS || "http://localhost:8000").split(","),
     credentials: true,
   }
 
   router.post("/store/ecpay/create-payment", cors(corsOptions), async (req, res) => {
     const { cart_id, customer_id, shipping_address, shipping_method } = req.body
 
-    const cartService = req.scope.resolve("cartService") as any
-    const orderService = req.scope.resolve("orderService") as any
-    const ecpayService = req.scope.resolve("ecpayService") as any
+    const cartService = (req as MedusaRequest).scope.resolve("cartService") as any
+    const orderService = (req as MedusaRequest).scope.resolve("orderService") as any
+    const ecpayService = (req as MedusaRequest).scope.resolve("ecpayService") as any
 
     try {
       // 1. 獲取購物車
@@ -50,7 +47,7 @@ export default (rootDirectory: string): Router | Router[] => {
 
   router.post("/store/ecpay/callback", async (req, res) => {
     const { RtnCode, MerchantTradeNo } = req.body
-    const orderService = req.scope.resolve("orderService") as any
+    const orderService = (req as MedusaRequest).scope.resolve("orderService") as any
 
     try {
       if (RtnCode === "1") {

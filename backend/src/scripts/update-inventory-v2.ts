@@ -18,12 +18,14 @@ export default async function updateInventory({ container }: ExecArgs) {
         console.log(`正在更新變體 ${update.id}，設定庫存為 ${update.inventory}...`)
         
         // 更新變體
-        await productModuleService.updateProductVariants({
-          id: update.id,
-          inventory_quantity: update.inventory,
-          manage_inventory: true,
-          allow_backorder: false
-        })
+        await productModuleService.updateProductVariants(
+          update.id,
+          {
+            inventory_quantity: update.inventory,
+            manage_inventory: true,
+            allow_backorder: false
+          }
+        )
         
         console.log(`✅ 變體 ${update.id} 庫存已更新為 ${update.inventory}`)
         

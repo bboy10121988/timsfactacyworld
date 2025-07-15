@@ -1,11 +1,25 @@
 import { IPaymentProvider } from "@medusajs/framework/types"
+import { WebhookActionResult } from "@medusajs/framework/types"
 
 class ECPayPaymentProvider implements IPaymentProvider {
+  getIdentifier(): string {
+    return ECPayPaymentProvider.identifier
+  }
+
+  async retrievePayment(paymentSessionData: any): Promise<any> {
+    // 取得支付資料
+    return paymentSessionData
+  }
+
+  async getWebhookActionAndData(data: { data: Record<string, unknown>; rawData: string | Buffer; headers: Record<string, unknown>; }): Promise<WebhookActionResult> {
+    // 處理 webhook
+    return Promise.resolve({ action: "captured", data: { session_id: "", amount: 0, currency_code: "" } })
+  }
   static identifier = "ecpay"
 
   constructor(private container: any, private options: any) {}
 
-  async initiatePayment(data: any) {
+  async initiatePayment(data: any): Promise<any> {
     // 初始化綠界支付
     return {
       session_data: {
@@ -17,15 +31,15 @@ class ECPayPaymentProvider implements IPaymentProvider {
     }
   }
 
-  async authorizePayment(paymentSessionData: any, context: any) {
+  async authorizePayment(data: any): Promise<any> {
     // 處理綠界授權
     return {
       status: "authorized",
-      data: paymentSessionData
+      data: data
     }
   }
 
-  async capturePayment(paymentData: any) {
+  async capturePayment(paymentData: any): Promise<any> {
     // 捕獲支付
     return {
       status: "captured",
@@ -33,15 +47,15 @@ class ECPayPaymentProvider implements IPaymentProvider {
     }
   }
 
-  async refundPayment(paymentData: any, refundAmount: number) {
+  async refundPayment(data: any): Promise<any> {
     // 處理退款
     return {
       status: "refunded",
-      data: { refund_amount: refundAmount }
+      data: data
     }
   }
 
-  async cancelPayment(paymentData: any) {
+  async cancelPayment(paymentData: any): Promise<any> {
     // 取消支付
     return {
       status: "canceled",
@@ -49,17 +63,17 @@ class ECPayPaymentProvider implements IPaymentProvider {
     }
   }
 
-  async deletePayment(paymentSessionData: any) {
+  async deletePayment(paymentSessionData: any): Promise<any> {
     // 刪除支付會話
     return
   }
 
-  async getPaymentStatus(paymentSessionData: any) {
+  async getPaymentStatus(paymentSessionData: any): Promise<any> {
     // 獲取支付狀態
     return "pending"
   }
 
-  async updatePayment(context: any) {
+  async updatePayment(context: any): Promise<any> {
     // 更新支付
     return {
       session_data: context.paymentSessionData
