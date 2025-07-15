@@ -59,13 +59,13 @@ const EnhancedShipping: React.FC<EnhancedShippingProps> = ({
   const getShippingIcon = (type: string) => {
     switch (type) {
       case "home_delivery":
-        // return <TruckFast className="w-5 h-5" />
+        return null
       case "convenience_store":
         return <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">超</div>
       case "pickup":
         return <div className="w-5 h-5 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">取</div>
       default:
-        // return <TruckFast className="w-5 h-5" />
+        return null
     }
   }
 
