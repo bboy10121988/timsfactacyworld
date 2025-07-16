@@ -190,7 +190,7 @@ function ServiceCard({ card, selectedDesigner }: ServiceCardProps) {
       {(() => {
         const cardImage = getCardImage()
         return cardImage.url ? (
-          <div className="h-full relative overflow-hidden">
+          <div className="relative aspect-[4/3] w-full overflow-hidden">
             <Image
               src={cardImage.url}
               alt={cardImage.alt}
