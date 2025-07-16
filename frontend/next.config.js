@@ -14,10 +14,10 @@ const getBackendUrl = () => {
  */
 const nextConfig = {
   reactStrictMode: true,
-  // output: 'export', // 移除靜態導出，恢復完整功能
+  // output: 'export', // Disabled for Vercel deployment with dynamic routes
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
-  // distDir: 'out', // 移除自定義輸出目錄
+  // distDir: 'out', // Not needed for Vercel deployment
   
   // 優化資源預加載
   experimental: {
@@ -71,50 +71,9 @@ const nextConfig = {
     return config
   },
   
-  // 配置CORS和API代理
-  async headers() {
-    return [
-      {
-        // 為所有API路由設置CORS headers
-        source: "/api/:path*",
-        headers: [
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "*", // 在生產環境中應該設置具體的域名
-          },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, PUT, DELETE, OPTIONS",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "Content-Type, Authorization, X-Requested-With",
-          },
-        ],
-      },
-    ]
-  },
-  
-  // 修復跨域和 fetch 問題
-  async rewrites() {
-    const backendUrl = getBackendUrl()
-    
-    return [
-      // 代理 Medusa API 請求到後端
-      {
-        source: "/api/medusa/:path*",
-        destination: `${backendUrl}/:path*`,
-      },
-      // 代理圖片請求到 Medusa 後端
-      {
-        source: "/static/:path*",
-        destination: `${backendUrl}/static/:path*`,
-      },
-    ]
-  },
   // 配置允許的圖片來源
   images: {
-    // unoptimized: true, // 恢復圖片優化功能
+    // unoptimized: true, // Re-enable image optimization for Vercel
     remotePatterns: [
       // 本地開發
       {
