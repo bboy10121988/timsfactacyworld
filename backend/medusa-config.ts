@@ -64,6 +64,7 @@ const corsConfig = isDevelopment ? developmentCors : productionCors
 const config = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    redisUrl: process.env.REDIS_URL,
     http: {
       storeCors: corsConfig.storeCors.join(','),
       adminCors: corsConfig.adminCors.join(','),
