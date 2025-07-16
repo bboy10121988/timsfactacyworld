@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 
@@ -46,7 +46,50 @@ const SearchBarClient = () => {
   const params = useParams()
   const countryCode = (params?.countryCode as string) || 'tw'
 
-  // 當使用者輸入變化時立即執行搜尋
+  const performSearch = useCallback(async (query: string) => {
+    if (!query || query.trim().length < 1) return
+
+    setResults(prev => ({ ...prev, isLoading: true }))
+
+    try {
+      // 搜尋商品 - 使用簡化格式
+      const productsRes = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&format=simple`)
+      let products: ProductResult[] = []
+      
+      if (productsRes.ok) {
+        const productData = await productsRes.json()
+        products = productData.products || []
+      } else {
+        console.error('商品搜尋失敗:', await productsRes.text())
+      }
+
+      // 搜尋部落格文章
+      const blogsRes = await fetch(`/api/blogs/search?q=${encodeURIComponent(query)}`)
+      let blogs: BlogResult[] = []
+      
+      if (blogsRes.ok) {
+        const blogData = await blogsRes.json()
+        blogs = blogData.posts || []
+      } else {
+        console.error('部落格文章搜尋失敗:', await blogsRes.text())
+      }
+
+      setResults({
+        products,
+        blogs,
+        isLoading: false
+      })
+    } catch (error) {
+      console.error('搜尋錯誤:', error)
+      setResults({
+        products: [],
+        blogs: [],
+        isLoading: false
+      })
+    }
+  }, [])
+
+  // 當使用者輸入變化時立即執行搜尋，使用優化的 debouncing
   useEffect(() => {
     // 如果輸入長度小於1，不執行搜尋
     if (searchQuery.trim().length < 1) {
@@ -66,9 +109,8 @@ const SearchBarClient = () => {
     }, 300)  // 300毫秒延遲
     
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, performSearch])
 
-  // 點擊外部關閉下拉菜單
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // 如果點擊的不是搜尋框且不是下拉菜單，則關閉下拉菜單
@@ -82,31 +124,12 @@ const SearchBarClient = () => {
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
-  // 按ESC關閉下拉菜單
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showDropdown) {
-        setShowDropdown(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleEsc)
-    
-    return () => {
-      document.removeEventListener('keydown', handleEsc)
-    }
-  }, [showDropdown])
-
-  // 監聽鍵盤快捷鍵 (按下 / 鍵聚焦搜尋框)
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showDropdown) {
+        setShowDropdown(false)
+        return
+      }
+      
       if (e.key === '/' && 
           !(e.target instanceof HTMLInputElement) && 
           !(e.target instanceof HTMLTextAreaElement)) {
@@ -117,20 +140,22 @@ const SearchBarClient = () => {
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
     
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [showDropdown])
 
-  // 檢查字符串是否包含中文字符
-  const isChinese = (str: string): boolean => {
+  // 檢查字符串是否包含中文字符，使用 useCallback 避免重新創建
+  const isChinese = useCallback((str: string): boolean => {
     return /[\u4e00-\u9fa5]/.test(str);
-  };
+  }, []);
 
-  // 添加一個將關鍵字高亮的輔助函數 - 統一處理中英文與混合情況
-  const highlightMatches = (text: string, query: string, type: 'title' | 'content' = 'title'): JSX.Element => {
+  // 添加一個將關鍵字高亮的輔助函數 - 統一處理中英文與混合情況，使用 useCallback 優化性能
+  const highlightMatches = useCallback((text: string, query: string, type: 'title' | 'content' = 'title'): JSX.Element => {
     if (!text || !query || query.trim() === '') return <>{text}</>;
     
     // 統一的高亮樣式 - 標題使用粗體，內容使用中等粗細
@@ -198,92 +223,49 @@ const SearchBarClient = () => {
         })}
       </>
     );
-  };
+  }, [isChinese]);
 
-  // 執行搜尋
-  const performSearch = async (query: string) => {
-    if (!query || query.trim().length < 1) return
 
-    setResults(prev => ({ ...prev, isLoading: true }))
-
-    try {
-      // 搜尋商品 - 使用簡化格式
-      const productsRes = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&format=simple`)
-      let products: ProductResult[] = []
-      
-      if (productsRes.ok) {
-        const productData = await productsRes.json()
-        products = productData.products || []
-      } else {
-        console.error('商品搜尋失敗:', await productsRes.text())
-      }
-
-      // 搜尋部落格文章
-      const blogsRes = await fetch(`/api/blogs/search?q=${encodeURIComponent(query)}`)
-      let blogs: BlogResult[] = []
-      
-      if (blogsRes.ok) {
-        const blogData = await blogsRes.json()
-        blogs = blogData.posts || []
-      } else {
-        console.error('部落格文章搜尋失敗:', await blogsRes.text())
-      }
-
-      setResults({
-        products,
-        blogs,
-        isLoading: false
-      })
-    } catch (error) {
-      console.error('搜尋錯誤:', error)
-      setResults({
-        products: [],
-        blogs: [],
-        isLoading: false
-      })
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
-  }
+  }, [])
 
-  const handleInputFocus = () => {
+  const handleInputFocus = useCallback(() => {
     if (searchQuery.trim().length >= 1) {
       setShowDropdown(true)
     }
-  }
+  }, [searchQuery])
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim().length >= 1) {
       router.push(`/${countryCode}/search?q=${encodeURIComponent(searchQuery)}`)
       setShowDropdown(false)
     }
-  }
+  }, [searchQuery, countryCode, router])
 
-  const handleProductClick = (handle: string) => {
+  const handleProductClick = useCallback((handle: string) => {
     router.push(`/${countryCode}/products/${handle}`)
     setShowDropdown(false)
-  }
+  }, [countryCode, router])
 
-  const handleBlogClick = (slug: string) => {
+  const handleBlogClick = useCallback((slug: string) => {
     router.push(`/${countryCode}/blog/${slug}`)
     setShowDropdown(false)
-  }
+  }, [countryCode, router])
 
-  const handleClickSearch = () => {
+  const handleClickSearch = useCallback(() => {
     if (searchQuery.trim().length >= 1) {
       router.push(`/${countryCode}/search?q=${encodeURIComponent(searchQuery)}`)
       setShowDropdown(false)
     } else if (inputRef.current) {
       inputRef.current.focus()
     }
-  }
+  }, [searchQuery, countryCode, router])
 
   const { products, blogs, isLoading } = results
-  const hasResults = products.length > 0 || blogs.length > 0
-  const noResults = !isLoading && searchQuery.trim().length >= 1 && !hasResults
+  const hasResults = useMemo(() => products.length > 0 || blogs.length > 0, [products.length, blogs.length])
+  const noResults = useMemo(() => !isLoading && searchQuery.trim().length >= 1 && !hasResults, [isLoading, searchQuery, hasResults])
 
   return (
     <div className="relative group">
