@@ -16,6 +16,10 @@ import {
   GetPaymentStatusOutput,
   UpdatePaymentInput,
   UpdatePaymentOutput,
+  RetrievePaymentInput,
+  RetrievePaymentOutput,
+  ProviderWebhookPayload,
+  WebhookActionResult,
 } from "@medusajs/framework/types"
 
 type Options = {
@@ -86,14 +90,22 @@ class ECPayPaymentProvider extends AbstractPaymentProvider<Options> {
     }
   }
 
-  async retrievePayment(paymentData: any): Promise<any> {
-    return paymentData
+  async retrievePayment(input: RetrievePaymentInput): Promise<RetrievePaymentOutput> {
+    return input.data || {
+      id: "ecpay_default",
+      amount: 0,
+      currency_code: "TWD",
+      status: "pending"
+    }
   }
 
-  async getWebhookActionAndData(data: any): Promise<any> {
+  async getWebhookActionAndData(payload: ProviderWebhookPayload["payload"]): Promise<WebhookActionResult> {
     return {
-      action: "payment_update",
-      data: data
+      action: "not_supported",
+      data: {
+        session_id: "",
+        amount: 0
+      }
     }
   }
 }
