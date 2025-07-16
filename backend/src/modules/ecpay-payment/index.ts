@@ -1,68 +1,99 @@
-import { IPaymentProvider } from "@medusajs/framework/types"
+import { AbstractPaymentProvider } from "@medusajs/framework/utils"
+import {
+  InitiatePaymentInput,
+  InitiatePaymentOutput,
+  AuthorizePaymentInput,
+  AuthorizePaymentOutput,
+  CapturePaymentInput,
+  CapturePaymentOutput,
+  RefundPaymentInput,
+  RefundPaymentOutput,
+  CancelPaymentInput,
+  CancelPaymentOutput,
+  DeletePaymentInput,
+  DeletePaymentOutput,
+  GetPaymentStatusInput,
+  GetPaymentStatusOutput,
+  UpdatePaymentInput,
+  UpdatePaymentOutput,
+} from "@medusajs/framework/types"
 
-class ECPayPaymentProvider implements IPaymentProvider {
+type Options = {
+  apiKey?: string
+}
+
+class ECPayPaymentProvider extends AbstractPaymentProvider<Options> {
   static identifier = "ecpay"
 
-  constructor(private container: any, private options: any) {}
+  constructor(container: any, options: Options) {
+    super(container, options)
+  }
 
-  async initiatePayment(data: any) {
-    // 初始化綠界支付
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     return {
-      session_data: {
-        id: `ecpay_${Date.now()}`,
+      id: `ecpay_${Date.now()}`,
+      data: {
         status: "pending",
-        amount: data.amount,
-        currency_code: data.currency_code,
+        amount: input.amount,
+        currency_code: input.currency_code,
       }
     }
   }
 
-  async authorizePayment(paymentSessionData: any, context: any) {
-    // 處理綠界授權
+  async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
     return {
       status: "authorized",
-      data: paymentSessionData
+      data: input.data
     }
   }
 
-  async capturePayment(paymentData: any) {
-    // 捕獲支付
+  async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
     return {
-      status: "captured",
-      data: paymentData
+      data: input.data
     }
   }
 
-  async refundPayment(paymentData: any, refundAmount: number) {
-    // 處理退款
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     return {
-      status: "refunded",
-      data: { refund_amount: refundAmount }
+      data: {
+        ...input.data,
+        refund_amount: input.amount
+      }
     }
   }
 
-  async cancelPayment(paymentData: any) {
-    // 取消支付
+  async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
     return {
-      status: "canceled",
-      data: paymentData
+      data: input.data
     }
   }
 
-  async deletePayment(paymentSessionData: any) {
-    // 刪除支付會話
-    return
-  }
-
-  async getPaymentStatus(paymentSessionData: any) {
-    // 獲取支付狀態
-    return "pending"
-  }
-
-  async updatePayment(context: any) {
-    // 更新支付
+  async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {
     return {
-      session_data: context.paymentSessionData
+      data: input.data
+    }
+  }
+
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
+    return {
+      status: "pending"
+    }
+  }
+
+  async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    return {
+      data: input.data
+    }
+  }
+
+  async retrievePayment(paymentData: any): Promise<any> {
+    return paymentData
+  }
+
+  async getWebhookActionAndData(data: any): Promise<any> {
+    return {
+      action: "payment_update",
+      data: data
     }
   }
 }
