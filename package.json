@@ -18,12 +18,11 @@
     "build": "yarn build:backend && yarn build:frontend",
     "build:backend": "cd backend && yarn build",
     "build:frontend": "cd frontend && yarn build",
-    "deploy:setup": "echo '請先在 Vercel 和 GitHub Pages 設定部署環境，詳情請參考 DEPLOYMENT.md'",
-    "deploy:frontend": "cd frontend && yarn build",
-    "deploy:backend": "echo '後端自動部署到 Vercel，請確認環境變數已設定'"
+    "deploy:frontend": "cd frontend && yarn build"
   },
   "dependencies": {
-    "ecpay_aio_nodejs": "^1.2.2"
+    "ecpay_aio_nodejs": "^1.2.2",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

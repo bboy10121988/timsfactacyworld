@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     if (req.url === '/api/health' || req.url === '/health') {
       res.status(200).json({
         status: 'ok',
-        message: 'Medusa API is running on Vercel',
+        message: 'Medusa API is running on localhost',
         timestamp: new Date().toISOString(),
         url: req.url
       })
