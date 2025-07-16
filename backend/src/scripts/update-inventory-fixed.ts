@@ -1,5 +1,4 @@
 import { ExecArgs } from "@medusajs/types"
-import { ProductService } from "@medusajs/medusa"
 
 export default async function updateInventory({ container }: ExecArgs) {
   try {
@@ -19,7 +18,7 @@ export default async function updateInventory({ container }: ExecArgs) {
     
     // 嘗試直接使用 productService
     try {
-      const productService = container.resolve<ProductService>("productService")
+      const productService = container.resolve("productService") as any
       for (const variantId of variantIds) {
         try {
           console.log(`嘗試使用 productService 更新變體 ${variantId}...`)

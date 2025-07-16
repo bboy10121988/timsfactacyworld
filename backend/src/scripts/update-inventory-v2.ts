@@ -21,7 +21,6 @@ export default async function updateInventory({ container }: ExecArgs) {
         await productModuleService.updateProductVariants(
           update.id,
           {
-            inventory_quantity: update.inventory,
             manage_inventory: true,
             allow_backorder: false
           }

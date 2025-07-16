@@ -3,7 +3,7 @@ import { ExecArgs } from "@medusajs/types"
 export default async function updateInventory({ container }: ExecArgs) {
   try {
     // 獲取產品服務
-    const productService = container.resolve<ProductVariantService>("productVariantService")
+    const productService = container.resolve("productVariantService") as any
     // 嘗試使用另一個服務名稱
     console.log("嘗試使用替代服務名稱...")
     const productVariantService = container.resolve("variantService")
