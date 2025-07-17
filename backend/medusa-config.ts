@@ -73,6 +73,10 @@ const config = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     }
   },
+  admin: {
+    disable: false,
+    path: "/app"
+  },
   modules: {
     // 在 Medusa v2 中，促銷模組是內建的，會自動啟用
     // 庫存模組也是內建的，無需額外配置
