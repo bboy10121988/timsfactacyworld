@@ -20,8 +20,10 @@ export const PRODUCT_LIMIT = 12
 export async function generateStaticParams() {
   try {
     // Skip static generation during build if backend is not available
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://')) {
-      console.log('Skipping static params generation for collections - backend not deployed yet')
+    if (process.env.RAILWAY_ENVIRONMENT || 
+        process.env.VERCEL_ENV === 'production' ||
+        (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://'))) {
+      console.log('Skipping static params generation for collections - backend not available during build')
       return []
     }
 
