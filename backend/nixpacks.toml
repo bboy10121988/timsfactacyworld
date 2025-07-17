@@ -1,5 +1,8 @@
+[phases.install]
+cmd = "yarn install"
+
 [phases.build]
-cmd = "yarn install && yarn build"
+cmd = "yarn build"
 
 [start]
-cmd = "yarn db:migrate && yarn start"
+cmd = "yarn start"
