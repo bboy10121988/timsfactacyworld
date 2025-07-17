@@ -23,12 +23,25 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  // 為了解決在Vercel上無法連接到Medusa API的問題
-  // 返回一個簡單的靜態路徑集合
-  return [
-    { countryCode: "us", slug: "about" },
-    { countryCode: "tw", slug: "about" }
-  ]
+  try {
+    // Skip static generation during build if backend is not available
+    if (process.env.RAILWAY_ENVIRONMENT || 
+        process.env.VERCEL_ENV === 'production' ||
+        (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://'))) {
+      console.log('Skipping static params generation for pages - backend not available during build')
+      return []
+    }
+
+    // 為了解決在Vercel上無法連接到Medusa API的問題
+    // 返回一個簡單的靜態路徑集合
+    return [
+      { countryCode: "us", slug: "about" },
+      { countryCode: "tw", slug: "about" }
+    ]
+  } catch (error) {
+    console.error('Error generating static params for pages:', error)
+    return []
+  }
   
   /*
   // 獲取所有啟用的頁面

@@ -11,8 +11,16 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  // 返回一個簡單的靜態路徑陣列，讓頁面在訪問時按需生成
   try {
+    // Skip static generation during build if backend is not available
+    if (process.env.RAILWAY_ENVIRONMENT || 
+        process.env.VERCEL_ENV === 'production' ||
+        (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith('https://'))) {
+      console.log('Skipping static params generation for products - backend not available during build')
+      return []
+    }
+
+    // 返回一個簡單的靜態路徑陣列，讓頁面在訪問時按需生成
     return [
       { countryCode: "tw", handle: "product-1" },
       { countryCode: "tw", handle: "product-2" }
