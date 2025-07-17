@@ -1,8 +1,2 @@
-[phases.install]
-cmd = "yarn install"
-
-[phases.build]
-cmd = "yarn build"
-
 [start]
-cmd = "yarn start"
+cmd = "yarn install && yarn build && yarn start"
