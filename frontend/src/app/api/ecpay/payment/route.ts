@@ -45,10 +45,10 @@ export async function POST(req: Request) {
           "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
         },
         body: JSON.stringify({ 
-          cart_id: cart.id,
-          customer_id: customer?.id,
-          shipping_address: shippingAddress,
-          shipping_method: shippingMethod
+          cart,
+          customer,
+          shippingAddress,
+          shippingMethod
         }),
       }
     )

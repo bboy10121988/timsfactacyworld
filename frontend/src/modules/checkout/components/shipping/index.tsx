@@ -13,6 +13,7 @@ import MedusaRadio from "@modules/common/components/radio"
 import StoreSelector from "@modules/checkout/components/store-selector"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { retrieveCart } from "@lib/data/cart"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
@@ -135,9 +136,15 @@ const Shipping: React.FC<ShippingProps> = ({
     })
 
     await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      .then(async () => {
+        // 新增：setShippingMethod 成功後 re-fetch 最新 cart
+        if (cart.id) {
+          const latestCart = await retrieveCart(cart.id as string)
+          window.dispatchEvent(new CustomEvent('cartUpdate', { detail: latestCart }))
+        }
+      })
       .catch((err) => {
         setShippingMethodId(currentId)
-
         setError(err.message)
       })
       .finally(() => {

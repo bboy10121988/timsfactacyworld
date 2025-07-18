@@ -12,59 +12,32 @@ export async function POST(
   console.log('🔑 API Key:', typeof req.headers['x-publishable-api-key'] === 'string' ? req.headers['x-publishable-api-key'].substring(0, 10) + '...' : req.headers['x-publishable-api-key'])
   
   const body = req.body as any
-  const { cart_id, customer_id, shipping_address, shipping_method } = body
+  const { cart, customer, shippingAddress, shippingMethod, choosePayment, returnUrl, clientBackUrl } = body
   
-  console.log('📦 收到的參數:')
-  console.log('- cart_id:', cart_id)
-  console.log('- customer_id:', customer_id)
-  console.log('- shipping_address:', !!shipping_address ? '✅ 有地址' : '❌ 無地址')
-  console.log('- shipping_method:', shipping_method)
+  if (!cart || !cart.items || !cart.total) {
+    return res.status(400).json({ error: '缺少購物車資料' })
+  }
 
   try {
-    // 暫時使用模擬數據進行測試
-    const mockCart = {
-      id: cart_id,
-      total: 100, // 測試最小金額
-      items: [
-        {
-          title: "測試商品A",
-          quantity: 1,
-          unit_price: 100
-        }
-      ]
+    // 用前端傳來的 cart 組合 orderData
+    const orderData = {
+      id: cart.id,
+      total: cart.total,
+      items: cart.items.map((item: any) => ({
+        title: item.title || item.variant?.title || item.variant?.product?.title || "商品",
+        quantity: item.quantity,
+        unit_price: item.unit_price || 0
+      })),
+      choosePayment: choosePayment || "ALL",
+      returnUrl: returnUrl,
+      clientBackUrl: clientBackUrl
     }
-
-    console.log('💰 使用固定金額 100 元進行測試')
-    console.log('📦 模擬購物車:', JSON.stringify(mockCart, null, 2))
 
     // 直接實例化 ECPay 服務
     const ecpayService = new EcpayService({})
 
-    // 2. 建立訂單資料結構
-    const orderData = {
-      id: mockCart.id,
-      total: 100, // 固定使用 100 元
-      items: mockCart.items.map((item: any) => ({
-        title: item.title || "商品",
-        quantity: item.quantity,
-        unit_price: item.unit_price || 0
-      }))
-    }
-
-    console.log('📋 ECPay 訂單資料:', JSON.stringify(orderData, null, 2))
-    console.log('🏠 收件地址:', JSON.stringify(shipping_address, null, 2))
-
-    // 3. 產生 ECPay 付款表單
-    console.log('🔄 開始調用 ECPay 服務...')
-    const html = await ecpayService.createPayment(orderData, shipping_address)
-    
-    console.log('✅ ECPay 服務調用成功')
-    console.log('返回 HTML 長度:', html?.length || 0)
-    
-    if (!html || html.length < 100) {
-      console.log('⚠️  ECPay 返回的 HTML 太短，可能有問題')
-      console.log('HTML 內容:', html)
-    }
+    // 產生 ECPay 付款表單，傳入動態參數
+    const html = await ecpayService.createPayment(orderData, shippingAddress)
     
     res.json({ html })
   } catch (error: any) {
