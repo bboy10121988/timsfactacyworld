@@ -78,7 +78,7 @@ const DeliveryAddressForm = ({
         } catch (e) {
           console.error('無法解析儲存的收件資訊:', e)
         }
-      } else if (Object.keys(initialData).length > 0) {
+      } else if (initialData && Object.keys(initialData).length > 0) {
         setFormData(prev => ({
           ...prev,
           ...initialData

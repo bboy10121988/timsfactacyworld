@@ -47,7 +47,7 @@ class EcpayService {
         HashKey: this.hashKey_,
         HashIV: this.hashIV_,
       },
-      IgnorePayment: ["GooglePay", "SamsungPay", "LinePay", "JKOPay", "TaiwanPay"], // 只保留基本付款方式
+      IgnorePayment: [], // 必須設為空陣列，避免 undefined.join 錯誤
       IsProjectContractor: false,
     }
 
@@ -68,13 +68,13 @@ class EcpayService {
     const trade: MerchantTradeData = {
       MerchantTradeNo: `TEST${Date.now().toString().slice(-10)}`, // 改為 TEST 開頭，和成功測試一樣
       MerchantTradeDate: tradeDate,
-      TotalAmount: 1000, // 固定使用 1000 元，和成功測試一樣
+      TotalAmount: order.total || 1000, // 若無金額則預設 1000
       TradeDesc: "測試訂單",
-      ItemName: "測試商品",
-      ReturnURL: "https://www.ecpay.com.tw/return_url.php", // 使用和成功測試一樣的網址
-      ClientBackURL: "https://www.ecpay.com.tw",
+      ItemName: items || "測試商品",
+      ReturnURL: process.env.ECPAY_RETURN_URL || "https://www.ecpay.com.tw/return_url.php",
+      ClientBackURL: process.env.ECPAY_CLIENT_BACK_URL || "https://www.ecpay.com.tw",
       PaymentType: "aio",
-      ChoosePayment: "ALL", // 使用和成功測試一樣的設定
+      ChoosePayment: "ALL",
       EncryptType: 1,
     }
 
@@ -86,29 +86,20 @@ class EcpayService {
 
     try {
       console.log('🔄 開始呼叫 ECPay SDK...')
-      
-      // 檢查 ECPay 實例是否正確建立
       console.log('ECPay 實例建立完成:', !!ecpay.payment_client)
-      
       const html = ecpay.payment_client.aio_check_out_all(trade)
       console.log('✅ ECPay SDK 呼叫成功，HTML 長度:', html.length)
-      
-      // 檢查返回的 HTML 是否包含錯誤
       if (html.includes('錯誤') || html.includes('失敗') || html.includes('10200141')) {
         console.log('⚠️  HTML 可能包含錯誤訊息:')
         console.log(html)
-        return html // 仍然返回，讓前端顯示錯誤
+        return html
       }
-      
-      // 檢查 HTML 是否包含正確的表單
       if (!html.includes('<form') || !html.includes('MerchantID')) {
         console.log('⚠️  HTML 格式異常:')
         console.log(html)
       }
-      
       console.log('HTML 前 300 字元:', html.substring(0, 300) + '...')
       return html
-      
     } catch (ecpayError: any) {
       console.error('❌ ECPay SDK 錯誤:', ecpayError)
       console.error('錯誤類型:', typeof ecpayError)

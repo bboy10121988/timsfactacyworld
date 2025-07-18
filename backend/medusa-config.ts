@@ -73,9 +73,8 @@ const config = defineConfig({
     }
   },
   modules: {
-    // 在 Medusa v2 中，促銷模組是內建的，會自動啟用
-    // 庫存模組也是內建的，無需額外配置
-    // 所有核心商務模組都會自動載入和配置
+    // 促銷、庫存等模組 Medusa v2 內建
+    // ECPay provider 由 Medusa v2 自動掃描 src/modules/ecpay-payment
   },
   plugins: [
     {
@@ -86,14 +85,14 @@ const config = defineConfig({
     }
     // 完全移除 ECPay 插件，避免啟動問題
   ],
-  services: {
-    ecpay: {
-      resolve: "src/services/ecpay",
-      container: {
-        resolve: "ecpayService",
-      },
-    },
-  },
+  // services: {
+  //   ecpay: {
+  //     resolve: "src/services/ecpay",
+  //     container: {
+  //       resolve: "ecpayService",
+  //     },
+  //   },
+  // },
 })
 
 export default config

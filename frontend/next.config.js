@@ -14,10 +14,10 @@ const getBackendUrl = () => {
  */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  // output: 'export', // 移除靜態導出，恢復完整功能
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
-  distDir: 'out',
+  // distDir: 'out', // 移除自定義輸出目錄
   logging: {
     fetches: {
       fullUrl: true,
@@ -101,6 +101,7 @@ const nextConfig = {
   },
   // 配置允許的圖片來源
   images: {
+    // unoptimized: true, // 恢復圖片優化功能
     remotePatterns: [
       // 本地開發
       {

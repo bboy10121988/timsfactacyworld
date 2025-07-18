@@ -145,37 +145,16 @@ export default function CheckoutForm({
         throw new Error('未收到付款表單 HTML')
       }
 
-      // 創建一個臨時的 div 來解析 HTML
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = data.html
-      const form = tempDiv.querySelector('form') as HTMLFormElement
-
-      if (!form) {
-        throw new Error('付款表單格式錯誤')
+      // 新開視窗寫入 ECPay 表單，避免 CSP 問題
+      const win = window.open('', '_blank')
+      if (win) {
+        win.document.write(data.html)
+        win.document.close()
+      } else {
+        throw new Error('無法開啟新視窗，請檢查瀏覽器彈窗設定')
       }
-
-      // 確保表單存在必要的欄位
-      if (!form.querySelector('input[name="MerchantID"]')) {
-        throw new Error('付款表單缺少必要欄位')
-      }
-
-      // 隱藏表單並添加到頁面
-      form.style.display = 'none'
-      form.target = '_self' // 確保在當前視窗開啟
-      document.body.appendChild(form)
-      
-      console.log('準備提交表單到綠界...', form.action)
-      console.log('表單內容:', Array.from(form.elements).map(el => ({ name: el.getAttribute('name'), value: (el as HTMLInputElement).value })))
-      
-      // 提交表單
-      form.submit()
-      
-      // 清理：在短暫延遲後移除表單
-      setTimeout(() => {
-        if (form.parentNode) {
-          form.parentNode.removeChild(form)
-        }
-      }, 1000)
+      // 表單會自動 submit（後端已加 script），或你可在 html 裡加 <script> 自動 submit
+      return
       
     } catch (error) {
       console.error('付款處理錯誤:', error)
