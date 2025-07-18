@@ -73,3 +73,4 @@ test_frontend/
 # Temporary files
 *.tmp
 *.temp
+.terraform/
