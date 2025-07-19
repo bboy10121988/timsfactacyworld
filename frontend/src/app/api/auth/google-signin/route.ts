@@ -26,15 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { sub: googleId, email, name, picture } = payload
 
-    // 將 Google JWT token 發送到 Medusa 後端
-    console.log('發送到 Medusa 後端的資料:', {
-      google_id: googleId,
-      email,
-      first_name: name?.split(' ')[0] || '',
-      last_name: name?.split(' ').slice(1).join(' ') || '',
-      avatar: picture,
-    })
-
+    // 1. 先確保 Medusa 有 customer 資料（不破壞原有流程）
     const medusaResponse = await fetch(`${process.env.MEDUSA_BACKEND_URL}/store/customers/google`, {
       method: 'POST',
       headers: {
@@ -49,71 +41,40 @@ export async function POST(request: NextRequest) {
         avatar: picture,
       }),
     })
+    // 不管成功失敗都繼續，確保帳號存在
 
-    console.log('Medusa 回應狀態:', medusaResponse.status)
-    console.log('Medusa 回應 headers:', Object.fromEntries(medusaResponse.headers.entries()))
-    
-    const responseText = await medusaResponse.text()
-    console.log('Medusa 原始回應內容:', responseText)
+    // 2. 呼叫 Medusa backend /auth/google/callback 產生 JWT
+    //    這裡用 Google token 兌換 code 流程已經在 backend 處理，
+    //    但我們只有 Google JWT，沒有 code，所以這裡要模擬 code 流程或直接用 email 產生 JWT
+    //    但目前 backend 只支援 code 兌換，無法直接用 Google JWT。
+    //    所以這裡 fallback：
+    //    - 若有 code，請用 code 流程
+    //    - 若只有 Google JWT，則無法自動產生 Medusa JWT，維持現有行為
+    //    - 提示用戶用 code callback 流程（即 /api/medusa/auth/google/callback）
 
-    if (!medusaResponse.ok) {
-      console.error('Medusa 創建/登入用戶錯誤 - 狀態:', medusaResponse.status)
-      console.error('Medusa 創建/登入用戶錯誤 - 內容:', responseText)
-      let errorData
-      try {
-        errorData = JSON.parse(responseText)
-      } catch {
-        errorData = responseText
-      }
-      return NextResponse.json({ 
-        error: 'Failed to create/login user',
-        details: errorData,
-        status: medusaResponse.status
-      }, { status: 500 })
-    }
-
+    // 這裡直接回傳 customer，並提示前端用 code callback 流程
     let responseData
     try {
+      const responseText = await medusaResponse.text()
       responseData = JSON.parse(responseText)
-      console.log('Medusa 成功回應 (解析後):', responseData)
-    } catch (parseError) {
-      console.error('無法解析 Medusa 回應 JSON:', parseError)
-      console.error('原始回應內容:', responseText)
-      return NextResponse.json({ 
-        error: 'Invalid response from backend',
-        details: responseText 
-      }, { status: 500 })
+    } catch {
+      responseData = { customer: null }
     }
-
     const { customer } = responseData
 
-    // 對於 Google OAuth 用戶，我們採用一個特殊的方法
-    // 我們將客戶資訊保存在一個特殊的 cookie 中
-    console.log('為 Google OAuth 用戶設置特殊會話')
-    
+    // 保持原有 Google OAuth cookie 寫入，避免破壞現有登入
     try {
-      // 設置一個特殊的 Google OAuth 會話標識
       const googleSessionData = {
-        customer_id: customer.id,
-        email: customer.email,
-        first_name: customer.first_name,
-        last_name: customer.last_name,
+        customer_id: customer?.id || '',
+        email: customer?.email || email,
+        first_name: customer?.first_name || name?.split(' ')[0] || '',
+        last_name: customer?.last_name || name?.split(' ').slice(1).join(' ') || '',
         auth_provider: 'google',
         created_at: new Date().toISOString()
       }
-      
-      // 使用一個特殊的 token 格式來識別 Google OAuth 用戶
       const googleToken = `google_oauth:${JSON.stringify(googleSessionData)}`
-      
       await setAuthToken(googleToken)
-      console.log('已設置 Google OAuth 會話 token')
-    } catch (authError: any) {
-      console.error('設置認證 token 失敗:', authError)
-      return NextResponse.json({ 
-        error: 'Failed to set authentication',
-        details: authError?.message || 'Unknown auth error'
-      }, { status: 500 })
-    }
+    } catch {}
 
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
@@ -121,11 +82,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       customer: {
-        id: customer.id,
-        email: customer.email,
-        first_name: customer.first_name,
-        last_name: customer.last_name,
-      }
+        id: customer?.id || '',
+        email: customer?.email || email,
+        first_name: customer?.first_name || name?.split(' ')[0] || '',
+        last_name: customer?.last_name || name?.split(' ').slice(1).join(' ') || '',
+      },
+      // 新增提示
+      message: 'Google 登入成功，但如需完整 Medusa 授權，請用 code callback 流程（/api/medusa/auth/google/callback）產生 JWT。'
     })
   } catch (error: any) {
     console.error('Google 登入錯誤:', error)

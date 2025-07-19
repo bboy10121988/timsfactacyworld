@@ -8,6 +8,9 @@ import StoreSelector from "@modules/checkout/components/store-selector"
 import DeliveryAddressForm from "@modules/checkout/components/delivery-address-form"
 import { toast } from "react-hot-toast"
 import LoadingSpinner from "@/components/ui/loading-spinner"
+import { setShippingMethod, retrieveCart } from "@lib/data/cart"
+import { listCartOptions } from "@lib/data/cart"
+import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 
 type ConvenienceStore = {
   id: string
@@ -18,12 +21,14 @@ type ConvenienceStore = {
 }
 
 export default function CheckoutForm({
-  cart,
+  cart: initialCart,
   customer,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) {
+  const [cart, setCart] = useState<HttpTypes.StoreCart | null>(initialCart)
+  const [shippingOptions, setShippingOptions] = useState<any[]>([])
   const [selectedShippingType, setSelectedShippingType] = useState<'home_delivery' | 'convenience_store' | 'pickup' | null>(null)
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("")
   const [currentStep, setCurrentStep] = useState(1)
@@ -31,6 +36,17 @@ export default function CheckoutForm({
   const [addressData, setAddressData] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // fetch shipping options on mount or when cart.id changes
+  useEffect(() => {
+    async function fetchOptions() {
+      if (cart && cart.id) {
+        const result = await listCartOptions()
+        setShippingOptions(result?.shipping_options || [])
+      }
+    }
+    fetchOptions()
+  }, [cart?.id])
 
   // 追蹤狀態變化
   useEffect(() => {
@@ -42,29 +58,46 @@ export default function CheckoutForm({
     return null
   }
 
-  const handleShippingMethodSelect = (methodId: string) => {
+  // handleShippingMethodSelect now stores Medusa option.id
+  const handleShippingMethodSelect = (methodId: string, type?: string) => {
     setSelectedShippingMethod(methodId)
     setError(null)
-    
-    if (methodId === "convenience_store") {
-      setSelectedShippingType("convenience_store")
-    } else if (methodId === "pickup") {
-      setSelectedShippingType("pickup")
-    } else if (methodId === "home_delivery") {
-      setSelectedShippingType("home_delivery")
+    let finalType: 'home_delivery' | 'convenience_store' | 'pickup' = 'home_delivery'
+    if (type === 'home_delivery' || type === 'convenience_store' || type === 'pickup') {
+      finalType = type
     } else {
-      setSelectedShippingType(null)
+      const option = shippingOptions.find(opt => opt.id === methodId)
+      if (option?.id?.includes('store')) finalType = 'convenience_store'
+      else if (option?.id?.includes('pickup')) finalType = 'pickup'
+      else if (option?.id?.includes('home')) finalType = 'home_delivery'
+      else if (option?.name?.includes('超商')) finalType = 'convenience_store'
+      else if (option?.name?.includes('自取')) finalType = 'pickup'
+      else if (option?.name?.includes('宅配')) finalType = 'home_delivery'
+      else {
+        console.warn('無法判斷 shipping type，預設 home_delivery', option)
+      }
     }
+    setSelectedShippingType(finalType)
+    console.log('handleShippingMethodSelect: selectedShippingType =', finalType)
   }
 
-  // 確認配送選擇並進入下一步
-  const handleConfirmShipping = () => {
+  // handleConfirmShipping 用正確的 option.id
+  const handleConfirmShipping = async () => {
     if (!selectedShippingMethod) {
       setError("請選擇配送方式")
       return
     }
-
     setError(null)
+    if (cart && cart.id) {
+      try {
+        await setShippingMethod({ cartId: cart.id, shippingMethodId: selectedShippingMethod })
+        const updatedCart = await retrieveCart(cart.id)
+        setCart(updatedCart)
+      } catch (err) {
+        setError("設定運送方式失敗，請重試")
+        return
+      }
+    }
     setCurrentStep(2)
   }
 
@@ -87,6 +120,21 @@ export default function CheckoutForm({
     console.log('收到地址資料:', formData)
     setAddressData(formData)
     console.log('設定後的 addressData:', formData)
+    // 新增：patch shipping_address 和 email 到 Medusa cart
+    if (cart && cart.id) {
+      try {
+        await fetch(`/store/carts/${cart.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: customer?.email,
+            shipping_address: formData
+          })
+        })
+      } catch (err) {
+        toast.error('同步收件資訊到 Medusa 失敗，但不影響付款流程')
+      }
+    }
     toast.success('收件資訊已確認，現在可以進行付款')
   }
 
@@ -142,15 +190,19 @@ export default function CheckoutForm({
       console.log('收到付款表單資料:', data)
       
       if (!data.html) {
+        console.error('未收到付款表單 HTML，後端回傳:', data)
         throw new Error('未收到付款表單 HTML')
       }
 
       // 新開視窗寫入 ECPay 表單，避免 CSP 問題
       const win = window.open('', '_blank')
       if (win) {
+        console.log('準備寫入 ECPay 表單到新視窗...')
         win.document.write(data.html)
         win.document.close()
+        console.log('已寫入表單並關閉 document')
       } else {
+        console.error('無法開啟新視窗，請檢查瀏覽器彈窗設定')
         throw new Error('無法開啟新視窗，請檢查瀏覽器彈窗設定')
       }
       // 表單會自動 submit（後端已加 script），或你可在 html 裡加 <script> 自動 submit
@@ -212,6 +264,7 @@ export default function CheckoutForm({
         <div className="p-8">
           <EnhancedShipping 
             cart={cart} 
+            shippingOptions={shippingOptions}
             selectedShippingMethod={selectedShippingMethod}
             onShippingMethodChange={handleShippingMethodSelect}
           />
@@ -318,6 +371,7 @@ export default function CheckoutForm({
           </div>
         </div>
       )}
+      {/* 不再渲染 CheckoutSummary，右欄會自動顯示最新 cart */}
     </div>
   )
 }

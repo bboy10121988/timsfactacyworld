@@ -81,33 +81,11 @@ export async function handleGoogleCallback(code: string) {
       throw new Error('後端未返回認證令牌')
     }
     
-    // 保存 token 到 cookies
-    const setTokenResponse = await fetch('/api/auth/set-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
-    })
-    
-    if (!setTokenResponse.ok) {
-      console.warn('設置令牌失敗:', setTokenResponse.status)
-    }
-    
-    // 轉移購物車（如果有的話）
-    try {
-      await fetch('/api/cart/transfer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    } catch (error) {
-      console.warn('購物車轉移失敗:', error)
-      // 購物車轉移失敗不應該阻止登入成功
-    }
-    
-    return { success: true, customer }
+    // 以前是 fetch('/api/auth/set-token', ...)
+    // 改成 redirect 讓 server action 設 cookie
+    window.location.href = `/api/auth/set-token-redirect?token=${encodeURIComponent(token)}&redirect=/tw/account`
+    // 下面的程式碼不再執行，因為會 redirect
+    // return { success: true, customer }
   } catch (error: any) {
     console.error("Google 回調處理錯誤:", error)
     return { success: false, error: error.message }
