@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Script from "next/script"
+import GoogleApiManager from "@lib/google-api-manager"
 
 declare global {
   interface Window {
@@ -24,8 +25,11 @@ interface GoogleLoginButtonProps {
 
 const GoogleLoginButton = ({ onSuccess, onError }: GoogleLoginButtonProps) => {
   const buttonRef = useRef<HTMLDivElement>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
+  const [isRendered, setIsRendered] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isTimeout, setIsTimeout] = useState(false)
+  const googleManager = GoogleApiManager.getInstance()
 
   const handleCredentialResponse = async (response: any) => {
     try {
@@ -79,52 +83,96 @@ const GoogleLoginButton = ({ onSuccess, onError }: GoogleLoginButtonProps) => {
     }
   }
 
-  const initializeGoogleSignIn = () => {
-    if (window.google && buttonRef.current) {
-      console.log('初始化 Google Sign-In')
-      console.log('Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
-      console.log('Current origin:', window.location.origin)
+  const initializeAndRenderButton = async () => {
+    if (!buttonRef.current) return
+    
+    try {
+      setError(null)
       
-      try {
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '21147467753-jfjp5g559a1s61s416bu4ko41mq6no5g.apps.googleusercontent.com',
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: false,
-          use_fedcm_for_prompt: false,
-        })
-
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-          shape: 'rectangular',
-          logo_alignment: 'left',
-          width: '100%',
-        })
-
-        setIsLoaded(true)
-        console.log('Google Sign-In 初始化完成')
-      } catch (error) {
-        console.error('Google Sign-In 初始化失敗:', error)
-        setError(`Google Sign-In 初始化失敗: ${error}`)
+      // 檢查是否已經初始化
+      if (googleManager.isGoogleInitialized()) {
+        console.log('Google API 已初始化，直接渲染按鈕')
+        googleManager.renderButton(buttonRef.current, handleCredentialResponse, setError)
+        setIsRendered(true)
+        return
       }
+
+      // 檢查是否正在初始化
+      if (googleManager.isGoogleLoading()) {
+        console.log('Google API 正在初始化中，等待完成...')
+        // 等待初始化完成
+        const checkInitialized = () => {
+          if (googleManager.isGoogleInitialized()) {
+            googleManager.renderButton(buttonRef.current!, handleCredentialResponse, setError)
+            setIsRendered(true)
+          } else if (!googleManager.isGoogleLoading()) {
+            setError('Google API 初始化失敗')
+          } else {
+            setTimeout(checkInitialized, 100)
+          }
+        }
+        setTimeout(checkInitialized, 100)
+        return
+      }
+
+      // 需要初始化
+      console.log('開始初始化 Google API...')
+      await googleManager.initializeGoogle()
+      
+      if (buttonRef.current) {
+        googleManager.renderButton(buttonRef.current, handleCredentialResponse, setError)
+        setIsRendered(true)
+      }
+    } catch (error: any) {
+      console.error('Google 按鈕初始化失敗:', error)
+      setError(`初始化失敗: ${error.message}`)
     }
   }
 
+  // 當 Script 載入完成後初始化
   useEffect(() => {
-    if (isLoaded && window.google) {
-      initializeGoogleSignIn()
+    if (isScriptLoaded && !isRendered) {
+      initializeAndRenderButton()
     }
-  }, [isLoaded])
+  }, [isScriptLoaded, isRendered])
+
+  // 超時處理
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isRendered && isScriptLoaded) {
+        setIsTimeout(true)
+        setError('Google 登入載入超時，請重新整理頁面再試')
+      }
+    }, 8000)
+
+    if (isRendered) {
+      clearTimeout(timer)
+    }
+
+    return () => clearTimeout(timer)
+  }, [isRendered, isScriptLoaded])
+
+  // 組件卸載時清理
+  useEffect(() => {
+    return () => {
+      // 移除當前組件的回調
+      googleManager.removeCallback(handleCredentialResponse)
+    }
+  }, [])
 
   return (
     <div className="w-full">
       <Script
         src="https://accounts.google.com/gsi/client"
-        onLoad={() => setIsLoaded(true)}
-        strategy="lazyOnload"
+        onLoad={() => {
+          console.log('Google Script 載入完成')
+          setIsScriptLoaded(true)
+        }}
+        onError={(e) => {
+          console.error('Google Script 載入失敗:', e)
+          setError('Google 登入腳本載入失敗，請檢查網路連接')
+        }}
+        strategy="afterInteractive"
       />
       
       {error && (
@@ -139,10 +187,42 @@ const GoogleLoginButton = ({ onSuccess, onError }: GoogleLoginButtonProps) => {
         style={{ minHeight: '44px' }}
       />
       
-      {!isLoaded && (
+      {!isRendered && !isTimeout && (
         <div className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700">
           <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
           <span className="text-sm font-medium">載入 Google 登入...</span>
+        </div>
+      )}
+      
+      {isTimeout && !isRendered && (
+        <div className="w-full flex flex-col items-center justify-center gap-3 px-4 py-3 border border-red-300 rounded-md shadow-sm bg-red-50 text-red-700">
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <span className="text-sm font-medium">Google 登入載入超時</span>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                setIsTimeout(false)
+                setIsRendered(false)
+                setError(null)
+                if (isScriptLoaded) {
+                  initializeAndRenderButton()
+                }
+              }} 
+              className="text-sm px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              重試
+            </button>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-sm px-3 py-1 border border-red-600 text-red-600 rounded hover:bg-red-50 transition-colors"
+            >
+              重新整理
+            </button>
+          </div>
         </div>
       )}
     </div>
