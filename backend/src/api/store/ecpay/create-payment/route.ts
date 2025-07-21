@@ -46,16 +46,20 @@ export async function POST(
       throw new Error('訂單金額必須大於 0')
     }
     
+    // 設置回調和返回 URL
+    const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000"
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:9000"
+    
     const ecpayParams = {
       MerchantTradeNo: merchantTradeNo,
       MerchantTradeDate: tradeDate,
       TotalAmount: totalAmount,
       TradeDesc: "網站訂單付款",
       ItemName: itemName,
-      ReturnURL: returnUrl || process.env.ECPAY_RETURN_URL || "https://www.ecpay.com.tw/return_url.php",
-      ClientBackURL: clientBackUrl || process.env.ECPAY_CLIENT_BACK_URL || "https://www.ecpay.com.tw",
+      ReturnURL: returnUrl || `${backendUrl}/store/ecpay/callback`, // 後端回調
+      ClientBackURL: clientBackUrl || `${frontendUrl}/api/ecpay/success`, // 前端成功頁面
       ChoosePayment: choosePayment || "ALL",
-      EncryptType: 1,
+      EncryptType:1,
     }
 
     console.log('🚚 送給綠界的參數:', JSON.stringify(ecpayParams, null, 2))

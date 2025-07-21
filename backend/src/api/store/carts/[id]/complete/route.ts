@@ -122,6 +122,117 @@ export async function POST(
     
     console.log(`✅ Order created successfully: ${savedOrder.id}`)
     
+    // 7. 檢查是否為宅配訂單，如果是則發送訂單摘要到儲存端點
+    const shippingMethod = cart.shipping_methods?.[0]
+    const isHomeDelivery = shippingMethod?.name?.includes('宅配') || 
+                          shippingMethod?.name?.toLowerCase().includes('home') ||
+                          (cart.metadata && (cart.metadata as any).shipping_type === 'home_delivery')
+    
+    if (isHomeDelivery) {
+      try {
+        console.log('🚚 Detected home delivery order, sending order summary for storage...')
+        
+        // 準備訂單摘要資料用於儲存
+        const orderSummary = {
+          // 基本訂單資訊
+          order_id: savedOrder.id,
+          cart_id: cart.id,
+          order_number: savedOrder.id, // 訂單編號
+          
+          // 訂單狀態
+          status: savedOrder.status,
+          payment_status: savedOrder.payment_status,
+          fulfillment_status: savedOrder.fulfillment_status,
+          
+          // 金額資訊
+          subtotal: savedOrder.subtotal || 0,
+          shipping_total: savedOrder.shipping_total || 0,
+          tax_total: savedOrder.tax_total || 0,
+          total: savedOrder.total,
+          currency_code: savedOrder.currency_code,
+          
+          // 客戶資訊
+          customer: {
+            email: savedOrder.email,
+            customer_id: savedOrder.customer_id,
+            name: savedOrder.shipping_address ? 
+                  `${savedOrder.shipping_address.first_name || ''} ${savedOrder.shipping_address.last_name || ''}`.trim() : 
+                  null,
+            phone: savedOrder.shipping_address?.phone || null
+          },
+          
+          // 配送資訊
+          shipping: {
+            method: shippingMethod?.name || 'Home Delivery',
+            address: {
+              recipient_name: savedOrder.shipping_address ? 
+                             `${savedOrder.shipping_address.first_name || ''} ${savedOrder.shipping_address.last_name || ''}`.trim() : 
+                             null,
+              address_line_1: savedOrder.shipping_address?.address_1 || '',
+              address_line_2: savedOrder.shipping_address?.address_2 || '',
+              city: savedOrder.shipping_address?.city || '',
+              province: savedOrder.shipping_address?.province || '',
+              postal_code: savedOrder.shipping_address?.postal_code || '',
+              country_code: savedOrder.shipping_address?.country_code || '',
+              phone: savedOrder.shipping_address?.phone || ''
+            }
+          },
+          
+          // 訂單商品摘要
+          items: savedOrder.items.map(item => ({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            title: item.title,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.total || (item.unit_price * item.quantity),
+            thumbnail: item.thumbnail
+          })),
+          
+          // 時間資訊
+          created_at: savedOrder.created_at,
+          updated_at: new Date().toISOString(),
+          
+          // 系統資訊
+          source: 'medusa',
+          order_type: 'home_delivery',
+          metadata: {
+            cart_metadata: cart.metadata,
+            order_metadata: savedOrder.metadata,
+            shipping_method_id: shippingMethod?.id
+          }
+        }
+        
+        // 發送訂單摘要到儲存端點
+        const fetch = (await import('node-fetch')).default
+        const storageUrl = process.env.ORDER_STORAGE_URL || 'http://localhost:9000/app/orders'
+        
+        const storageResponse = await fetch(storageUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Medusa-Order-Storage/1.0',
+            'X-Order-Source': 'medusa-homedelivery'
+          },
+          body: JSON.stringify(orderSummary)
+        })
+        
+        if (storageResponse.ok) {
+          const result = await storageResponse.json()
+          console.log(`✅ Order summary sent successfully to storage endpoint: ${storageUrl}`)
+          console.log(`📋 Storage response:`, result)
+        } else {
+          console.warn(`⚠️ Order storage failed: ${storageResponse.status} ${storageResponse.statusText}`)
+          const errorText = await storageResponse.text()
+          console.warn(`❌ Storage error details:`, errorText)
+        }
+        
+      } catch (storageError) {
+        console.error('💥 Error sending order summary to storage:', storageError)
+        // 不影響主流程，只記錄錯誤
+      }
+    }
+    
     return res.json({
       order: savedOrder,
       message: "Cart completed successfully"

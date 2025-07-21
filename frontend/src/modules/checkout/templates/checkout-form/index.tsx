@@ -4,7 +4,6 @@ import { HttpTypes } from "@medusajs/types"
 import { useState, useEffect } from "react"
 import { Button } from "@medusajs/ui"
 import EnhancedShipping from "@modules/checkout/components/enhanced-shipping"
-import EcpayStoreMap from "@modules/checkout/components/ecpay-store-map"
 import DeliveryAddressForm from "@modules/checkout/components/delivery-address-form"
 import { toast } from "react-hot-toast"
 import LoadingSpinner from "@/components/ui/loading-spinner"
@@ -125,6 +124,15 @@ export default function CheckoutForm({
       return
     }
     setError(null)
+    
+    // 檢查是否選擇了需要ECPay物流選擇的配送方式
+    const selectedMethod = cart?.shipping_methods?.find(m => m.id === selectedShippingMethod) || 
+                           shippingOptions?.find(opt => opt.id === selectedShippingMethod)
+    
+    // 只有超商取貨需要串接綠界物流選擇，宅配直接進入下一步
+    const isEcpayLogistics = selectedMethod?.name?.includes('超商') || 
+                            selectedShippingType === 'convenience_store'
+    
     if (cart && cart.id) {
       try {
         await setShippingMethod({ cartId: cart.id, shippingMethodId: selectedShippingMethod })
@@ -135,6 +143,87 @@ export default function CheckoutForm({
         return
       }
     }
+
+    // 如果是ECPay物流，跳轉到綠界物流選擇頁面
+    if (isEcpayLogistics && cart) {
+      try {
+        console.log('🚚 準備跳轉到綠界物流選擇頁面...')
+        
+        // 準備ECPay物流選擇所需參數
+        const logisticsParams = {
+          tempLogisticsID: "0", // 新建訂單
+          goodsAmount: Math.round(cart.total || 0), // 商品金額
+          goodsName: cart.items?.map(item => item.title).join(',').substring(0, 50) || "商品", // 商品名稱
+          senderName: "雷特先生", // 寄件人姓名 - 可從環境變數或設定取得
+          senderZipCode: "100", // 寄件人郵遞區號 - 可從環境變數或設定取得  
+          senderAddress: "台北市中正區重慶南路一段122號", // 寄件人地址 - 可從環境變數或設定取得
+          serverReplyURL: `${window.location.origin}/api/ecpay/logistics/callback`, // Server回調URL
+          clientReplyURL: `${window.location.origin}/checkout/logistics-callback`, // Client回調URL
+          remark: `訂單編號: ${cart.id}`,
+          receiverName: customer?.first_name && customer?.last_name ? 
+                       `${customer.first_name}${customer.last_name}` : "",
+          receiverCellPhone: customer?.phone || "",
+          temperature: "0001", // 常溫
+          specification: "0001", // 60cm
+          isCollection: "N", // 不代收貨款
+          enableSelectDeliveryTime: "Y" // 允許選擇送達時間
+        }
+
+        // 呼叫前端代理API建立ECPay物流選擇頁面
+        const response = await fetch('/api/ecpay/logistics-selection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(logisticsParams)
+        })
+
+        if (!response.ok) {
+          throw new Error(`API回應錯誤: ${response.status}`)
+        }
+
+        const contentType = response.headers.get('content-type')
+        
+        if (contentType && contentType.includes('application/json')) {
+          // JSON回應 - 可能包含錯誤或成功訊息
+          const result = await response.json()
+          console.log('ECPay物流選擇API回應:', result)
+          
+          if (!result.success) {
+            throw new Error(result.message || '建立物流選擇頁面失敗')
+          }
+          
+          // 如果有回傳URL，則跳轉
+          if (result.redirectUrl) {
+            window.location.href = result.redirectUrl
+            return
+          }
+        } else {
+          // HTML回應 - 直接顯示ECPay跳轉頁面
+          const htmlContent = await response.text()
+          console.log('收到ECPay跳轉頁面，準備顯示...')
+          
+          // 在新視窗中開啟ECPay物流選擇頁面
+          const newWindow = window.open('', '_blank', 'width=800,height=600')
+          if (newWindow) {
+            newWindow.document.write(htmlContent)
+            newWindow.document.close()
+          } else {
+            // 如果無法開啟新視窗，則在當前頁面顯示
+            document.write(htmlContent)
+            document.close()
+          }
+          return
+        }
+        
+      } catch (err: any) {
+        console.error('跳轉到ECPay物流選擇頁面失敗:', err)
+        setError(`跳轉到綠界物流選擇頁面失敗: ${err.message}`)
+        return
+      }
+    }
+    
+    // 非ECPay物流或跳轉失敗，繼續原本流程
     setCurrentStep(2)
   }
 
@@ -372,13 +461,11 @@ export default function CheckoutForm({
           </div>
           <div className="p-8">
             {selectedShippingType === 'convenience_store' && (
-              <EcpayStoreMap 
-                cart={cart}
-                onStoreSelected={(storeInfo) => {
-                  console.log('選擇的門市:', storeInfo)
-                  // 處理門市選擇完成
-                }}
-              />
+              <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <h4 className="font-medium mb-2 text-gray-900">超商取貨</h4>
+                <p className="text-sm text-gray-600">請使用物流選擇頁面來選擇取貨門市</p>
+                <p className="text-sm text-gray-600">系統將引導您到 ECPay 物流選擇頁面完成門市選擇</p>
+              </div>
             )}
             {selectedShippingType === 'pickup' && (
               <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">

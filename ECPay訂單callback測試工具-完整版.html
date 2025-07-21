@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECPay Callback 測試工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .success-btn {
+            background-color: #28a745;
+        }
+        .success-btn:hover {
+            background-color: #1e7e34;
+        }
+        .fail-btn {
+            background-color: #dc3545;
+        }
+        .fail-btn:hover {
+            background-color: #c82333;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            display: none;
+        }
+        .response-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .response-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .preset-buttons {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 ECPay Callback 測試工具</h1>
+        
+        <div class="info">
+            <strong>測試說明：</strong><br>
+            1. 先建立測試購物車（使用手動建立購物車功能）<br>
+            2. 複製購物車的 MerchantTradeNo<br>
+            3. 在下方輸入 MerchantTradeNo 並測試成功/失敗情境<br>
+            4. 檢查 Console 輸出和資料庫訂單狀態
+        </div>
+
+        <div class="preset-buttons">
+            <button onclick="createTestCart()" class="success-btn">📝 建立測試購物車</button>
+            <button onclick="loadSuccessPreset()">💰 載入成功付款資料</button>
+            <button onclick="loadFailPreset()">❌ 載入失敗付款資料</button>
+        </div>
+
+        <form id="callbackForm">
+            <div class="form-group">
+                <label for="merchantTradeNo">MerchantTradeNo (商店交易編號):</label>
+                <input type="text" id="merchantTradeNo" name="MerchantTradeNo" 
+                       placeholder="例如: test_cart_1753102937" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rtnCode">RtnCode (回傳狀態碼):</label>
+                <select id="rtnCode" name="RtnCode">
+                    <option value="1">1 - 付款成功</option>
+                    <option value="0">0 - 付款失敗</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tradeNo">TradeNo (綠界交易編號):</label>
+                <input type="text" id="tradeNo" name="TradeNo" 
+                       placeholder="例如: 2410281234567890">
+            </div>
+
+            <div class="form-group">
+                <label for="tradeAmt">TradeAmt (交易金額):</label>
+                <input type="number" id="tradeAmt" name="TradeAmt" 
+                       value="2100" placeholder="2100">
+            </div>
+
+            <div class="form-group">
+                <label for="paymentDate">PaymentDate (付款時間):</label>
+                <input type="text" id="paymentDate" name="PaymentDate" 
+                       placeholder="例如: 2024/10/28 14:30:00">
+            </div>
+
+            <div class="form-group">
+                <label for="paymentType">PaymentType (付款方式):</label>
+                <select id="paymentType" name="PaymentType">
+                    <option value="Credit_CreditCard">Credit_CreditCard - 信用卡</option>
+                    <option value="ATM_LAND">ATM_LAND - ATM轉帳</option>
+                    <option value="WebATM_LAND">WebATM_LAND - 網路ATM</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="checkMacValue">CheckMacValue (檢查碼):</label>
+                <input type="text" id="checkMacValue" name="CheckMacValue" 
+                       value="TESTVALUE123" placeholder="TESTVALUE123">
+            </div>
+
+            <button type="submit">🚀 發送 Callback 測試</button>
+        </form>
+
+        <div id="response"></div>
+    </div>
+
+    <script>
+        // 設定目前時間
+        document.getElementById('paymentDate').value = new Date().toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }).replace(/\//g, '/').replace(',', '');
+
+        // 設定隨機交易編號
+        document.getElementById('tradeNo').value = '24' + Date.now().toString().slice(-8);
+
+        function createTestCart() {
+            showResponse('正在建立測試購物車...', 'info');
+            
+            const testCartData = {
+                region_id: 'reg_01HJ2WNQMHQM0KJZV8DMGH9NW8',
+                sales_channel_id: 'sc_01HJ2WNQK8KGE9VHGVHJ4KV7MS',
+                currency_code: 'TWD',
+                email: 'test@ecpay.com.tw',
+                metadata: {
+                    ecpay_merchant_trade_no: 'test_cart_' + Date.now(),
+                    created_for_testing: true,
+                    test_purpose: 'ecpay_callback_testing'
+                }
+            };
+
+            fetch('/api/test/create-cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(testCartData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResponse(`✅ 測試購物車建立成功！\n\n購物車ID: ${data.cart.id}\nMerchantTradeNo: ${data.cart.metadata.ecpay_merchant_trade_no}`, 'success');
+                    document.getElementById('merchantTradeNo').value = data.cart.metadata.ecpay_merchant_trade_no;
+                } else {
+                    showResponse(`❌ 建立失敗: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showResponse(`❌ 請求失敗: ${error.message}`, 'error');
+            });
+        }
+
+        function loadSuccessPreset() {
+            document.getElementById('rtnCode').value = '1';
+            document.getElementById('tradeAmt').value = '2100';
+            document.getElementById('paymentType').value = 'Credit_CreditCard';
+            document.getElementById('tradeNo').value = '24' + Date.now().toString().slice(-8);
+            showResponse('✅ 已載入成功付款測試資料', 'info');
+        }
+
+        function loadFailPreset() {
+            document.getElementById('rtnCode').value = '0';
+            document.getElementById('tradeAmt').value = '2100';
+            document.getElementById('paymentType').value = 'Credit_CreditCard';
+            document.getElementById('tradeNo').value = '24' + Date.now().toString().slice(-8);
+            showResponse('❌ 已載入失敗付款測試資料', 'info');
+        }
+
+        function showResponse(message, type) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = message;
+            responseDiv.className = `response-${type}`;
+            responseDiv.style.display = 'block';
+        }
+
+        document.getElementById('callbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            showResponse('正在發送 ECPay callback 請求...', 'info');
+            
+            // 使用 application/x-www-form-urlencoded 格式（ECPay 標準格式）
+            const params = new URLSearchParams(data);
+            
+            fetch('/api/store/ecpay/callback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params
+            })
+            .then(response => {
+                const status = response.status;
+                return response.text().then(text => ({ status, text }));
+            })
+            .then(({ status, text }) => {
+                const timestamp = new Date().toLocaleString('zh-TW');
+                let message = `[${timestamp}] Callback 測試結果:\n\n`;
+                message += `HTTP Status: ${status}\n`;
+                message += `Response: ${text}\n\n`;
+                message += `測試資料:\n${JSON.stringify(data, null, 2)}`;
+                
+                if (status === 200 && text.includes('1|OK')) {
+                    showResponse(message, 'success');
+                } else {
+                    showResponse(message, 'error');
+                }
+            })
+            .catch(error => {
+                showResponse(`❌ 請求失敗: ${error.message}`, 'error');
+            });
+        });
+    </script>
+</body>
+</html>

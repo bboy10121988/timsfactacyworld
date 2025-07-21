@@ -41,7 +41,16 @@ export default async function OrderCompletedTemplate({
             摘要
           </Heading>
           <Items order={order} />
-          <CartTotals totals={order} />
+          <CartTotals totals={{
+            total: order.total,
+            subtotal: order.subtotal,
+            tax_total: order.tax_total,
+            shipping_total: order.shipping_total,
+            discount_total: order.discount_total,
+            gift_card_total: order.gift_card_total,
+            currency_code: order.currency_code,
+            shipping_subtotal: order.shipping_total
+          }} />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} />
           <Help />

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECPay API 測試</title>
+</head>
+<body>
+    <h1>ECPay API 端點測試</h1>
+    
+    <div>
+        <h2>1. 測試我們的 API 端點</h2>
+        <button onclick="testOurAPI()">測試本地 API</button>
+        <div id="ourResult"></div>
+    </div>
+    
+    <div>
+        <h2>2. 檢查 ECPay 官方端點</h2>
+        <button onclick="checkECPayEndpoints()">檢查 ECPay 端點</button>
+        <div id="ecpayResult"></div>
+    </div>
+    
+    <div>
+        <h2>3. 手動測試表單</h2>
+        <form id="testForm" method="POST" action="https://logistics-stage.ecpay.com.tw/Express/RedirectToLogisticsSelection" target="_blank">
+            <input type="hidden" name="PlatformID" value="">
+            <input type="hidden" name="MerchantID" value="3002607">
+            <input type="hidden" name="RqHeader" value='{"Timestamp":"1753098156","Revision":"1.0.0"}'>
+            <input type="hidden" name="Data" value="test">
+            <button type="submit">直接測試 ECPay 表單</button>
+        </form>
+    </div>
+    
+    <script>
+        async function testOurAPI() {
+            try {
+                const response = await fetch('http://localhost:9000/store/ecpay/logistics-selection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+                    },
+                    body: JSON.stringify({
+                        goodsAmount: 500,
+                        goodsName: "Test Product",
+                        senderName: "John Smith",
+                        senderZipCode: "100",
+                        senderAddress: "Taipei City Taiwan"
+                    })
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    document.getElementById('ourResult').innerHTML = '<p>✅ 本地 API 正常</p>';
+                    console.log('本地 API 回應:', html.substring(0, 200));
+                } else {
+                    const error = await response.text();
+                    document.getElementById('ourResult').innerHTML = `<p>❌ 本地 API 錯誤: ${error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('ourResult').innerHTML = `<p>❌ 本地 API 請求失敗: ${error.message}</p>`;
+            }
+        }
+        
+        async function checkECPayEndpoints() {
+            const endpoints = [
+                'https://logistics-stage.ecpay.com.tw/Express/RedirectToLogisticsSelection',
+                'https://logistics.ecpay.com.tw/Express/RedirectToLogisticsSelection',
+                'https://logistics-stage.ecpay.com.tw/Express/Map',
+                'https://logistics.ecpay.com.tw/Express/Map'
+            ];
+            
+            let results = '<h3>ECPay 端點檢查結果:</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        mode: 'no-cors'
+                    });
+                    results += `<p>✅ ${endpoint} - 可訪問</p>`;
+                } catch (error) {
+                    results += `<p>❌ ${endpoint} - 無法訪問: ${error.message}</p>`;
+                }
+            }
+            
+            document.getElementById('ecpayResult').innerHTML = results;
+        }
+    </script>
+</body>
+</html>

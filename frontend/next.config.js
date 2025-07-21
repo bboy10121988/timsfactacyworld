@@ -87,6 +87,16 @@ const nextConfig = {
     const backendUrl = getBackendUrl()
     
     return [
+      // 代理 Medusa Store API 請求到後端 (直接路徑)
+      {
+        source: "/store/:path*",
+        destination: `${backendUrl}/store/:path*`,
+      },
+      // 代理 Medusa Admin API 請求到後端 (直接路徑)
+      {
+        source: "/admin/:path*", 
+        destination: `${backendUrl}/admin/:path*`,
+      },
       // 代理 Medusa API 請求到後端
       {
         source: "/api/medusa/:path*",

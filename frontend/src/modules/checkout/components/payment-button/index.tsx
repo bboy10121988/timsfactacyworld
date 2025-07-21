@@ -1,6 +1,6 @@
 "use client"
 
-import { isManual, isStripe } from "@lib/constants"
+import { isManual, isStripe, isECPay } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -30,6 +30,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isStripe(paymentSession?.provider_id):
       return (
         <StripePaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isECPay(paymentSession?.provider_id):
+      return (
+        <ECPayPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
@@ -146,6 +154,119 @@ const StripePaymentButton = ({
       <ErrorMessage
         error={errorMessage}
         data-testid="stripe-payment-error-message"
+      />
+    </>
+  )
+}
+
+const ECPayPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const onPaymentCompleted = async () => {
+    await placeOrder()
+      .catch((err) => {
+        setErrorMessage(err.message)
+      })
+      .finally(() => {
+        setSubmitting(false)
+      })
+  }
+
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    setErrorMessage(null)
+
+    if (!cart || !paymentSession) {
+      setSubmitting(false)
+      setErrorMessage("付款資訊不完整")
+      return
+    }
+
+    try {
+      // 建立ECPay付款
+      const response = await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/ecpay/create-payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cart: {
+            id: cart.id,
+            items: cart.items,
+            total: cart.total,
+            subtotal: cart.subtotal,
+            tax_total: cart.tax_total,
+            shipping_total: cart.shipping_total,
+            region: cart.region,
+            email: cart.email,
+            shipping_address: cart.shipping_address,
+            billing_address: cart.billing_address,
+            shipping_methods: cart.shipping_methods
+          },
+          customer: cart.customer_id ? { id: cart.customer_id } : null,
+          shippingAddress: cart.shipping_address,
+          shippingMethod: cart.shipping_methods?.[0],
+          choosePayment: paymentSession.provider_id,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("建立付款失敗")
+      }
+
+      const data = await response.json()
+
+      if (data.form_html) {
+        // 直接提交ECPay表單跳轉到綠界
+        const tempDiv = document.createElement("div")
+        tempDiv.innerHTML = data.form_html
+        const form = tempDiv.querySelector("form")
+        
+        if (form) {
+          document.body.appendChild(form)
+          form.submit()
+          // 不需要設置 submitting = false，因為頁面會跳轉
+          return
+        }
+      }
+
+      // 如果沒有表單或其他付款方式，直接完成訂單
+      await onPaymentCompleted()
+      
+    } catch (error: any) {
+      console.error("ECPay payment error:", error)
+      setErrorMessage(error.message || "付款處理失敗")
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        onClick={handlePayment}
+        size="large"
+        isLoading={submitting}
+        data-testid={dataTestId}
+      >
+        {submitting ? "處理中..." : "確認付款"}
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="ecpay-payment-error-message"
       />
     </>
   )

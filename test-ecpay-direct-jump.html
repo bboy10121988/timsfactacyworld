@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECPay 物流選擇直接跳轉</title>
+</head>
+<body>
+    <h1>ECPay 物流選擇測試</h1>
+    <p>點擊按鈕後將直接跳轉到 ECPay 物流選擇頁面</p>
+    
+    <button onclick="testDirectJump()" style="padding: 10px 20px; font-size: 16px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        🚚 直接跳轉到物流選擇頁面
+    </button>
+    
+    <div id="status" style="margin-top: 20px; padding: 10px; border-radius: 5px;"></div>
+    
+    <script>
+        async function testDirectJump() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.background = '#fff3cd';
+            statusDiv.style.color = '#856404';
+            statusDiv.innerHTML = '⏳ 正在生成物流選擇表單...';
+            
+            try {
+                const response = await fetch('http://localhost:9000/store/ecpay/logistics-selection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+                    },
+                    body: JSON.stringify({
+                        goodsAmount: 500,
+                        goodsName: "測試商品",
+                        senderName: "測試店家",
+                        senderZipCode: "100",
+                        senderAddress: "台北市中正區"
+                    })
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.innerHTML = '✅ 表單已生成，正在跳轉...';
+                    
+                    // 在當前頁面直接提交表單
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const form = tempDiv.querySelector('form');
+                    
+                    if (form) {
+                        // 將表單加到頁面並立即提交
+                        form.style.display = 'none';
+                        document.body.appendChild(form);
+                        
+                        // 稍微延遲以顯示狀態訊息
+                        setTimeout(() => {
+                            form.submit();
+                        }, 1000);
+                        
+                        statusDiv.innerHTML = '🚀 正在跳轉到 ECPay 物流選擇頁面...';
+                    } else {
+                        throw new Error('無法找到表單元素');
+                    }
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '伺服器回應錯誤');
+                }
+                
+            } catch (error) {
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerHTML = `❌ 錯誤: ${error.message}`;
+                console.error('跳轉失敗:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ECPay 物流測試</title>
+</head>
+<body>
+    <h1>ECPay 物流選擇表單測試</h1>
+    
+    <form method="POST" action="https://logistics-stage.ecpay.com.tw/Express/v2/RedirectToLogisticsSelection">
+        <p><strong>MerchantID:</strong> <input type="text" name="MerchantID" value="3002607" readonly></p>
+        <p><strong>PlatformID:</strong> <input type="text" name="PlatformID" value="" readonly></p>
+        <p><strong>RqHeader:</strong> <input type="text" name="RqHeader" value='{"Timestamp":"1753096600","Revision":"1.0.0"}' readonly style="width: 400px;"></p>
+        <p><strong>Data:</strong> <textarea name="Data" readonly style="width: 500px; height: 100px;">J+4RZICRafc0qeX9gqdrlV7nv7AiixVoLlmti9IHNfdZ6exxrmWJwyx43CsBxzx/RtBuvbOZNjglsL9I6xw9u+MYDvserhIz+hb/iV+amGJPGVmhbEyzbMfwHYixrshdu7H3UqnTLZ0hQDzITzh3xfPJ1um2IvHEh3Cq1bOVA6rX1/d7kFQzr40z0CZ8p75GESISGbxWkUFHD81n8+1VDFkSdenxdSLTOlcZoMnNtLGix3nEbFYgbvBERFW8uRWAFGICOeZzzO6WPkIH8gfNHCfzR62Md1OOKw2fNq/EHNGPoAxvWbRDBaW+NwPQPgo2ZkWbPYvAWuABW7+j0NFMP+OT9XTvdw8qteH7JF957Bwtod0uL18x7iUDVu93YB/GyzGhyIefHLgPi5ZhdRLpjcqzJ8BNGfI4Zlwx44FKnmRxS1ZrF0L4TB+IiDpYb9Xzh6VUgULQu1pJLn+uGerUOBSAodD2Pzb1Gu2ebBzPnFf0fe3tTBR0UUSxrdEyYzHES8icZOthRiJLZ8IN+nmcO1kpYsNSIXo68DYEiSyUfcGU7l68buiTy6d3smwn6VmVa0/QjyFJ3U+hYxc5z3KPoyNF//PWc0e+62vjeg15dVxObtS7QYWDJsY21tQJjmWLRzWmZF3tj58PjW0+uflxZy3XDv3lOBqWrlY3HB/NFtdHSNX3ywzfg6elPAgX6XYR</textarea></p>
+        
+        <input type="submit" value="測試提交到 ECPay">
+    </form>
+    
+    <script>
+        // 檢查表單數據
+        const form = document.querySelector('form');
+        console.log('表單 action:', form.action);
+        
+        const formData = new FormData(form);
+        console.log('表單數據:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+    </script>
+</body>
+</html>

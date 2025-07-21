@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在跳轉到物流選擇頁面...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .loading-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .debug {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <h2>正在跳轉到物流選擇頁面</h2>
+        <p>請稍候，系統正在為您準備物流選擇介面...</p>
+        
+        <form id="ecpayForm" method="POST" action="https://logistics-stage.ecpay.com.tw/Express/v2/RedirectToLogisticsSelection">
+            <input type="hidden" name="PlatformID" value="">
+            <input type="hidden" name="MerchantID" value="3002607">
+            <input type="hidden" name="RqHeader" value="{&quot;Timestamp&quot;:&quot;1753096519&quot;,&quot;Revision&quot;:&quot;1.0.0&quot;}">
+            <input type="hidden" name="Data" value="J+4RZICRafc0qeX9gqdrlV7nv7AiixVoLlmti9IHNfdZ6exxrmWJwyx43CsBxzx/RtBuvbOZNjglsL9I6xw9u+MYDvserhIz+hb/iV+amGJPGVmhbEyzbMfwHYixrshdu7H3UqnTLZ0hQDzITzh3xfPJ1um2IvHEh3Cq1bOVA6rX1/d7kFQzr40z0CZ8p75GESISGbxWkUFHD81n8+1VDFkSdenxdSLTOlcZoMnNtLGix3nEbFYgbvBERFW8uRWAFGICOeZzzO6WPkIH8gfNHCfzR62Md1OOKw2fNq/EHNGPoAxvWbRDBaW+NwPQPgo2ZkWbPYvAWuABW7+j0NFMP+OT9XTvdw8qteH7JF957Bwtod0uL18x7iUDVu93YB/GyzGhyIefHLgPi5ZhdRLpjcqzJ8BNGfI4Zlwx44FKnmRxS1ZrF0L4TB+IiDpYb9Xzh6VUgULQu1pJLn+uGerUOBSAodD2Pzb1Gu2ebBzPnFf0fe3tTBR0UUSxrdEyYzHES8icZOthRiJLZ8IN+nmcO1kpYsNSIXo68DYEiSyUfcGU7l68buiTy6d3smwn6VmVa0/QjyFJ3U+hYxc5z3KPoyNF//PWc0e+62vjeg15dVxObtS7QYWDJsY21tQJjmWLRzWmZF3tj58PjW0+uflxZy3XDv3lOBqWrlY3HB/NFtdHSNX3ywzfg6elPAgX6XYR">
+        </form>
+        
+        <div class="debug">
+            <p>商店代號: 3002607</p>
+            <p>平台代號: 無</p>
+            <p>時間戳: 1753096519</p>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚚 ECPay 物流選擇表單參數:');
+        console.log('PlatformID:', '');
+        console.log('MerchantID:', '3002607');
+        console.log('RqHeader:', '{"Timestamp":"1753096519","Revision":"1.0.0"}');
+        console.log('RqHeader (escaped):', '{&quot;Timestamp&quot;:&quot;1753096519&quot;,&quot;Revision&quot;:&quot;1.0.0&quot;}');
+        console.log('Data length:', 704);
+        console.log('Target URL:', 'https://logistics-stage.ecpay.com.tw/Express/v2/RedirectToLogisticsSelection');
+        
+        // 檢查表單元素值
+        const form = document.getElementById('ecpayForm');
+        const formData = new FormData(form);
+        console.log('📋 實際表單資料:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${key === 'Data' ? value.toString().substring(0, 50) + '...' : value}`);
+        }
+        
+        // 攔截表單提交，先檢查資料
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('🔍 提交前最終檢查:');
+            const inputs = form.querySelectorAll('input[type="hidden"]');
+            inputs.forEach(input => {
+                console.log(`  ${input.name}: ${input.value.substring(0, 100)}${input.value.length > 100 ? '...' : ''}`);
+            });
+            
+            // 確認後提交
+            setTimeout(() => {
+                console.log('🚀 確認提交表單到 ECPay...');
+                form.submit();
+            }, 2000);
+        });
+        
+        // 3秒後自動觸發提交檢查
+        setTimeout(function() {
+            console.log('🚀 正在提交表單到 ECPay...');
+            document.getElementById('ecpayForm').submit();
+        }, 3000);
+    </script>
+</body>
+</html>

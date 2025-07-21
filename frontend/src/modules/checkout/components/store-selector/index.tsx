@@ -70,118 +70,64 @@ const StoreSelector: React.FC = () => {
     }
   ];
 
-  // 開啟 ECPay 電子地圖
-  const openEcpayMap = async () => {
+  // 使用物流選擇頁面代替電子地圖
+  const openLogisticsSelection = async () => {
     try {
       setIsLoading(true);
-      console.log('🗺️ 開啟 ECPay 電子地圖:', selectedLogistics);
+      console.log('� 開啟物流選擇頁面:', selectedLogistics);
 
-      // 檢測設備類型
-      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const device = isMobile ? 1 : 0;
-
-      // 呼叫後端 API 生成電子地圖表單
-      const response = await fetch('http://localhost:9000/store/ecpay/logistics-map', {
+      // 呼叫後端物流選擇 API
+      const response = await fetch('http://localhost:9000/store/ecpay/logistics-selection', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-publishable-api-key': 'pk_6a5b6f62e29baea8089628c7713ce56a388c5944011f43fcf15b8837b00464b7'
+          'x-publishable-api-key': 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
         },
         body: JSON.stringify({
-          logisticsSubType: selectedLogistics,
-          device: device,
-          extraData: JSON.stringify({ 
-            timestamp: Date.now(),
-            source: 'store-selector' 
-          })
+          goodsAmount: 500,
+          goodsName: "商品配送",
+          senderName: "商家名稱",
+          senderZipCode: "100", 
+          senderAddress: "台北市中正區",
+          logisticsType: "CVS",
+          logisticsSubType: selectedLogistics
         })
       });
 
-      const result = await response.json();
-      console.log('📋 API 回應:', result);
-
-      if (!result.success) {
-        throw new Error(result.message || '電子地圖生成失敗');
-      }
-
-      // 建立隱藏的 iframe 來載入表單
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.name = 'ecpay_map_frame';
-      document.body.appendChild(iframe);
-
-      // 建立表單並提交
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = result.html;
-      const form = tempDiv.querySelector('form');
-      
-      if (form) {
-        // 針對 iOS 設備進行特殊處理
-        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          // iOS 設備開啟新頁面
-          form.target = '_blank';
-          form.style.display = 'none';
-          document.body.appendChild(form);
-          form.submit();
-          document.body.removeChild(form);
+      if (response.ok) {
+        const html = await response.text();
+        
+        // 在新視窗中開啟物流選擇頁面
+        const logisticsWindow = window.open('', 'ecpay_logistics', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        if (logisticsWindow) {
+          logisticsWindow.document.write(html);
+          logisticsWindow.document.close();
         } else {
-          // 其他設備使用彈出視窗
-          const mapWindow = window.open('', 'ecpay_map', 'width=800,height=600,scrollbars=yes,resizable=yes');
-          if (mapWindow) {
-            mapWindow.document.write(result.html);
-            mapWindow.document.close();
-          } else {
-            // 如果彈出視窗被阻擋，改用新分頁
-            form.target = '_blank';
-            form.style.display = 'none';
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-          }
+          alert('請允許彈出視窗以開啟物流選擇頁面');
         }
+      } else {
+        // 更好的錯誤處理
+        let errorMessage = '物流選擇頁面生成失敗';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // 如果回應不是 JSON，使用狀態文字
+          errorMessage = `${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
-
-      // 清理 iframe
-      setTimeout(() => {
-        if (iframe.parentNode) {
-          document.body.removeChild(iframe);
-        }
-      }, 1000);
 
     } catch (error: any) {
-      console.error('❌ 開啟電子地圖失敗:', error);
-      alert(`開啟電子地圖失敗: ${error.message}`);
+      console.error('❌ 開啟物流選擇頁面失敗:', error);
+      alert(`開啟物流選擇頁面失敗: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 監聽來自 ECPay 的門市選擇結果
-  useEffect(() => {
-    const handleStoreSelection = (event: MessageEvent) => {
-      console.log('📩 收到門市選擇訊息:', event);
-      
-      if (event.origin !== window.location.origin) {
-        return; // 安全檢查：只接受同源訊息
-      }
-
-      if (event.data && event.data.type === 'ECPAY_STORE_SELECTED') {
-        const storeData: StoreSelectionData = event.data.data;
-        console.log('🏪 門市選擇完成:', storeData);
-        
-        setSelectedStore({
-          CVSStoreID: storeData.storeId,
-          CVSStoreName: storeData.storeName,
-          CVSAddress: storeData.storeAddress,
-          CVSTelephone: storeData.telephone,
-          logisticsSubType: storeData.logisticsSubType
-        });
-      }
-    };
-
-    window.addEventListener('message', handleStoreSelection);
-    return () => window.removeEventListener('message', handleStoreSelection);
-  }, []);
+  // 注意：使用物流選擇頁面後，門市選擇結果將透過回調 URL 處理
+  // 這裡不再需要監聽 postMessage 事件
 
   return (
     <div className="space-y-4">
@@ -214,11 +160,11 @@ const StoreSelector: React.FC = () => {
         </div>
 
         <button
-          onClick={openEcpayMap}
+          onClick={openLogisticsSelection}
           disabled={isLoading}
           className="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 px-4 rounded-lg font-medium transition-colors"
         >
-          {isLoading ? '開啟地圖中...' : '🗺️ 選擇門市'}
+          {isLoading ? '開啟選擇頁面中...' : '� 選擇取貨門市'}
         </button>
       </div>
 

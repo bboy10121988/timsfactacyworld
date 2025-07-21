@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECPay 訂單建立流程測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        textarea { width: 100%; height: 200px; margin: 10px 0; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 ECPay 訂單建立流程測試工具</h1>
+        
+        <div class="section">
+            <h2>⚙️ 設定</h2>
+            <label>Backend URL:</label>
+            <input type="text" id="backendUrl" value="http://localhost:9000" style="width: 300px;">
+            <br><br>
+            <label>Frontend URL:</label>
+            <input type="text" id="frontendUrl" value="http://localhost:8000" style="width: 300px;">
+        </div>
+
+        <div class="section">
+            <h2>1️⃣ 測試建立 ECPay 付款</h2>
+            <button onclick="testCreatePayment()">測試 Create Payment API</button>
+            <div id="createPaymentResult" class="log"></div>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ 模擬 ECPay Callback</h2>
+            <label>MerchantTradeNo:</label>
+            <input type="text" id="merchantTradeNo" value="" placeholder="會從上面的測試自動填入">
+            <br><br>
+            <button onclick="simulateCallback()">模擬付款成功 Callback</button>
+            <div id="callbackResult" class="log"></div>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ 檢查訂單建立</h2>
+            <button onclick="checkOrderCreation()">檢查訂單是否建立</button>
+            <div id="orderCheckResult" class="log"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 完整測試流程</h2>
+            <button onclick="runFullTest()">執行完整測試</button>
+            <div id="fullTestResult" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentMerchantTradeNo = '';
+        let currentCartId = '';
+
+        // 模擬購物車資料
+        const mockCart = {
+            id: 'cart_test_' + Date.now(),
+            items: [
+                {
+                    id: 'item_1',
+                    title: '測試商品 1',
+                    quantity: 2,
+                    unit_price: 1000,
+                    total: 2000,
+                    variant: {
+                        id: 'variant_1',
+                        title: '測試變體',
+                        product: {
+                            id: 'product_1',
+                            title: '測試產品'
+                        }
+                    }
+                }
+            ],
+            total: 2100,
+            subtotal: 2000,
+            tax_total: 100,
+            shipping_total: 0,
+            email: 'test@example.com',
+            region: {
+                id: 'region_tw',
+                currency_code: 'TWD'
+            },
+            shipping_address: {
+                first_name: '測試',
+                last_name: '用戶',
+                address_1: '台北市信義區',
+                city: '台北市',
+                country_code: 'TW',
+                postal_code: '110',
+                phone: '0912345678'
+            },
+            billing_address: {
+                first_name: '測試',
+                last_name: '用戶',
+                address_1: '台北市信義區',
+                city: '台北市',
+                country_code: 'TW',
+                postal_code: '110',
+                phone: '0912345678'
+            },
+            shipping_methods: [
+                {
+                    id: 'sm_1',
+                    name: '宅配',
+                    price: 0
+                }
+            ]
+        };
+
+        async function testCreatePayment() {
+            const backendUrl = document.getElementById('backendUrl').value;
+            const resultDiv = document.getElementById('createPaymentResult');
+            
+            try {
+                resultDiv.textContent = '🔄 正在測試建立付款...\\n';
+                
+                const response = await fetch(`${backendUrl}/store/ecpay/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cart: mockCart,
+                        customer: null,
+                        shippingAddress: mockCart.shipping_address,
+                        shippingMethod: mockCart.shipping_methods[0],
+                        choosePayment: 'ecpay_credit_card'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent += '✅ Create Payment API 成功！\\n';
+                    resultDiv.textContent += `回應: ${JSON.stringify(data, null, 2)}\\n`;
+                    
+                    // 嘗試從回應中提取 MerchantTradeNo
+                    if (data.html) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(data.html, 'text/html');
+                        const merchantTradeNoInput = doc.querySelector('input[name="MerchantTradeNo"]');
+                        if (merchantTradeNoInput) {
+                            currentMerchantTradeNo = merchantTradeNoInput.value;
+                            document.getElementById('merchantTradeNo').value = currentMerchantTradeNo;
+                            resultDiv.textContent += `🔑 MerchantTradeNo: ${currentMerchantTradeNo}\\n`;
+                        }
+                    }
+                    
+                    currentCartId = mockCart.id;
+                } else {
+                    resultDiv.textContent += `❌ Create Payment API 失敗: ${JSON.stringify(data, null, 2)}\\n`;
+                }
+            } catch (error) {
+                resultDiv.textContent += `💥 錯誤: ${error.message}\\n`;
+            }
+        }
+
+        async function simulateCallback() {
+            const backendUrl = document.getElementById('backendUrl').value;
+            const merchantTradeNo = document.getElementById('merchantTradeNo').value;
+            const resultDiv = document.getElementById('callbackResult');
+            
+            if (!merchantTradeNo) {
+                resultDiv.textContent = '❌ 請先執行 Create Payment 測試或手動輸入 MerchantTradeNo\\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent = '🔄 正在模擬 ECPay callback...\\n';
+                
+                // 模擬 ECPay callback 資料
+                const callbackData = {
+                    RtnCode: '1',
+                    MerchantTradeNo: merchantTradeNo,
+                    TradeNo: 'TEST' + Date.now(),
+                    TradeAmt: '2100',
+                    PaymentDate: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                    PaymentType: 'Credit_CreditCard',
+                    CheckMacValue: 'test_check_mac_value'
+                };
+
+                const response = await fetch(`${backendUrl}/store/ecpay/callback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(callbackData)
+                });
+
+                const responseText = await response.text();
+                
+                if (response.ok && responseText.includes('1|OK')) {
+                    resultDiv.textContent += '✅ ECPay Callback 成功！\\n';
+                    resultDiv.textContent += `回應: ${responseText}\\n`;
+                } else {
+                    resultDiv.textContent += `❌ ECPay Callback 失敗: ${responseText}\\n`;
+                }
+            } catch (error) {
+                resultDiv.textContent += `💥 錯誤: ${error.message}\\n`;
+            }
+        }
+
+        async function checkOrderCreation() {
+            const backendUrl = document.getElementById('backendUrl').value;
+            const merchantTradeNo = document.getElementById('merchantTradeNo').value;
+            const resultDiv = document.getElementById('orderCheckResult');
+            
+            if (!merchantTradeNo) {
+                resultDiv.textContent = '❌ 請先執行前面的測試\\n';
+                return;
+            }
+
+            try {
+                resultDiv.textContent = '🔄 正在檢查訂單...\\n';
+                
+                const response = await fetch(`${backendUrl}/store/orders/by-merchant-trade-no/${merchantTradeNo}`);
+                
+                if (response.ok) {
+                    const orderData = await response.json();
+                    resultDiv.textContent += '✅ 訂單建立成功！\\n';
+                    resultDiv.textContent += `訂單資料: ${JSON.stringify(orderData, null, 2)}\\n`;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.textContent += `❌ 找不到訂單: ${JSON.stringify(errorData, null, 2)}\\n`;
+                }
+            } catch (error) {
+                resultDiv.textContent += `💥 錯誤: ${error.message}\\n`;
+            }
+        }
+
+        async function runFullTest() {
+            const resultDiv = document.getElementById('fullTestResult');
+            resultDiv.textContent = '🚀 開始執行完整測試流程...\\n\\n';
+            
+            // 步驟 1: 建立付款
+            resultDiv.textContent += '步驟 1: 建立 ECPay 付款\\n';
+            await testCreatePayment();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 步驟 2: 模擬 callback
+            resultDiv.textContent += '\\n步驟 2: 模擬付款成功 callback\\n';
+            await simulateCallback();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 步驟 3: 檢查訂單
+            resultDiv.textContent += '\\n步驟 3: 檢查訂單建立\\n';
+            await checkOrderCreation();
+            
+            resultDiv.textContent += '\\n🎉 完整測試流程執行完畢！\\n';
+        }
+    </script>
+</body>
+</html>
