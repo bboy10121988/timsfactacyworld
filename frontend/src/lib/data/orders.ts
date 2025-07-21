@@ -6,6 +6,15 @@ import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
 export const retrieveOrder = async (id: string) => {
+  // 檢查是否為 Google OAuth 用戶
+  const cookies = await import('next/headers').then(m => m.cookies())
+  const token = (await cookies).get("_medusa_jwt")?.value
+  
+  if (token?.startsWith('google_oauth:') || token?.startsWith('medusa_google_')) {
+    // Google OAuth 用戶暫時無法獲取訂單詳情
+    throw new Error("Order details not available for Google OAuth users")
+  }
+
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -24,7 +33,6 @@ export const retrieveOrder = async (id: string) => {
       headers,
       next,
       cache: "force-cache",
-      credentials: 'include',
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
@@ -35,6 +43,20 @@ export const listOrders = async (
   offset: number = 0,
   filters?: Record<string, any>
 ) => {
+  // 檢查是否為 Google OAuth 用戶
+  const cookies = await import('next/headers').then(m => m.cookies())
+  const token = (await cookies).get("_medusa_jwt")?.value
+  
+  if (token?.startsWith('google_oauth:') || token?.startsWith('medusa_google_')) {
+    // Google OAuth 用戶暫時返回空訂單列表
+    return {
+      orders: [],
+      count: 0,
+      offset,
+      limit
+    }
+  }
+
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -56,7 +78,6 @@ export const listOrders = async (
       headers,
       next,
       cache: "force-cache",
-      credentials: 'include',
     })
     .then(({ orders }) => orders)
     .catch((err) => medusaError(err))

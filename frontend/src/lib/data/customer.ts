@@ -17,10 +17,6 @@ import {
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
-    const authHeaders = await getAuthHeaders()
-
-    if (!authHeaders) return null
-
     // 檢查是否是 Google OAuth token
     const cookies = await import('next/headers').then(m => m.cookies())
     const token = (await cookies).get("_medusa_jwt")?.value
@@ -54,6 +50,49 @@ export const retrieveCustomer =
         return null
       }
     }
+
+    if (token?.startsWith('medusa_google_')) {
+      // 處理 Medusa Google token
+      try {
+        const tokenData = token.replace('medusa_google_', '')
+        const sessionData = JSON.parse(Buffer.from(tokenData, 'base64').toString())
+        
+        // 檢查 token 是否過期
+        if (sessionData.expires_at && Date.now() > sessionData.expires_at) {
+          console.log('Google token 已過期')
+          return null
+        }
+        
+        console.log('找到 Medusa Google 會話:', sessionData)
+        
+        // 返回 Google 用戶資料
+        return {
+          id: sessionData.customer_id,
+          email: sessionData.email,
+          first_name: sessionData.first_name || '',
+          last_name: sessionData.last_name || '',
+          company_name: null,
+          phone: null,
+          has_account: true,
+          metadata: {
+            auth_provider: 'google'
+          },
+          addresses: [],
+          default_billing_address_id: null,
+          default_shipping_address_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as unknown as HttpTypes.StoreCustomer
+      } catch (error) {
+        console.error('無法解析 Medusa Google token:', error)
+        return null
+      }
+    }
+
+    // 只有在不是 Google token 的情況下才獲取授權標頭
+    const authHeaders = await getAuthHeaders()
+
+    if (!authHeaders) return null
 
     // 處理一般的 Medusa JWT token
     const headers = {
@@ -120,6 +159,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
   }
 
   try {
+    // 使用標準 Medusa SDK 進行註冊
     const token = await sdk.auth.register("customer", "emailpass", {
       email: customerForm.email,
       password: password,
@@ -137,6 +177,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       headers
     )
 
+    // 註冊後自動登入
     const loginToken = await sdk.auth.login("customer", "emailpass", {
       email: customerForm.email,
       password,
@@ -147,47 +188,27 @@ export async function signup(_currentState: unknown, formData: FormData) {
     const customerCacheTag = await getCacheTag("customers")
     revalidateTag(customerCacheTag)
 
-    // 嘗試轉移購物車，如果失敗則處理
-    try {
-      await transferCart()
-    } catch (error: any) {
-      console.error("註冊後購物車轉移錯誤:", error)
-      // 嘗試確保購物車關聯
-      try {
-        await ensureCartAssociation()
-      } catch (associationError) {
-        console.error("購物車關聯失敗:", associationError)
-      }
-    }
+    await transferCart()
 
     return createdCustomer
   } catch (error: any) {
     console.error("註冊錯誤:", error)
     
-    // 處理不同類型的錯誤
+    // 處理註冊錯誤
     if (error.message || error.response?.data?.message) {
       const errorMessage = error.message || error.response.data.message
       
-      // 帳戶已存在
       if (errorMessage.includes('already exists') || errorMessage.includes('duplicate') || 
           errorMessage.includes('已存在') || errorMessage.includes('conflict')) {
         return "該電子郵件地址已被註冊，請使用其他郵件地址或嘗試登入"
       }
       
-      // 無效的電子郵件
       if (errorMessage.includes('invalid email') || errorMessage.includes('email')) {
         return "電子郵件地址格式不正確"
       }
       
-      // 密碼問題
       if (errorMessage.includes('password') || errorMessage.includes('密碼')) {
         return "密碼不符合要求，請確保長度至少 6 個字元"
-      }
-      
-      // 網路連接問題
-      if (errorMessage.includes('network') || errorMessage.includes('fetch') || 
-          errorMessage.includes('timeout') || error.code === 'NETWORK_ERROR') {
-        return "網路連接出現問題，請檢查網路連接後重試"
       }
       
       return errorMessage
@@ -213,50 +234,24 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 
   try {
-    await sdk.auth
-      .login("customer", "emailpass", { email, password })
-      .then(async (token) => {
-        await setAuthToken(token as string)
-        const customerCacheTag = await getCacheTag("customers")
-        revalidateTag(customerCacheTag)
-      })
+    // 使用標準 Medusa SDK 進行登入
+    const token = await sdk.auth.login("customer", "emailpass", { email, password })
+    
+    await setAuthToken(token as string)
+    
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+    
   } catch (error: any) {
     console.error("登入錯誤:", error)
     
-    // 處理不同類型的登入錯誤
+    // 處理登入錯誤
     if (error.message || error.response?.data?.message) {
       const errorMessage = error.message || error.response.data.message
       
-      // 帳戶不存在或密碼錯誤
       if (errorMessage.includes('unauthorized') || errorMessage.includes('invalid credentials') ||
-          errorMessage.includes('401') || errorMessage.includes('authentication failed') ||
-          errorMessage.includes('incorrect') || errorMessage.includes('wrong password') ||
-          errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
+          errorMessage.includes('401') || errorMessage.includes('authentication failed')) {
         return "電子郵件或密碼錯誤，請檢查後重試"
-      }
-      
-      // 帳戶被鎖定或停用
-      if (errorMessage.includes('locked') || errorMessage.includes('disabled') || 
-          errorMessage.includes('suspended') || errorMessage.includes('blocked')) {
-        return "帳戶已被停用，請聯繫客服"
-      }
-      
-      // 太多次失敗嘗試
-      if (errorMessage.includes('too many attempts') || errorMessage.includes('rate limit') ||
-          errorMessage.includes('temporary') || errorMessage.includes('timeout')) {
-        return "登入嘗試次數過多，請稍後再試"
-      }
-      
-      // 電子郵件未驗證
-      if (errorMessage.includes('not verified') || errorMessage.includes('email verification') ||
-          errorMessage.includes('confirm email')) {
-        return "請先驗證您的電子郵件地址"
-      }
-      
-      // 網路連接問題
-      if (errorMessage.includes('network') || errorMessage.includes('fetch') || 
-          errorMessage.includes('timeout') || error.code === 'NETWORK_ERROR') {
-        return "網路連接出現問題，請檢查網路連接後重試"
       }
       
       return errorMessage
@@ -269,13 +264,7 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     console.error("購物車轉移錯誤:", error)
-    // 購物車轉移失敗時，嘗試創建新的購物車關聯
-    try {
-      await ensureCartAssociation()
-    } catch (associationError) {
-      console.error("購物車關聯失敗:", associationError)
-      // 即使購物車處理失敗，也不應該阻止登入成功
-    }
+    // 購物車轉移失敗不應該阻止登入成功
   }
 }
 
