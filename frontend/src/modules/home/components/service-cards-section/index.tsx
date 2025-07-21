@@ -316,7 +316,7 @@ export default function ServiceCardsSection({
     <section className={heading ? "py-8 md:py-12 bg-stone-50/30" : "py-0 bg-stone-50/30"}>
       <div className="max-w-[1440px] mx-auto w-full">
         {heading && (
-          <div className="mb-20 text-center">
+          <div className="mb-12 text-center">
             <h1 className="text-3xl md:text-4xl font-light text-stone-900 mb-4 tracking-wide">{heading}</h1>
           </div>
         )}
@@ -324,9 +324,6 @@ export default function ServiceCardsSection({
         {allStylists.length > 0 && (
           <div className="mb-16">
             <div className="w-full max-w-[280px] mx-auto">
-              <div className="text-center text-sm font-light text-stone-700 mb-4 tracking-[0.15em] uppercase">
-                選擇設計師
-              </div>
               <Select 
                 value={selectedDesigner}
                 onValueChange={setSelectedDesigner}

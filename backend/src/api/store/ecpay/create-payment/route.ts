@@ -1,48 +1,98 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import EcpayService from "../../../../services/ecpay"
-import crypto from "crypto"
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<any> {
+  console.log('🚀 ECPay create-payment API called')
+  console.log('📦 Request body:', JSON.stringify(req.body, null, 2))
+  console.log('🔑 API Key:', typeof req.headers['x-publishable-api-key'] === 'string' ? req.headers['x-publishable-api-key'].substring(0, 10) + '...' : req.headers['x-publishable-api-key'])
+  
+  const body = req.body as any
+  const { cart, customer, shippingAddress, shippingMethod, choosePayment, returnUrl, clientBackUrl } = body
+  
+  if (!cart || !cart.items || !cart.total) {
+    return res.status(400).json({ error: '缺少購物車資料' })
+  }
+
   try {
-    // log scope keys for debug
-    console.log('scope keys:', Object.keys(req.scope.registrations))
-    const { cart, choosePayment, returnUrl, clientBackUrl } = req.body as any
-    if (!cart || !cart.items || !cart.total) {
-      return res.status(400).json({ error: '缺少購物車資料' })
+    // 組裝 ECPay 所需的參數格式
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hour = String(now.getHours()).padStart(2, '0')
+    const minute = String(now.getMinutes()).padStart(2, '0')
+    const second = String(now.getSeconds()).padStart(2, '0')
+    const tradeDate = `${year}/${month}/${day} ${hour}:${minute}:${second}` // ECPay 正確格式
+
+    // 產生唯一訂單編號
+    const merchantTradeNo = `ORDER${Date.now().toString().slice(-7)}`
+    
+    // 過濾商品名稱特殊字元
+    const safeItems = cart.items.map((item: any) => {
+      const safeTitle = (item.title || item.variant?.title || item.variant?.product?.title || "商品").replace(/[\#&<>%\r\n]/g, '')
+      return `${safeTitle} x ${item.quantity}`
+    })
+    let itemName = safeItems.join('#')
+    if (itemName.length > 400) {
+      itemName = itemName.slice(0, 400)
     }
-    // 產生唯一 MerchantTradeNo
-    const merchantTradeNo = `ORDER${Date.now().toString().slice(-7)}${crypto.randomBytes(3).toString("hex").toUpperCase()}`
-    // 組裝參數
-    const paymentParams = {
+
+    // 金額必須大於 0
+    const totalAmount = Math.round(cart.total || 100)
+    if (totalAmount <= 0) {
+      throw new Error('訂單金額必須大於 0')
+    }
+    
+    const ecpayParams = {
       MerchantTradeNo: merchantTradeNo,
-      TotalAmount: Math.round(cart.total),
-      ItemName: cart.items.map((item: any) => `${(item.title || item.variant?.title || item.variant?.product?.title || "商品").replace(/[#&<>%\r\n]/g, '')} x ${item.quantity}`).join('#'),
+      MerchantTradeDate: tradeDate,
+      TotalAmount: totalAmount,
       TradeDesc: "網站訂單付款",
-      ReturnURL: returnUrl || process.env.ECPAY_RETURN_URL,
+      ItemName: itemName,
+      ReturnURL: returnUrl || process.env.ECPAY_RETURN_URL || "https://www.ecpay.com.tw/return_url.php",
+      ClientBackURL: clientBackUrl || process.env.ECPAY_CLIENT_BACK_URL || "https://www.ecpay.com.tw",
       ChoosePayment: choosePayment || "ALL",
-      ClientBackURL: clientBackUrl || process.env.ECPAY_CLIENT_BACK_URL,
-      PaymentType: "aio",
       EncryptType: 1,
     }
-    const ecpayService = new EcpayService()
-    const html = await ecpayService.createPayment(paymentParams)
-    res.json({ html })
-    // 嘗試寫入 cart metadata，但不影響付款流程
+
+    console.log('🚚 送給綠界的參數:', JSON.stringify(ecpayParams, null, 2))
+
+    // 將 MerchantTradeNo 保存到 Cart 的 metadata 中，以便 callback 時能找到對應的 Cart
     try {
       const manager: any = req.scope.resolve("manager")
       const cartRepository = manager.getRepository("Cart")
-      const cartEntity = await cartRepository.findOne({ where: { id: cart.id } })
-      if (cartEntity) {
-        cartEntity.metadata = { ...cartEntity.metadata, ecpay_merchant_trade_no: merchantTradeNo }
-        await cartRepository.save(cartEntity)
+      
+      const existingCart = await cartRepository.findOne({ where: { id: cart.id } })
+      if (existingCart) {
+        existingCart.metadata = {
+          ...existingCart.metadata,
+          ecpay_merchant_trade_no: merchantTradeNo,
+          ecpay_created_at: new Date().toISOString(),
+          ecpay_total_amount: totalAmount
+        }
+        await cartRepository.save(existingCart)
+        console.log('✅ Cart metadata updated with MerchantTradeNo:', merchantTradeNo)
       }
-    } catch (err) {
-      console.warn("寫入 cart metadata 失敗，不影響付款流程", err)
+    } catch (metadataError) {
+      console.warn('⚠️ Failed to update cart metadata:', metadataError)
+      // 繼續處理，不中斷付款流程
     }
+
+    // 直接實例化 ECPay 服務
+    const ecpayService = new EcpayService()
+
+    // 產生 ECPay 付款表單
+    const html = await ecpayService.createPayment(ecpayParams)
+    
+    res.json({ html })
   } catch (error: any) {
-    res.status(500).json({ error: error.message })
+    console.error('ECPay 錯誤:', error)
+    res.status(500).json({ 
+      error: error.message || "ECPay 付款失敗", 
+      details: error.stack 
+    })
   }
 }

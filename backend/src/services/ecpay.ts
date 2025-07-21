@@ -45,6 +45,31 @@ function getTaiwanDateTimeString() {
 }
 
 class EcpayService {
+  
+  // 驗證 ECPay callback 的 CheckMacValue
+  verifyCallback(callbackData: any): boolean {
+    try {
+      const options = {
+        OperationMode: process.env.NODE_ENV === "production" ? "Production" : "Test",
+        MercProfile: {
+          MerchantID: process.env.ECPAY_MERCHANT_ID || "2000132",
+          HashKey: process.env.ECPAY_HASH_KEY || "ejCk326UnaZWKisg",
+          HashIV: process.env.ECPAY_HASH_IV || "q9jcZX8Ib9LM8wYk",
+        },
+        IgnorePayment: [],
+        IsProjectContractor: false,
+      }
+      
+      const ecpay = new ECPayAIO(options)
+      
+      // 使用 ECPay SDK 驗證
+      return ecpay.payment_client.aio_check_out_feedback(callbackData)
+    } catch (error) {
+      console.error('ECPay callback verification error:', error)
+      return false
+    }
+  }
+
   async createPayment(params: Partial<MerchantTradeData>) {
     // 動態組裝參數，外部可傳入所有欄位，否則用預設值
     const trade: MerchantTradeData = {
@@ -78,8 +103,21 @@ class EcpayService {
     }
     // 過濾掉 undefined/null
     const filteredTrade = Object.fromEntries(Object.entries(trade).filter(([_, v]) => v !== undefined && v !== null))
+    
     // 新增 log
-    console.log('送給 ECPay 的參數:', filteredTrade)
+    console.log('🔧 ECPay Service - 送給 ECPay 的參數:', filteredTrade)
+    
+    // 驗證必要參數
+    if (!filteredTrade.MerchantTradeNo) {
+      throw new Error("MerchantTradeNo is required")
+    }
+    if (!filteredTrade.TotalAmount || filteredTrade.TotalAmount <= 0) {
+      throw new Error("TotalAmount must be greater than 0")
+    }
+    if (!filteredTrade.ItemName) {
+      throw new Error("ItemName is required")
+    }
+    
     // 初始化 ECPay SDK
     const options = {
       OperationMode: process.env.NODE_ENV === "production" ? "Production" : "Test",
@@ -91,16 +129,50 @@ class EcpayService {
       IgnorePayment: [],
       IsProjectContractor: false,
     }
+    
+    console.log('🔧 ECPay SDK Options:', {
+      OperationMode: options.OperationMode,
+      MerchantID: options.MercProfile.MerchantID,
+      HashKey: options.MercProfile.HashKey ? '***' + options.MercProfile.HashKey.slice(-4) : 'NOT_SET',
+      HashIV: options.MercProfile.HashIV ? '***' + options.MercProfile.HashIV.slice(-4) : 'NOT_SET'
+    })
+    
     const ecpay = new ECPayAIO(options)
     // 產生付款表單 HTML
     try {
+      console.log('⚡ ECPay Service - 呼叫 aio_check_out_all...')
       const html = ecpay.payment_client.aio_check_out_all(filteredTrade)
-      if (!html || !html.includes("<form")) {
-        throw new Error("ECPay 未回傳付款表單")
+      
+      console.log('📄 ECPay Service - HTML 生成結果:')
+      console.log('- HTML type:', typeof html)
+      console.log('- HTML length:', html?.length || 0)
+      console.log('- Contains <form>:', html?.includes('<form') || false)
+      console.log('- HTML preview:', html?.substring(0, 300) + '...')
+      
+      if (!html) {
+        throw new Error("ECPay 回傳空的 HTML")
       }
+      
+      if (typeof html !== 'string') {
+        throw new Error(`ECPay 回傳非字串類型: ${typeof html}`)
+      }
+      
+      if (!html.includes("<form")) {
+        console.log('❌ HTML 不包含 <form> 標籤，完整內容:', html)
+        throw new Error("ECPay 未回傳有效的付款表單")
+      }
+      
+      console.log('✅ ECPay Service - HTML 驗證通過')
       return html
+      
     } catch (err: any) {
-      throw new Error("ECPay 處理失敗: " + (err.message || err))
+      console.error('❌ ECPay Service - 生成 HTML 失敗:', err)
+      console.error('❌ ECPay Service - Error details:', {
+        message: err.message,
+        stack: err.stack,
+        code: err.code
+      })
+      throw new Error("ECPay 處理失敗: " + (err.message || err.toString() || "Unknown error"))
     }
   }
 }

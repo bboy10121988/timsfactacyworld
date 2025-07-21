@@ -20,14 +20,17 @@ export default async function Checkout() {
   const customer = await retrieveCustomer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white" style={{ background: "var(--bg-secondary)" }}>
       {/* Header with subtle brand accent */}
-      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-sm">
+      <div className="border-b bg-white/80 backdrop-blur-sm" style={{ 
+        borderColor: "var(--border-primary)", 
+        backgroundColor: "var(--bg-primary)" 
+      }}>
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-6">
-          <h1 className="text-2xl font-light tracking-wide text-gray-900">
+          <h1 className="text-2xl font-light tracking-wide" style={{ color: "var(--text-primary)" }}>
             結帳
           </h1>
-          <p className="text-sm text-gray-500 mt-1">安全結帳流程</p>
+          <p className="text-sm mt-1" style={{ color: "var(--text-tertiary)" }}>安全結帳流程</p>
         </div>
       </div>
 

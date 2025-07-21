@@ -149,7 +149,7 @@ const Payment = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="text-blue-600 hover:text-blue-600-hover"
               data-testid="edit-payment-button"
             >
               編輯
@@ -212,11 +212,11 @@ const Payment = ({
 
           {paidByGiftcard && (
             <div className="flex flex-col w-1/3">
-              <Text className="text-sm text-ui-fg-base mb-1 font-medium">
+              <Text className="text-sm text-gray-900 mb-1 font-medium">
                 付款方式
               </Text>
               <Text
-                className="text-xs text-ui-fg-subtle"
+                className="text-xs text-gray-600"
                 data-testid="payment-method-summary"
               >
                 禮品卡
@@ -254,11 +254,11 @@ const Payment = ({
           {cart && paymentReady && activeSession ? (
             <div className="flex items-start gap-x-1 w-full">
               <div className="flex flex-col w-1/3">
-                <Text className="text-sm text-ui-fg-base mb-1 font-medium">
+                <Text className="text-sm text-gray-900 mb-1 font-medium">
                   付款方式
                 </Text>
                 <Text
-                  className="text-xs text-ui-fg-subtle"
+                  className="text-xs text-gray-600"
                   data-testid="payment-method-summary"
                 >
                   {paymentInfoMap[activeSession?.provider_id]?.title ||
@@ -266,14 +266,14 @@ const Payment = ({
                 </Text>
               </div>
               <div className="flex flex-col w-1/3">
-                <Text className="text-sm text-ui-fg-base mb-1 font-medium">
+                <Text className="text-sm text-gray-900 mb-1 font-medium">
                   付款詳情
                 </Text>
                 <div
-                  className="flex gap-2 text-xs text-ui-fg-subtle items-center"
+                  className="flex gap-2 text-xs text-gray-600 items-center"
                   data-testid="payment-details-summary"
                 >
-                  <Container className="flex items-center h-7 w-fit p-2 bg-ui-button-neutral-hover">
+                  <Container className="flex items-center h-7 w-fit p-2 bg-gray-200">
                     {paymentInfoMap[selectedPaymentMethod]?.icon || (
                       <CreditCard />
                     )}
@@ -288,11 +288,11 @@ const Payment = ({
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              <Text className="txt-medium-plus text-gray-900 mb-1">
                 付款方式
               </Text>
               <Text
-                className="txt-medium text-ui-fg-subtle"
+                className="txt-medium text-gray-600"
                 data-testid="payment-method-summary"
               >
                 禮品卡

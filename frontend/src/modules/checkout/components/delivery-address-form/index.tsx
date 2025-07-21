@@ -266,9 +266,12 @@ const DeliveryAddressForm = ({
           name="city"
           value={formData.city}
           onChange={handleChange}
-          className={`w-full h-10 bg-white border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full h-10 bg-white border rounded-md px-4 py-2 focus:outline-none focus:ring-2 ${
             errors.city ? "border-rose-500" : "border-gray-200"
           }`}
+          style={{
+            '--tw-ring-color': 'var(--color-primary)',
+          } as React.CSSProperties}
           required
         >
           <option value="">請選擇縣市</option>

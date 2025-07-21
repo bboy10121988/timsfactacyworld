@@ -5,13 +5,16 @@ export async function POST(req: Request) {
   console.log('⏰ 時間:', new Date().toISOString())
   
   try {
-    const { cart, customer, shippingAddress, shippingMethod } = await req.json()
+    const { cart, customer, shippingAddress, shippingMethod, selectedStore } = await req.json()
     
     console.log('📦 前端收到的參數:')
     console.log('- cart ID:', cart?.id)
+    console.log('- cart total:', cart?.total)
+    console.log('- cart items:', cart?.items?.length || 0)
     console.log('- customer ID:', customer?.id) 
     console.log('- shippingAddress:', !!shippingAddress ? '✅ 有地址' : '❌ 無地址')
     console.log('- shippingMethod:', shippingMethod)
+    console.log('- selectedStore:', !!selectedStore ? '✅ 有門市' : '❌ 無門市')
 
     // 驗證必要資訊
     if (!cart || !cart.id) {
@@ -35,29 +38,61 @@ export async function POST(req: Request) {
 
     console.log('🔄 準備調用後端 API...')
     console.log('後端 URL:', `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/ecpay/create-payment`)
+    console.log('API Key:', process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? 'SET' : 'NOT_SET')
     
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/ecpay/create-payment`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
-        },
-        body: JSON.stringify({ 
-          cart,
-          customer,
-          shippingAddress,
-          shippingMethod
-        }),
-      }
-    )
+    const backendUrl = `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/ecpay/create-payment`
+    const requestBody = { 
+      cart,
+      customer,
+      shippingAddress,
+      shippingMethod,
+      selectedStore
+    }
+    
+    console.log('🔄 Request payload:', JSON.stringify(requestBody, null, 2))
+    
+    const response = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+      },
+      body: JSON.stringify(requestBody),
+    })
 
     console.log('後端回應狀態:', response.status, response.statusText)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ 後端錯誤回應:', errorText)
+      
+      try {
+        const errorData = JSON.parse(errorText)
+        return NextResponse.json(
+          { error: errorData.error || errorData.message || "後端處理失敗" },
+          { status: response.status }
+        )
+      } catch {
+        return NextResponse.json(
+          { error: `後端處理失敗: ${response.status} ${response.statusText}` },
+          { status: response.status }
+        )
+      }
+    }
     
     const data = await response.json()
     console.log('後端回應數據:', data)
     
+    // 驗證回應數據
+    if (!data.html) {
+      console.error('❌ 後端未返回 HTML:', data)
+      return NextResponse.json(
+        { error: "後端未返回付款表單 HTML" },
+        { status: 500 }
+      )
+    }
+    
+    console.log('✅ 付款表單 HTML 驗證通過')
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error creating payment:", error)

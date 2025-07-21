@@ -62,7 +62,7 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
       id: "ecpay_atm",
       name: "ATM 轉帳",
       description: "虛擬帳號轉帳 (3天內完成轉帳)",
-      icon: <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">ATM</div>,
+      icon: <div className="w-5 h-5 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "var(--color-primary)" }}>ATM</div>,
       available: true
     },
     {
@@ -111,49 +111,53 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
                 key={option.id}
                 value={option.id}
                 disabled={!option.available}
-                className={({ checked, disabled }) => 
-                  clx(
-                    "relative flex cursor-pointer rounded-lg p-4 focus:outline-none",
-                    {
-                      "bg-blue-50 border-2 border-blue-500": checked && !disabled,
-                      "border border-gray-300 bg-white": !checked && !disabled,
-                      "border border-gray-200 bg-gray-50 cursor-not-allowed opacity-50": disabled,
-                    }
-                  )
-                }
               >
                 {({ checked, disabled }) => (
-                  <div className="flex w-full items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={clx(
-                        "flex items-center justify-center",
-                        disabled ? "text-gray-400" : "text-gray-700"
-                      )}>
-                        {option.icon}
-                      </div>
-                      <div>
-                        <Text className={clx(
-                          "font-medium",
-                          disabled ? "text-gray-400" : "text-gray-900"
-                        )}>
-                          {option.name}
-                        </Text>
-                        <Text className={clx(
-                          "text-sm mt-1",
-                          disabled ? "text-gray-400" : "text-gray-600"
-                        )}>
-                          {option.description}
-                        </Text>
-                        {!option.available && option.id === "ecpay_store_payment" && (
-                          <Text className="text-xs text-orange-600 mt-1">
-                            ※ 請先選擇超商取貨配送方式
-                          </Text>
-                        )}
-                      </div>
-                    </div>
-                    {checked && !disabled && (
-                      <CheckCircleSolid className="w-5 h-5 text-blue-600" />
+                  <div 
+                    className={clx(
+                      "relative flex cursor-pointer rounded-lg p-4 focus:outline-none border-2",
+                      {
+                        "cursor-not-allowed opacity-50": disabled,
+                      }
                     )}
+                    style={{
+                      backgroundColor: checked && !disabled ? "var(--bg-secondary)" : "var(--bg-primary)",
+                      borderColor: checked && !disabled ? "var(--color-primary)" : 
+                                 disabled ? "var(--border-secondary)" : "var(--border-primary)"
+                    }}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={clx(
+                          "flex items-center justify-center",
+                          disabled ? "text-gray-400" : "text-gray-700"
+                        )}>
+                          {option.icon}
+                        </div>
+                        <div>
+                          <Text className={clx(
+                            "font-medium",
+                            disabled ? "text-gray-400" : "text-gray-900"
+                          )}>
+                            {option.name}
+                          </Text>
+                          <Text className={clx(
+                            "text-sm mt-1",
+                            disabled ? "text-gray-400" : "text-gray-600"
+                          )}>
+                            {option.description}
+                          </Text>
+                          {!option.available && option.id === "ecpay_store_payment" && (
+                            <Text className="text-xs text-orange-600 mt-1">
+                              ※ 請先選擇超商取貨配送方式
+                            </Text>
+                          )}
+                        </div>
+                      </div>
+                      {checked && !disabled && (
+                        <CheckCircleSolid className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
+                      )}
+                    </div>
                   </div>
                 )}
               </RadioGroup.Option>

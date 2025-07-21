@@ -181,7 +181,7 @@ const Shipping: React.FC<ShippingProps> = ({
             <Text>
               <button
                 onClick={handleEdit}
-                className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+                className="text-blue-600 hover:text-blue-600-hover"
                 data-testid="edit-delivery-button"
               >
                 編輯
@@ -193,10 +193,10 @@ const Shipping: React.FC<ShippingProps> = ({
         <>
           <div className="grid">
             <div className="flex flex-col">
-              <span className="font-medium txt-medium text-ui-fg-base">
+              <span className="font-medium txt-medium text-gray-900">
                 Shipping method
               </span>
-              <span className="mb-4 text-ui-fg-muted txt-medium">
+              <span className="mb-4 text-gray-500 txt-medium">
                 您希望訂單如何配送
               </span>
             </div>
@@ -221,7 +221,7 @@ const Shipping: React.FC<ShippingProps> = ({
                       className={clx(
                         "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
                         {
-                          "border-ui-border-interactive":
+                          "border-gray-900":
                             showPickupOptions === PICKUP_OPTION_ON,
                         }
                       )}
@@ -234,7 +234,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           自取訂單
                         </span>
                       </div>
-                      <span className="justify-self-end text-ui-fg-base">
+                      <span className="justify-self-end text-gray-900">
                         -
                       </span>
                     </Radio>
@@ -259,7 +259,7 @@ const Shipping: React.FC<ShippingProps> = ({
                         className={clx(
                           "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
                           {
-                            "border-ui-border-interactive":
+                            "border-gray-900":
                               option.id === shippingMethodId,
                             "hover:shadow-brders-none cursor-not-allowed":
                               isDisabled,
@@ -274,7 +274,7 @@ const Shipping: React.FC<ShippingProps> = ({
                             {option.name}
                           </span>
                         </div>
-                        <span className="justify-self-end text-ui-fg-base">
+                        <span className="justify-self-end text-gray-900">
                           {option.price_type === "flat" ? (
                             convertToLocale({
                               amount: option.amount!,
@@ -302,10 +302,10 @@ const Shipping: React.FC<ShippingProps> = ({
           {showPickupOptions === PICKUP_OPTION_ON && (
             <div className="grid">
               <div className="flex flex-col">
-                <span className="font-medium txt-medium text-ui-fg-base">
+                <span className="font-medium txt-medium text-gray-900">
                   Store
                 </span>
-                <span className="mb-4 text-ui-fg-muted txt-medium">
+                <span className="mb-4 text-gray-500 txt-medium">
                   Choose a store near you
                 </span>
               </div>
@@ -325,7 +325,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           className={clx(
                             "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-rounded px-8 mb-2 hover:shadow-borders-interactive-with-active",
                             {
-                              "border-ui-border-interactive":
+                              "border-gray-900":
                                 option.id === shippingMethodId,
                               "hover:shadow-brders-none cursor-not-allowed":
                                 option.insufficient_inventory,
@@ -340,7 +340,7 @@ const Shipping: React.FC<ShippingProps> = ({
                               <span className="text-base-regular">
                                 {option.name}
                               </span>
-                              <span className="text-base-regular text-ui-fg-muted">
+                              <span className="text-base-regular text-gray-500">
                                 {formatAddress(
                                   option.service_zone?.fulfillment_set?.location
                                     ?.address
@@ -348,7 +348,7 @@ const Shipping: React.FC<ShippingProps> = ({
                               </span>
                             </div>
                           </div>
-                          <span className="justify-self-end text-ui-fg-base">
+                          <span className="justify-self-end text-gray-900">
                             {convertToLocale({
                               amount: option.amount!,
                               currency_code: cart?.currency_code,
@@ -385,10 +385,10 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="text-small-regular">
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
-                <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                <Text className="txt-medium-plus text-gray-900 mb-1">
                   配送方式
                 </Text>
-                <Text className="txt-medium text-ui-fg-subtle">
+                <Text className="txt-medium text-gray-600">
                   {cart.shipping_methods?.at(-1)?.name}{" "}
                   {convertToLocale({
                     amount: cart.shipping_methods.at(-1)?.amount!,

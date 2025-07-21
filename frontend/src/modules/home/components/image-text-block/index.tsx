@@ -37,12 +37,15 @@ const ImageTextBlock = ({
   return (
     <div className={cn(
       "w-full max-w-[1440px] mx-auto",
-      hasTitle ? "py-12 md:py-20" : "py-8 md:py-12"
+      // 左圖右文和右圖左文模組例外，皆為0間距
+      (layout === 'imageLeft' || layout === 'imageRight') ? "" : 
+      // 其他布局：有標題則顯示間距，無標題則為0
+      hasTitle ? "py-12 md:py-20" : ""
     )}>
       {/* 左圖右文布局 */}
       {layout === 'imageLeft' && image && (
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="grid md:grid-cols-2 items-center">
+          <div className="relative aspect-[4/3] w-full overflow-hidden border border-white">
             <Image
               src={image.url || ''}
               alt={image.alt || '區塊圖片'}
@@ -70,7 +73,7 @@ const ImageTextBlock = ({
 
       {/* 右圖左文布局 */}
       {layout === 'imageRight' && image && (
-        <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="grid md:grid-cols-2 items-center">
           <div className={cn(
             "flex flex-col justify-center px-4 md:px-8 order-2 md:order-1",
             hasTitle ? "space-y-8" : "space-y-4"
@@ -85,7 +88,7 @@ const ImageTextBlock = ({
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>
-          <div className="relative aspect-[4/3] w-full overflow-hidden order-1 md:order-2">
+          <div className="relative aspect-[4/3] w-full overflow-hidden order-1 md:order-2 border border-white">
             <Image
               src={image.url || ''}
               alt={image.alt || '區塊圖片'}

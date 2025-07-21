@@ -40,7 +40,7 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
       id: "ecpay_atm",
       name: "ATM 轉帳",
       description: "線上產生專屬虛擬帳號",
-      icon: <span className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs">ATM</span>,
+      icon: <span className="w-5 h-5 rounded flex items-center justify-center text-white text-xs" style={{ backgroundColor: "var(--color-primary)" }}>ATM</span>,
       available: true
     },
     {
@@ -97,18 +97,21 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
               key={option.id}
               value={option.id}
               disabled={!option.available || isLoading}
-              className={({ active, checked, disabled }) => clx(
-                "relative flex cursor-pointer rounded-lg px-5 py-4 shadow-sm focus:outline-none",
-                {
-                  "bg-gray-50 cursor-not-allowed": disabled,
-                  "border-2 border-blue-500": checked,
-                  "border border-gray-300": !checked,
-                  "ring-2 ring-blue-200": active && !disabled
-                }
-              )}
             >
-              {({ checked, disabled }) => (
-                <>
+              {({ active, checked, disabled }) => (
+                <div
+                  className={clx(
+                    "relative flex cursor-pointer rounded-lg px-5 py-4 shadow-sm focus:outline-none border-2",
+                    {
+                      "bg-gray-50 cursor-not-allowed": disabled,
+                    }
+                  )}
+                  style={{
+                    backgroundColor: disabled ? "#f9fafb" : checked ? "var(--bg-secondary)" : "var(--bg-primary)",
+                    borderColor: checked ? "var(--color-primary)" : "var(--border-primary)",
+                    boxShadow: active && !disabled ? "0 0 0 2px var(--color-primary-light)" : undefined
+                  }}
+                >
                   <div className="flex w-full items-center justify-between">
                     <div className="flex items-center">
                       <div className="text-sm">
@@ -144,10 +147,13 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
                   </div>
                   {checked && (
                     <div className="absolute top-4 right-4">
-                      <CheckCircleSolid className="h-5 w-5 text-blue-500" />
+                      <CheckCircleSolid 
+                        className="h-5 w-5"
+                        style={{ color: "var(--color-primary)" }}
+                      />
                     </div>
                   )}
-                </>
+                </div>
               )}
             </RadioGroup.Option>
           ))}

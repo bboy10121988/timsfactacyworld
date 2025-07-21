@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECPay 物流加密測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 ECPay 物流加密測試工具</h1>
+    
+    <div class="container">
+        <h2>測試項目</h2>
+        <p>此工具用於測試 ECPay 物流電子地圖的加密驗證功能，確保可以正確生成 CheckMacValue。</p>
+        
+        <button class="button" onclick="testLogisticsMapAPI()">🗺️ 測試電子地圖 API</button>
+        <button class="button" onclick="testAllLogisticsTypes()">📦 測試所有物流類型</button>
+        <button class="button" onclick="clearResults()">🧹 清除結果</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        let testResults = [];
+
+        function addResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleString('zh-TW');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = `[${timestamp}] ${message}`;
+            
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.appendChild(resultDiv);
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+            
+            testResults.push({ timestamp, message, type });
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            testResults = [];
+            addResult('測試結果已清除', 'info');
+        }
+
+        async function testLogisticsMapAPI() {
+            addResult('開始測試電子地圖 API...', 'info');
+            
+            try {
+                const testData = {
+                    logisticsSubType: 'FAMI',
+                    device: 0,
+                    extraData: JSON.stringify({ 
+                        test: true,
+                        timestamp: Date.now() 
+                    })
+                };
+
+                addResult(`發送請求參數: ${JSON.stringify(testData, null, 2)}`);
+
+                const response = await fetch('http://localhost:9000/store/ecpay/logistics-map', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': 'pk_6a5b6f62e29baea8089628c7713ce56a388c5944011f43fcf15b8837b00464b7'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addResult('✅ API 呼叫成功！', 'success');
+                    addResult(`回應資料: ${JSON.stringify(result, null, 2)}`);
+                    
+                    // 檢查是否包含 CheckMacValue
+                    if (result.params && result.params.CheckMacValue) {
+                        addResult(`✅ CheckMacValue 已生成: ${result.params.CheckMacValue}`, 'success');
+                    } else {
+                        addResult('❌ 缺少 CheckMacValue', 'error');
+                    }
+                    
+                    // 檢查必要參數
+                    const requiredParams = ['MerchantID', 'MerchantTradeNo', 'LogisticsType', 'LogisticsSubType'];
+                    const missingParams = requiredParams.filter(param => !result.params[param]);
+                    
+                    if (missingParams.length === 0) {
+                        addResult('✅ 所有必要參數都存在', 'success');
+                    } else {
+                        addResult(`❌ 缺少必要參數: ${missingParams.join(', ')}`, 'error');
+                    }
+                    
+                } else {
+                    addResult(`❌ API 呼叫失敗: ${result.message}`, 'error');
+                    if (result.error) {
+                        addResult(`錯誤詳情: ${result.error}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addResult(`❌ 網路錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllLogisticsTypes() {
+            addResult('開始測試所有物流類型...', 'info');
+            
+            const logisticsTypes = [
+                { type: 'FAMI', name: '全家' },
+                { type: 'UNIMART', name: '7-ELEVEN' },
+                { type: 'HILIFE', name: '萊爾富' },
+                { type: 'FAMIC2C', name: '全家店到店' },
+                { type: 'UNIMARTC2C', name: '7-ELEVEN交貨便' },
+                { type: 'HILIFEC2C', name: '萊爾富店到店' }
+            ];
+
+            for (const logistics of logisticsTypes) {
+                addResult(`測試 ${logistics.name} (${logistics.type})...`);
+                
+                try {
+                    const response = await fetch('http://localhost:9000/store/ecpay/logistics-map', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-publishable-api-key': 'pk_6a5b6f62e29baea8089628c7713ce56a388c5944011f43fcf15b8837b00464b7'
+                        },
+                        body: JSON.stringify({
+                            logisticsSubType: logistics.type,
+                            device: 0
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success && result.params && result.params.CheckMacValue) {
+                        addResult(`✅ ${logistics.name}: CheckMacValue 生成成功`, 'success');
+                    } else {
+                        addResult(`❌ ${logistics.name}: ${result.message || '測試失敗'}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    addResult(`❌ ${logistics.name}: ${error.message}`, 'error');
+                }
+                
+                // 避免請求過於頻繁
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            addResult('所有物流類型測試完成', 'info');
+        }
+
+        // 頁面載入時顯示歡迎訊息
+        window.addEventListener('load', () => {
+            addResult('ECPay 物流加密測試工具已載入', 'info');
+            addResult('請點擊上方按鈕開始測試', 'info');
+        });
+    </script>
+</body>
+</html>
