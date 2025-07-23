@@ -71,10 +71,15 @@ class EcpayService {
   }
 
   async createPayment(params: Partial<MerchantTradeData>) {
+    // 確保必要參數存在
+    if (!params.MerchantTradeNo) {
+      throw new Error('MerchantTradeNo is required')
+    }
+    
     // 動態組裝參數，外部可傳入所有欄位，否則用預設值
     const trade: MerchantTradeData = {
       MerchantID: params.MerchantID || process.env.ECPAY_MERCHANT_ID || "2000132",
-      MerchantTradeNo: params.MerchantTradeNo || `ORDER${Date.now().toString().slice(-7)}${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
+      MerchantTradeNo: params.MerchantTradeNo, // 必須使用傳入的值
       MerchantTradeDate: params.MerchantTradeDate || getTaiwanDateTimeString(),
       PaymentType: params.PaymentType || "aio",
       TotalAmount: String(params.TotalAmount || 100),

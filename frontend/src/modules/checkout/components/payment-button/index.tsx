@@ -230,15 +230,38 @@ const ECPayPaymentButton = ({
       const data = await response.json()
 
       if (data.form_html) {
-        // 直接提交ECPay表單跳轉到綠界
+        // 開新視窗到ECPay付款頁面
         const tempDiv = document.createElement("div")
         tempDiv.innerHTML = data.form_html
         const form = tempDiv.querySelector("form")
         
         if (form) {
+          // 修改form target為新視窗
+          form.setAttribute('target', '_blank')
+          
+          // 開啟ECPay付款視窗
+          const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+          
+          if (!paymentWindow) {
+            throw new Error("無法開啟付款視窗，請檢查瀏覽器彈出視窗設定")
+          }
+          
+          // 在新視窗中提交表單
           document.body.appendChild(form)
           form.submit()
-          // 不需要設置 submitting = false，因為頁面會跳轉
+          
+          // 監聽視窗關閉事件
+          const checkClosed = setInterval(() => {
+            if (paymentWindow.closed) {
+              clearInterval(checkClosed)
+              // 視窗關閉後，檢查付款結果並重新導向
+              setTimeout(() => {
+                window.location.href = `/order/payment-result?cart_id=${cart.id}`
+              }, 1000)
+            }
+          }, 1000)
+          
+          setSubmitting(false)
           return
         }
       }

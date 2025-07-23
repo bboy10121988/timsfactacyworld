@@ -338,12 +338,59 @@ export default function CheckoutForm({
       console.log('✅ 付款表單 HTML 驗證通過，長度:', data.html.length)
 
       // 新開視窗寫入 ECPay 表單，避免 CSP 問題
-      const win = window.open('', '_blank')
+      const win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
       if (win) {
         console.log('準備寫入 ECPay 表單到新視窗...')
         win.document.write(data.html)
         win.document.close()
         console.log('已寫入表單並關閉 document')
+        
+        // 監聽付款視窗關閉，檢查付款狀態
+        const checkPaymentStatus = setInterval(() => {
+          if (win.closed) {
+            console.log('💳 付款視窗已關閉，檢查付款狀態...')
+            clearInterval(checkPaymentStatus)
+            
+            // 檢查訂單狀態
+            setTimeout(async () => {
+              try {
+                console.log('🔍 檢查購物車是否已轉換為訂單...')
+                const statusResponse = await fetch(`/store/carts/order-by-trade-no/${cart.metadata?.ecpay_trade_no || cart.id}`, {
+                  headers: {
+                    'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+                  }
+                })
+                
+                if (statusResponse.ok) {
+                  const orderData = await statusResponse.json()
+                  if (orderData.order && orderData.order.id) {
+                    console.log('✅ 訂單創建成功，跳轉到訂單完成頁面')
+                    toast.success('付款成功！正在跳轉到訂單詳情頁面...')
+                    setTimeout(() => {
+                      window.location.href = `/order/confirmed/${orderData.order.id}`
+                    }, 2000)
+                    return
+                  }
+                }
+                
+                // 如果沒有找到訂單，顯示提示
+                console.log('⚠️ 暫未找到對應訂單，可能還在處理中')
+                toast('付款處理中，請稍後查看訂單狀態', { 
+                  duration: 5000,
+                  icon: '⏳' 
+                })
+                
+              } catch (error) {
+                console.error('❌ 檢查付款狀態時發生錯誤:', error)
+                toast('付款狀態檢查失敗，請稍後查看訂單狀態', { 
+                  duration: 5000,
+                  icon: '⚠️' 
+                })
+              }
+            }, 3000) // 等待 3 秒讓 callback 處理完成
+          }
+        }, 1000) // 每秒檢查一次視窗狀態
+        
       } else {
         console.error('無法開啟新視窗，請檢查瀏覽器彈窗設定')
         throw new Error('無法開啟新視窗，請檢查瀏覽器彈窗設定')
