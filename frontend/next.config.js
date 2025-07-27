@@ -30,6 +30,59 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // 啟用實驗性功能以提升性能
+  experimental: {
+    optimizePackageImports: ['@medusajs/medusa', '@sanity/client'],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  
+  // 圖片優化
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9000',
+      },
+    ],
+    formats: ['image/webp', 'image/avif'],
+  },
+  
+  // HTTP 快取設定
+  async headers() {
+    return [
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+  
   // 配置 webpack 別名解析
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     const path = require('path')

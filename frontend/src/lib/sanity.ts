@@ -1,4 +1,5 @@
 import { createClient } from "@sanity/client"
+import { requestDeduplicator } from "./request-deduplicator"
 import type { ServiceCards } from './types/service-cards'
 import type { Category } from './types/sanity'
 import type { MainSection } from './types/page-sections'
@@ -10,42 +11,101 @@ const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "m7o2mv1n",
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2022-03-25",
-  useCdn: true
+  useCdn: true,
+  // 啟用 HTTP 快取
+  requestTagPrefix: 'sanity',
+  // 設定重試機制
+  maxRetries: 3,
+  retryDelay: (attemptNumber) => Math.min(300 * attemptNumber, 2000),
   // 移除無效的 token，只讀取公開數據
 })
 
+// 建立快取實例
+const cache = new Map()
+const CACHE_TTL = 5 * 60 * 1000 // 5分鐘
+const MAX_CACHE_SIZE = 50 // 最大快取項目數
+
+// 定期清理快取
+let cleanupInterval: NodeJS.Timeout | null = null
+if (typeof window === 'undefined') {
+  // 僅在服務端設定清理
+  cleanupInterval = setInterval(() => {
+    const now = Date.now()
+    cache.forEach((entry, key) => {
+      if (now - entry.timestamp > CACHE_TTL * 2) {
+        cache.delete(key)
+      }
+    })
+    
+    // 如果快取太大，移除最舊的項目
+    if (cache.size > MAX_CACHE_SIZE) {
+      const entries: [string, any][] = []
+      cache.forEach((entry, key) => {
+        entries.push([key, entry])
+      })
+      entries.sort((a, b) => a[1].timestamp - b[1].timestamp)
+      const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE)
+      toRemove.forEach(([key]) => cache.delete(key))
+    }
+  }, 60000) // 每分鐘清理一次
+}
+
+// 快取包裝函數 - 優化版，加入去重功能
+function withCache<T>(key: string, fn: () => Promise<T>, ttl: number = CACHE_TTL): Promise<T> {
+  return requestDeduplicator.dedupe(key, async () => {
+    const cached = cache.get(key)
+    if (cached && Date.now() - cached.timestamp < ttl) {
+      return cached.data
+    }
+
+    try {
+      const data = await fn()
+      cache.set(key, { data, timestamp: Date.now() })
+      return data
+    } catch (error) {
+      // 如果有快取資料但已過期，在錯誤時仍返回舊資料
+      if (cached) {
+        console.warn(`API 調用失敗，使用快取資料: ${key}`, error)
+        return cached.data
+      }
+      throw error
+    }
+  })
+}
+
 export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
-  const query = `*[_type == "homePage"][0] {
-    title,
-    "mainSections": mainSections[] {
-      ...select(
-        _type == "mainBanner" => {
-          _type,
-          isActive,
-          "slides": slides[] {
-            heading,
-            "backgroundImage": backgroundImage.asset->url,
-            "backgroundImageAlt": backgroundImage.alt,
-            buttonText,
-            buttonLink
+  return withCache('homepage', async () => {
+    const query = `*[_type == "homePage"][0] {
+      title,
+      "mainSections": mainSections[] {
+        ...select(
+          _type == "mainBanner" => {
+            _type,
+            isActive,
+            "slides": slides[] {
+              heading,
+              "backgroundImage": backgroundImage.asset->url,
+              "backgroundImageAlt": backgroundImage.alt,
+              buttonText,
+              buttonLink
+            },
+            "settings": settings {
+              autoplay,
+              autoplaySpeed,
+              showArrows,
+              showDots
+            }
           },
-          "settings": settings {
-            autoplay,
-            autoplaySpeed,
-            showArrows,
-            showDots
-          }
+      _type == "imageTextBlock" => {
+        _type,
+        isActive,
+        heading,
+        hideTitle,
+        content,
+        "image": image {
+          "url": asset->url,
+          "alt": alt
         },
-    _type == "imageTextBlock" => {
-      _type,
-      isActive,
-      heading,
-      hideTitle,
-      content,
-      "image": image {
-        "url": asset->url,
-        "alt": alt
-      },
       layout,
       "leftImage": leftImage {
         "url": asset->url,
@@ -141,37 +201,41 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
   }
   
   return result as { title: string; mainSections: MainSection[] }
+  })
 }
 
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
-  const query = `*[_type == "featuredProducts" && isActive == true]{
-    title,
-    handle,
-    collection_id,
-    description,
-    isActive
-  }`
-  return client.fetch(query)
+  return withCache('featured-products', async () => {
+    const query = `*[_type == "featuredProducts" && isActive == true]{
+      title,
+      handle,
+      collection_id,
+      description,
+      isActive
+    }`
+    return client.fetch(query)
+  })
 }
 
 export async function getHeader() {
-  const query = `*[_type == "header"][0]{
-    logo{
-      "url": asset->url,
-      alt
-    },
-    storeName,
-    logoWidth,
-    navigation[]{
-      name,
-      href
-    },
-    marquee {
-      enabled,
-      text1 {
-        enabled,
-        content
+  return withCache('header', async () => {
+    const query = `*[_type == "header"][0]{
+      logo{
+        "url": asset->url,
+        alt
       },
+      storeName,
+      logoWidth,
+      navigation[]{
+        name,
+        href
+      },
+      marquee {
+        enabled,
+        text1 {
+          enabled,
+          content
+        },
       text2 {
         enabled,
         content
@@ -185,6 +249,7 @@ export async function getHeader() {
     }
   }`
   return client.fetch(query)
+  })
 }
 
 export async function getPageBySlug(slug: string): Promise<PageData | null> {
@@ -349,7 +414,7 @@ export async function getAllPosts(category?: string, limit: number = 50): Promis
       body // 添加內文欄位
     }`
 
-    const posts = await client.fetch<BlogPost>(query)
+    const posts = await client.fetch<BlogPost[]>(query)
     return posts || []
   } catch (error) {
     console.error('[getAllPosts] 從 Sanity 獲取部落格文章時發生錯誤:', error)
