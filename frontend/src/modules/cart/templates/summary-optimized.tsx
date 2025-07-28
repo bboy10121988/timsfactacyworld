@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Button, Heading } from "@medusajs/ui"
 import { useRouter } from "next/navigation"
 import { useParams } from "next/navigation"
@@ -9,14 +8,12 @@ import { toast } from "react-hot-toast"
 
 import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
-import DiscountCode from "@modules/checkout/components/discount-code"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import QuickCheckoutActions from "@modules/cart/components/quick-checkout-actions"
+import CartActions from "@modules/cart/components/cart-actions"
 import { HttpTypes } from "@medusajs/types"
 
 type SummaryProps = {
-  cart: HttpTypes.StoreCart & {
-    promotions: HttpTypes.StorePromotion[]
-  }
+  cart: HttpTypes.StoreCart
 }
 
 function getCheckoutStep(cart: HttpTypes.StoreCart) {
@@ -108,9 +105,6 @@ const Summary = ({ cart }: SummaryProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Discount Code */}
-      <DiscountCode cart={cart} />
-      
       {/* Price Breakdown */}
       <div className="space-y-4">
         <CartTotals totals={cart} />
@@ -123,18 +117,19 @@ const Summary = ({ cart }: SummaryProps) => {
           disabled={!isReady || isNavigating}
           data-testid="checkout-button"
           className={`
-            w-full h-12 rounded-lg font-medium text-base transition-all duration-200
+            checkout-button w-full h-12 rounded-lg font-medium text-base transition-all duration-200
             ${isReady 
-              ? 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5' 
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 gradient-button' 
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }
             ${isNavigating ? 'opacity-75 cursor-wait' : ''}
+            ${isReady ? 'pulse-effect' : ''}
           `}
         >
           <div className="flex items-center justify-center space-x-2">
             {isNavigating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin loading-spinner"></div>
                 <span>準備中...</span>
               </>
             ) : (
@@ -154,20 +149,26 @@ const Summary = ({ cart }: SummaryProps) => {
         {isReady && (
           <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
             <div className="flex items-center space-x-1">
-              <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 616 0z" clipRule="evenodd" />
+              <svg className="w-3 h-3 text-green-500 security-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
               </svg>
               <span>安全結帳</span>
             </div>
             <div className="flex items-center space-x-1">
-              <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3 h-3 text-blue-500 speed-icon" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
-              <span>快速結帳</span>
+              <span>快速結帳 (&lt;1秒)</span>
             </div>
           </div>
         )}
       </div>
+      
+      {/* 快速結帳選項 */}
+      <QuickCheckoutActions cart={cart} />
+      
+      {/* 購物車管理操作 */}
+      <CartActions cart={cart} />
     </div>
   )
 }
