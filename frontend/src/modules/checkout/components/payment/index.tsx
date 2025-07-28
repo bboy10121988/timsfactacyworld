@@ -9,7 +9,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import PaymentContainer, {
   StripeCardContainer,
 } from "@modules/checkout/components/payment-container"
-// import EcpayPayment from "@modules/checkout/components/ecpay-payment"
+import EcpayPayment from "@modules/checkout/components/ecpay-payment"
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -54,18 +54,17 @@ const Payment = ({
       await initiatePaymentSession(cart, {
         provider_id: method,
       })
-    } else if (isEcpay(method)) {
-      await initiatePaymentSession(cart, {
-        provider_id: method,
-      })
     }
+    // ECPay 不需要建立 payment session，會在完成訂單時直接處理
   }
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
+    (activeSession && cart?.shipping_methods.length !== 0) || 
+    paidByGiftcard ||
+    (isEcpayMethod && cart?.shipping_methods.length !== 0) // ECPay 不需要 activeSession
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -92,7 +91,8 @@ const Payment = ({
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
-      if (!checkActiveSession) {
+      // 對於非 ECPay 支付方式，需要建立或檢查 payment session
+      if (!isEcpayMethod && !checkActiveSession) {
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
@@ -161,14 +161,14 @@ const Payment = ({
         <div className={isOpen ? "block" : "hidden"}>
           {!paidByGiftcard && (
             <>
-              {/* 綠界金流選項 - 暫時注釋掉 */}
-              {/* <div className="mb-6">
+              {/* 綠界金流選項 */}
+              <div className="mb-6">
                 <EcpayPayment 
                   cart={cart}
                   onPaymentMethodChange={setPaymentMethod}
                   selectedPaymentMethod={selectedPaymentMethod}
                 />
-              </div> */}
+              </div>
 
               {/* 原有的其他支付方法 */}
               {availablePaymentMethods?.filter(pm => pm.id !== "ecpay")?.length > 0 && (

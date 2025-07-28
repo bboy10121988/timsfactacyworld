@@ -83,6 +83,26 @@ const config = defineConfig({
           }
         ]
       }
+    },
+    {
+      resolve: "@medusajs/payment",
+      options: {
+        providers: [
+          // ECPay 支付提供者
+          {
+            resolve: "./src/modules/ecpay-payment",
+            id: "ecpay_payment",
+            options: {
+              merchant_id: process.env.ECPAY_MERCHANT_ID || "3002607",
+              hash_key: process.env.ECPAY_HASH_KEY || "pwFHCqoQZGmho4w6",
+              hash_iv: process.env.ECPAY_HASH_IV || "EkRm7iFT261dpevs",
+              base_url: process.env.ECPAY_BASE_URL || "https://payment-stage.ecpay.com.tw",
+              return_url: process.env.ECPAY_RETURN_URL || "https://localhost:9000/api/ecpay-webhook",
+              client_back_url: process.env.ECPAY_CLIENT_BACK_URL || "http://localhost:8000/order/thank-you"
+            }
+          }
+        ]
+      }
     }
   ],
   plugins: [

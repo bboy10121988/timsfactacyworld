@@ -53,45 +53,17 @@ const EcpayPayment: React.FC<EcpayPaymentProps> = ({
   const paymentOptions = [
     {
       id: "ecpay_credit_card",
-      name: "線上刷卡",
+      name: "綠界刷卡",
       description: "信用卡 / 金融卡 (VISA、Mastercard、JCB)",
       icon: <CreditCard className="w-5 h-5" />,
       available: true
     },
     {
-      id: "ecpay_atm",
-      name: "ATM 轉帳",
-      description: "虛擬帳號轉帳 (3天內完成轉帳)",
-      icon: <div className="w-5 h-5 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: "var(--color-primary)" }}>ATM</div>,
+      id: "ecpay_bank_transfer",
+      name: "銀行轉帳",
+      description: "手動銀行轉帳 (需要人工核帳)",
+      icon: <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">銀</div>,
       available: true
-    },
-    {
-      id: "ecpay_barcode",
-      name: "超商代碼繳費",
-      description: "7-11、全家、萊爾富、OK超商 (3天內繳費)",
-      icon: <div className="w-5 h-5 bg-orange-500 rounded flex items-center justify-center text-white text-xs font-bold">超</div>,
-      available: true
-    },
-    {
-      id: "ecpay_linepay",
-      name: "LINE Pay",
-      description: "使用 LINE Pay 付款",
-      icon: <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center text-white text-xs font-bold">L</div>,
-      available: true
-    },
-    {
-      id: "ecpay_jkopay",
-      name: "街口支付",
-      description: "使用街口支付付款",
-      icon: <div className="w-5 h-5 bg-purple-500 rounded flex items-center justify-center text-white text-xs font-bold">街</div>,
-      available: true
-    },
-    {
-      id: "ecpay_store_payment", 
-      name: "超商付款",
-      description: "到超商取貨時付款 (僅限超商取貨)",
-      icon: <div className="w-5 h-5 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">付</div>,
-      available: isConvenienceStoreDelivery
     }
   ]
 

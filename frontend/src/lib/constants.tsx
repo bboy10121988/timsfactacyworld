@@ -31,6 +31,10 @@ export const paymentInfoMap: Record<
     icon: <CreditCard />,
   },
   // ECPay 付款方式
+  pp_ecpay_payment_ecpay_payment: {
+    title: "綠界科技付款",
+    icon: <CreditCard />,
+  },
   ecpay_credit_card: {
     title: "線上刷卡",
     icon: <CreditCard />,
@@ -71,7 +75,7 @@ export const isManual = (providerId?: string) => {
 
 // Check if it's ECPay payment
 export const isECPay = (providerId?: string) => {
-  return providerId?.startsWith("ecpay_")
+  return providerId?.startsWith("ecpay_") || providerId?.includes("ecpay")
 }
 
 // Add currencies that don't need to be divided by 100

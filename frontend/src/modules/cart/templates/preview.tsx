@@ -1,51 +1,40 @@
-"use client"
-
-import repeat from "@lib/util/repeat"
+import { Heading } from "@medusajs/ui"
+import Item from "@modules/cart/components/item"
 import { HttpTypes } from "@medusajs/types"
-import { clx } from "@medusajs/ui"
 
-import CheckoutItem from "@modules/checkout/components/checkout-item"
-import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
-
-type ItemsTemplateProps = {
+type ItemsPreviewTemplateProps = {
   cart: HttpTypes.StoreCart
 }
 
-const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
-  const items = cart.items
-  const hasOverflow = items && items.length > 4
+const ItemsPreviewTemplate = ({ cart }: ItemsPreviewTemplateProps) => {
+  const hasOverflow = cart?.items && cart.items.length > 4
 
   return (
-    <div className="space-y-4">
-      <div
-        className={clx("space-y-4", {
-          "max-h-[480px] overflow-y-auto pr-2": hasOverflow,
-        })}
-      >
-        {items
-          ? items
-              .sort((a, b) => {
-                return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-              })
-              .map((item, index) => (
-                <div 
-                  key={item.id}
-                  className={clx(
-                    "border-b border-gray-100 last:border-b-0 pb-4 last:pb-0",
-                    { "pt-4": index > 0 }
-                  )}
-                >
-                  <CheckoutItem
-                    item={item}
-                    currencyCode={cart.currency_code}
-                  />
-                </div>
-              ))
-          : repeat(3).map((i) => (
-              <div key={i} className="border-b border-gray-100 last:border-b-0 pb-4 last:pb-0">
-                <SkeletonLineItem />
-              </div>
-            ))}
+    <div>
+      <div className="flex items-center pb-3">
+        <Heading className="text-[2rem] leading-[2.75rem]">
+          In your Cart
+        </Heading>
+      </div>
+      <div className="flex flex-col gap-y-4">
+        {cart?.items
+          ?.slice(0, 4)
+          .sort((a, b) => {
+            return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+          })
+          ?.map((item) => (
+            <Item
+              key={item.id}
+              item={item}
+              type="preview"
+              currencyCode={cart.region?.currency_code || 'TWD'}
+            />
+          ))}
+        {hasOverflow && (
+          <span className="text-small-regular text-ui-fg-base">
+            + {(cart.items?.length || 0) - 4} more
+          </span>
+        )}
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
 import EcpayService from "../../../../services/ecpay"
+import { addTradeMapping } from "../../../../utils/trade-mapping"
 
 export async function POST(
   req: MedusaRequest,
@@ -66,7 +67,7 @@ export async function POST(
       TotalAmount: totalAmount,
       TradeDesc: "網站訂單付款",
       ItemName: itemName,
-      ReturnURL: returnUrl || `${backendUrl}/webhooks/ecpay`, // 後端回調 - 使用正確的 webhooks 端點
+      ReturnURL: returnUrl || `${backendUrl}/hooks/ecpay/callback`, // 後端回調 - 修正為正確的端點
       ClientBackURL: clientBackUrl || `${frontendUrl}/tw/account/orders`, // 前端重定向
       ChoosePayment: choosePayment || "ALL",
       EncryptType: 1,
@@ -74,25 +75,21 @@ export async function POST(
 
     console.log('🚚 送給綠界的參數:', JSON.stringify(ecpayParams, null, 2))
 
-    // 將 MerchantTradeNo 保存到 Cart 的 metadata 中，以便 callback 時能找到對應的 Cart
+    // 將 MerchantTradeNo 保存到 trade mapping 中，以便 callback 時能找到對應的 Cart
     try {
-      const manager: any = req.scope.resolve("manager")
-      const cartRepository = manager.getRepository("Cart")
+      // 使用全域 trade mapping 存儲
+      addTradeMapping(merchantTradeNo, {
+        cartId: cart.id,
+        timestamp: Date.now(),
+        totalAmount: totalAmount,
+        customer: customer,
+        items: cart.items
+      })
       
-      const existingCart = await cartRepository.findOne({ where: { id: cart.id } })
-      if (existingCart) {
-        existingCart.metadata = {
-          ...existingCart.metadata,
-          ecpay_merchant_trade_no: merchantTradeNo,
-          ecpay_created_at: new Date().toISOString(),
-          ecpay_total_amount: totalAmount
-        }
-        await cartRepository.save(existingCart)
-        console.log('✅ Cart metadata updated with MerchantTradeNo:', merchantTradeNo)
-      }
+      console.log('✅ Trade mapping stored - MerchantTradeNo:', merchantTradeNo, '-> CartID:', cart.id)
+      
     } catch (metadataError) {
-      console.warn('⚠️ Failed to update cart metadata:', metadataError)
-      // 繼續處理，不中斷付款流程
+      console.error('❌ Failed to store trade mapping:', metadataError)
     }
 
     // 直接實例化 ECPay 服務

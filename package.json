@@ -3,24 +3,16 @@
   "version": "1.0.0",
   "description": "Medusa + Next.js + ECPay 電商專案",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "install:all": "yarn install && yarn install:backend && yarn install:frontend",
-    "install:backend": "cd backend && yarn install",
-    "install:frontend": "cd frontend && yarn install",
-    "dev": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
-    "dev:integrated": "concurrently \"yarn dev:backend\" \"yarn dev:frontend\"",
+    "dev": "concurrently \"cd backend && yarn dev\" \"cd frontend && yarn dev\"",
     "dev:backend": "cd backend && yarn dev",
     "dev:frontend": "cd frontend && yarn dev",
-    "build": "yarn build:backend && yarn build:frontend",
+    "install:backend": "cd backend && yarn install",
+    "install:frontend": "cd frontend && yarn install",
+    "install:all": "yarn install:backend && yarn install:frontend",
     "build:backend": "cd backend && yarn build",
     "build:frontend": "cd frontend && yarn build",
-    "deploy:setup": "echo '請先在 Vercel 和 GitHub Pages 設定部署環境，詳情請參考 DEPLOYMENT.md'",
-    "deploy:frontend": "cd frontend && yarn build",
-    "deploy:backend": "echo '後端自動部署到 Vercel，請確認環境變數已設定'"
+    "build": "yarn build:backend && yarn build:frontend"
   },
   "dependencies": {
     "@cspell/cspell-bundled-dicts": "^9.2.0",

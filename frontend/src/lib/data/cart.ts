@@ -24,6 +24,7 @@ export async function retrieveCart(cartId?: string) {
   const id = cartId || (await getCartId())
 
   if (!id) {
+    // 這是正常情況 - 新用戶還沒有購物車
     return null
   }
 
@@ -48,32 +49,31 @@ export async function retrieveCart(cartId?: string) {
     })
     .then(({ cart }) => cart)
     .catch((error) => {
-      console.error("❌ retrieveCart 失敗:", error)
+      // 只在真正的錯誤時記錄，而不是沒有購物車時
+      if (error.status !== 404) {
+        // 在開發環境才顯示錯誤
+        if (process.env.NODE_ENV === 'development') {
+          console.error("❌ retrieveCart 失敗:", error)
+        }
+      }
       return null
     })
 }
 
 export async function getOrSetCart(countryCode: string) {
-  console.log("🔍 getOrSetCart 開始:", { countryCode })
-  
   const region = await getRegion(countryCode)
 
   if (!region) {
-    console.error("❌ 找不到地區:", countryCode)
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
-  console.log("✅ 找到地區:", { regionId: region.id, regionName: region.name })
-
   let cart = await retrieveCart()
-  console.log("🔍 獲取現有購物車:", cart ? { id: cart.id, region_id: cart.region_id } : "無現有購物車")
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
   if (!cart) {
-    console.log("🛒 創建新購物車...")
     try {
       const cartResp = await sdk.store.cart.create(
         { region_id: region.id },
@@ -81,32 +81,26 @@ export async function getOrSetCart(countryCode: string) {
         headers
       )
       cart = cartResp.cart
-      console.log("✅ 創建購物車成功:", { id: cart.id })
 
       await setCartId(cart.id)
 
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
     } catch (error) {
-      console.error("❌ 創建購物車失敗:", error)
       throw error
     }
   }
 
   if (cart && cart?.region_id !== region.id) {
-    console.log("🔄 更新購物車地區...")
     try {
       await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
-      console.log("✅ 購物車地區更新成功")
     } catch (error) {
-      console.error("❌ 更新購物車地區失敗:", error)
       throw error
     }
   }
 
-  console.log("🎉 getOrSetCart 完成:", { cartId: cart.id })
   return cart
 }
 
@@ -144,29 +138,21 @@ export async function addToCart({
   quantity: number
   countryCode: string
 }) {
-  console.log("🛒 addToCart 開始:", { variantId, quantity, countryCode })
-  
   if (!variantId) {
-    console.error("❌ addToCart: Missing variant ID")
     throw new Error("Missing variant ID when adding to cart")
   }
 
   try {
-    console.log("🔍 獲取或創建購物車...")
     const cart = await getOrSetCart(countryCode)
 
     if (!cart) {
-      console.error("❌ addToCart: Error retrieving or creating cart")
       throw new Error("Error retrieving or creating cart")
     }
-
-    console.log("✅ 獲取購物車成功:", { cartId: cart.id })
 
     const headers = {
       ...(await getAuthHeaders()),
     }
 
-    console.log("🔄 添加商品到購物車...")
     await sdk.store.cart
       .createLineItem(
         cart.id,
@@ -178,7 +164,6 @@ export async function addToCart({
         headers
       )
       .then(async (response) => {
-        console.log("✅ 成功添加商品到購物車:", response)
         const cartCacheTag = await getCacheTag("carts")
         revalidateTag(cartCacheTag)
 
@@ -186,13 +171,9 @@ export async function addToCart({
         revalidateTag(fulfillmentCacheTag)
       })
       .catch((error) => {
-        console.error("❌ createLineItem 失敗:", error)
         throw error
       })
-
-    console.log("🎉 addToCart 完成")
   } catch (error) {
-    console.error("❌ addToCart 整體失敗:", error)
     throw error
   }
 }
@@ -304,8 +285,6 @@ export async function applyPromotions(codes: string[]) {
 
   // 確保 codes 是有效的字符串數組
   const validCodes = codes.filter(code => typeof code === 'string' && code.trim() !== '')
-  
-  console.log(`嘗試應用優惠碼到購物車 ${cartId}:`, validCodes)
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -314,7 +293,6 @@ export async function applyPromotions(codes: string[]) {
   return sdk.store.cart
     .update(cartId, { promo_codes: validCodes }, {}, headers)
     .then(async () => {
-      console.log("優惠碼應用成功:", validCodes)
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
 
@@ -322,7 +300,6 @@ export async function applyPromotions(codes: string[]) {
       revalidateTag(fulfillmentCacheTag)
     })
     .catch((error) => {
-      console.error("應用優惠碼失敗:", error)
       throw medusaError(error)
     })
 }
@@ -504,6 +481,12 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 
 export async function listCartOptions() {
   const cartId = await getCartId()
+  
+  // 如果沒有購物車 ID，返回空的運送選項
+  if (!cartId) {
+    return { shipping_options: [] }
+  }
+  
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -518,5 +501,7 @@ export async function listCartOptions() {
     next,
     headers,
     cache: "force-cache",
+  }).catch(() => {
+    return { shipping_options: [] }
   })
 }
