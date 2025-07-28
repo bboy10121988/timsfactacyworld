@@ -72,10 +72,19 @@ const config = defineConfig({
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
     }
   },
-  modules: {
-    // 促銷、庫存等模組 Medusa v2 內建
-    // ECPay provider 由 Medusa v2 自動掃描 src/modules/ecpay-payment
-  },
+  modules: [
+    {
+      resolve: "@medusajs/fulfillment",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/fulfillment-manual",
+            id: "manual"
+          }
+        ]
+      }
+    }
+  ],
   plugins: [
     {
       resolve: "@medusajs/file-local",
@@ -83,16 +92,7 @@ const config = defineConfig({
         upload_dir: "uploads"
       }
     }
-    // 完全移除 ECPay 插件，避免啟動問題
-  ],
-  // services: {
-  //   ecpay: {
-  //     resolve: "src/services/ecpay",
-  //     container: {
-  //       resolve: "ecpayService",
-  //     },
-  //   },
-  // },
+  ]
 })
 
 export default config

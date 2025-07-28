@@ -9,7 +9,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import PaymentContainer, {
   StripeCardContainer,
 } from "@modules/checkout/components/payment-container"
-import EcpayPayment from "@modules/checkout/components/ecpay-payment"
+// import EcpayPayment from "@modules/checkout/components/ecpay-payment"
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -161,14 +161,14 @@ const Payment = ({
         <div className={isOpen ? "block" : "hidden"}>
           {!paidByGiftcard && (
             <>
-              {/* 綠界金流選項 */}
-              <div className="mb-6">
+              {/* 綠界金流選項 - 暫時注釋掉 */}
+              {/* <div className="mb-6">
                 <EcpayPayment 
                   cart={cart}
                   onPaymentMethodChange={setPaymentMethod}
                   selectedPaymentMethod={selectedPaymentMethod}
                 />
-              </div>
+              </div> */}
 
               {/* 原有的其他支付方法 */}
               {availablePaymentMethods?.filter(pm => pm.id !== "ecpay")?.length > 0 && (

@@ -5,33 +5,27 @@ import { HttpTypes } from "@medusajs/types"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 
 export const listCartShippingMethods = async (cartId: string) => {
-  const headers = {
-    ...(await getAuthHeaders()),
-  }
-
-  const next = {
-    ...(await getCacheOptions("fulfillment")),
-  }
-
-  return sdk.client
-    .fetch<HttpTypes.StoreShippingOptionListResponse>(
-      `/store/shipping-options`,
-      {
-        method: "GET",
-        query: {
-          cart_id: cartId,
-          fields:
-            "+service_zone.fulfllment_set.type,*service_zone.fulfillment_set.location.address",
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ shipping_options }) => shipping_options)
-    .catch(() => {
-      return null
+  console.log("📞 listCartShippingMethods 被呼叫，cartId:", cartId)
+  
+  try {
+    // 使用官方推薦的 SDK 方法
+    const response = await sdk.store.fulfillment.listCartOptions({ 
+      cart_id: cartId 
     })
+    
+    console.log("✅ SDK 回應:", response)
+    
+    if (response && response.shipping_options) {
+      console.log("✅ listCartShippingMethods 成功，收到 shipping_options:", response.shipping_options)
+      return response.shipping_options
+    } else {
+      console.log("⚠️ 沒有 shipping_options 在回應中")
+      return []
+    }
+  } catch (error) {
+    console.error("❌ listCartShippingMethods 失敗:", error)
+    return null
+  }
 }
 
 export const calculatePriceForShippingOption = async (
