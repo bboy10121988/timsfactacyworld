@@ -3,7 +3,7 @@ import {
   MedusaNextFunction,
   MedusaRequest,
   MedusaResponse,
-} from "@medusajs/framework/http"
+} from "@medusajs/medusa"
 import cors from "cors"
 
 console.log('🔧 Middlewares.ts loaded')
