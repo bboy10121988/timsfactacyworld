@@ -15,11 +15,6 @@ export const convertToLocale = ({
   maximumFractionDigits,
   locale = "en-US",
 }: ConvertToLocaleParams) => {
-  // 檢查 amount 是否為 undefined 或 null
-  if (amount === undefined || amount === null) {
-    return "-"
-  }
-
   if (!currency_code || isEmpty(currency_code)) {
     return amount.toString()
   }

@@ -34,7 +34,7 @@ interface EcpayOptions {
 }
 
 export default class EcpayPaymentProvider extends AbstractPaymentProvider<EcpayOptions> {
-  static identifier = "ecpay_payment"
+  static identifier = "ecpay"
   
   protected options_: EcpayOptions
   protected ecpayService_: EcpayService
@@ -61,7 +61,7 @@ export default class EcpayPaymentProvider extends AbstractPaymentProvider<EcpayO
         TotalAmount: Number(input.amount),
         TradeDesc: `Order ${input.context?.customer?.id || 'N/A'}`,
         ItemName: `Order ${input.context?.customer?.id || 'N/A'}`,
-        ReturnURL: this.options_.return_url || `${process.env.BACKEND_URL}/hooks/ecpay/callback`,
+        ReturnURL: this.options_.return_url || `${process.env.BACKEND_URL}/api/ecpay/callback`,
         ClientBackURL: this.options_.client_back_url || `${process.env.FRONTEND_URL}/checkout/payment-result`,
         PaymentType: 'aio',
         ChoosePayment: 'ALL' // 預設允許所有支付方式
@@ -69,17 +69,15 @@ export default class EcpayPaymentProvider extends AbstractPaymentProvider<EcpayO
 
       console.log('🔧 ECPay params for initiation:', ecpayParams)
 
-      // 為 ECPay 跳轉建立一個臨時端點 URL
-      // 前端會 POST 到這個 URL 來獲取 ECPay 付款表單並自動提交
-      const redirectUrl = `${process.env.BACKEND_URL || 'http://localhost:9000'}/store/ecpay/create-payment`
+      // 產生付款表單
+      const paymentForm = await this.ecpayService_.createPayment(ecpayParams)
 
       return {
         id: tradeNo,
         status: "pending",
         data: {
           trade_no: tradeNo,
-          redirect_url: redirectUrl,
-          payment_params: ecpayParams // 前端需要這些參數來提交到我們的端點
+          payment_form: paymentForm
         }
       }
     } catch (error) {

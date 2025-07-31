@@ -47,6 +47,7 @@ export default defineConfig({
 
   projectId: 'm7o2mv1n',
   dataset: 'production',
+  basePath: '/cms',
 
   plugins: [
     structureTool(),

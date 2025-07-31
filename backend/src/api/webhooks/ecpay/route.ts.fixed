@@ -92,26 +92,24 @@ export const POST = async (
           
           if (recentCartsResult && recentCartsResult.length > 0) {
             // 選擇最近創建的未完成購物車
-            const fallbackCartId = recentCartsResult[0].id;
-            if (fallbackCartId) {
-              cartId = fallbackCartId;
-              console.log(`🔍 Using most recent cart as fallback: ${cartId}`);
-              console.log(`⚠️ Warning: This is a fallback method and may not be the correct cart!`);
-              // 將映射存入內存供後續使用
-              addTradeMapping(MerchantTradeNo, cartId as string, parseInt(TradeAmt));
-              // 更新這個購物車的 metadata 以記錄 ECPay 訊息
-              await manager.query(
-                `UPDATE "cart" 
-                 SET metadata = jsonb_set(
-                   COALESCE(metadata, '{}'::jsonb), 
-                   '{ecpay_merchant_trade_no}', 
-                   '"${MerchantTradeNo}"'::jsonb
-                 )
-                 WHERE id = $1`,
-                [cartId]
-              );
-              console.log(`✅ Updated cart metadata with MerchantTradeNo: ${MerchantTradeNo}`);
-            }
+            cartId = recentCartsResult[0].id
+            console.log(`🔍 Using most recent cart as fallback: ${cartId}`)
+            console.log(`⚠️ Warning: This is a fallback method and may not be the correct cart!`)
+            
+            // 將映射存入內存供後續使用
+            addTradeMapping(MerchantTradeNo, cartId, parseInt(TradeAmt))
+            
+            // 更新這個購物車的 metadata 以記錄 ECPay 訊息
+            await manager.query(
+              `UPDATE "cart" 
+               SET metadata = jsonb_set(
+                 COALESCE(metadata, '{}'::jsonb), 
+                 '{ecpay_merchant_trade_no}', 
+                 '"${MerchantTradeNo}"'::jsonb
+               )
+               WHERE id = '${cartId}'`
+            )
+            console.log(`✅ Updated cart metadata with MerchantTradeNo: ${MerchantTradeNo}`)
           }
         }
       } catch (searchError) {

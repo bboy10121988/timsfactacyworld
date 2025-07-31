@@ -255,15 +255,15 @@ const Shipping: React.FC<ShippingProps> = ({
                           </span>
                         </div>
                         <span className="justify-self-end text-ui-fg-base">
-                          {option.price_type === "flat" && option.amount !== undefined ? (
+                          {option.price_type === "flat" ? (
                             convertToLocale({
-                              amount: option.amount,
-                              currency_code: cart?.currency_code || "TWD",
+                              amount: option.amount!,
+                              currency_code: cart?.currency_code,
                             })
                           ) : calculatedPricesMap[option.id] ? (
                             convertToLocale({
                               amount: calculatedPricesMap[option.id],
-                              currency_code: cart?.currency_code || "TWD",
+                              currency_code: cart?.currency_code,
                             })
                           ) : isLoadingPrices ? (
                             <Loader />
@@ -326,10 +326,10 @@ const Shipping: React.FC<ShippingProps> = ({
                             </div>
                           </div>
                           <span className="justify-self-end text-ui-fg-base">
-                            {option.amount !== undefined ? convertToLocale({
-                              amount: option.amount,
-                              currency_code: cart?.currency_code || "TWD",
-                            }) : "-"}
+                            {convertToLocale({
+                              amount: option.amount!,
+                              currency_code: cart?.currency_code,
+                            })}
                           </span>
                         </Radio>
                       )
@@ -367,9 +367,9 @@ const Shipping: React.FC<ShippingProps> = ({
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
                   {cart.shipping_methods?.at(-1)?.name}{" "}
-                  {cart.shipping_methods?.at(-1)?.amount !== undefined && convertToLocale({
+                  {cart.shipping_methods?.at(-1)?.amount && convertToLocale({
                     amount: cart.shipping_methods.at(-1)!.amount!,
-                    currency_code: cart?.currency_code || "TWD",
+                    currency_code: cart?.currency_code,
                   })}
                 </Text>
               </div>

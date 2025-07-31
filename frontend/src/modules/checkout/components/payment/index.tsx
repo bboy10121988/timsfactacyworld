@@ -5,11 +5,9 @@ import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
+
 import ErrorMessage from "@modules/checkout/components/error-message"
-import PaymentContainer, {
-  StripeCardContainer,
-} from "@modules/checkout/components/payment-container"
-import EcpayPayment from "@modules/checkout/components/ecpay-payment"
+import PaymentContainer, { StripeCardContainer } from "@modules/checkout/components/payment-container"
 import Divider from "@modules/common/components/divider"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
@@ -54,17 +52,18 @@ const Payment = ({
       await initiatePaymentSession(cart, {
         provider_id: method,
       })
+    } else if (isEcpay(method)) {
+      await initiatePaymentSession(cart, {
+        provider_id: method,
+      })
     }
-    // ECPay 不需要建立 payment session，會在完成訂單時直接處理
   }
 
   const paidByGiftcard =
     cart?.gift_cards && cart?.gift_cards?.length > 0 && cart?.total === 0
 
   const paymentReady =
-    (activeSession && cart?.shipping_methods.length !== 0) || 
-    paidByGiftcard ||
-    (isEcpayMethod && cart?.shipping_methods.length !== 0) // ECPay 不需要 activeSession
+    (activeSession && cart?.shipping_methods.length !== 0) || paidByGiftcard
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -91,8 +90,7 @@ const Payment = ({
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
-      // 對於非 ECPay 支付方式，需要建立或檢查 payment session
-      if (!isEcpayMethod && !checkActiveSession) {
+      if (!checkActiveSession) {
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
         })
@@ -161,52 +159,25 @@ const Payment = ({
         <div className={isOpen ? "block" : "hidden"}>
           {!paidByGiftcard && (
             <>
-              {/* 綠界金流選項 */}
-              <div className="mb-6">
-                <EcpayPayment 
-                  cart={cart}
-                  onPaymentMethodChange={setPaymentMethod}
-                  selectedPaymentMethod={selectedPaymentMethod}
-                />
-              </div>
-
-              {/* 原有的其他支付方法 */}
-              {availablePaymentMethods?.filter(pm => pm.id !== "ecpay")?.length > 0 && (
-                <>
-                  <Divider className="my-6" />
-                  <Heading level="h3" className="text-base font-medium mb-4">
-                    其他支付方式
-                  </Heading>
-                  <RadioGroup
-                    value={selectedPaymentMethod}
-                    onChange={(value: string) => setPaymentMethod(value)}
-                  >
-                    {availablePaymentMethods
-                      .filter(pm => pm.id !== "ecpay")
-                      .map((paymentMethod) => (
-                        <div key={paymentMethod.id}>
-                          {isStripeFunc(paymentMethod.id) ? (
-                            <StripeCardContainer
-                              paymentProviderId={paymentMethod.id}
-                              selectedPaymentOptionId={selectedPaymentMethod}
-                              paymentInfoMap={paymentInfoMap}
-                              setCardBrand={setCardBrand}
-                              setError={setError}
-                              setCardComplete={setCardComplete}
-                            />
-                          ) : (
-                            <PaymentContainer
-                              paymentInfoMap={paymentInfoMap}
-                              paymentProviderId={paymentMethod.id}
-                              selectedPaymentOptionId={selectedPaymentMethod}
-                            />
-                          )}
-                        </div>
-                      ))
-                    }
-                  </RadioGroup>
-                </>
-              )}
+              {/* 只顯示兩個硬編碼選項：綠界支付（含刷卡）與銀行轉帳 */}
+              <RadioGroup value={selectedPaymentMethod} onChange={setPaymentMethod}>
+                <RadioGroup.Option value="ecpay_credit_card">
+                  {({ checked }) => (
+                    <div className={`border p-4 rounded mb-2 ${checked ? 'border-blue-500' : 'border-gray-200'}`}>
+                      <Heading level="h3" className="text-base font-medium mb-1">綠界支付（含刷卡）</Heading>
+                      <Text className="text-sm text-gray-600">信用卡 / 金融卡 (VISA、Mastercard、JCB)</Text>
+                    </div>
+                  )}
+                </RadioGroup.Option>
+                <RadioGroup.Option value="ecpay_bank_transfer">
+                  {({ checked }) => (
+                    <div className={`border p-4 rounded mb-2 ${checked ? 'border-blue-500' : 'border-gray-200'}`}>
+                      <Heading level="h3" className="text-base font-medium mb-1">銀行轉帳</Heading>
+                      <Text className="text-sm text-gray-600">手動銀行轉帳 (需要人工核帳)</Text>
+                    </div>
+                  )}
+                </RadioGroup.Option>
+              </RadioGroup>
             </>
           )}
 

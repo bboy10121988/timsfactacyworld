@@ -1,16 +1,17 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
+import { EntityManager } from "typeorm"
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse
 ): Promise<any> {
   const cartId = req.params.id
-  const { payment_captured = false } = req.body || {}
+  const { payment_captured = false } = req.body as { payment_captured?: boolean } || {}
   
   console.log(`🛒 Completing cart: ${cartId}, payment_captured: ${payment_captured}`)
   
   try {
-    const manager: any = req.scope.resolve("manager")
+    const manager = req.scope.resolve("manager") as EntityManager
     const cartRepository = manager.getRepository("Cart")
     const orderRepository = manager.getRepository("Order")
     

@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button, Heading, Text } from "@medusajs/ui"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 
-export default function ECPayReturnPage() {
+function ECPayReturnPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'processing'>('loading')
@@ -15,14 +15,11 @@ export default function ECPayReturnPage() {
   useEffect(() => {
     const processReturn = async () => {
       try {
-        // 檢查 searchParams 是否存在
         if (!searchParams) {
           setStatus('error')
           setMessage('無法取得付款資訊，請聯繫客服。')
           return
         }
-
-        // 從 URL 參數取得 ECPay 回傳的資訊
         const rtnCode = searchParams.get('RtnCode')
         const merchantTradeNo = searchParams.get('MerchantTradeNo')
         const tradeNo = searchParams.get('TradeNo')
@@ -30,7 +27,6 @@ export default function ECPayReturnPage() {
         const paymentDate = searchParams.get('PaymentDate')
         const paymentType = searchParams.get('PaymentType')
         const rtnMsg = searchParams.get('RtnMsg')
-
         console.log('🔍 ECPay 回傳參數:', {
           rtnCode,
           merchantTradeNo,
@@ -40,13 +36,11 @@ export default function ECPayReturnPage() {
           paymentType,
           rtnMsg
         })
-
         if (!merchantTradeNo) {
           setStatus('error')
           setMessage('缺少交易資訊，請聯繫客服。')
           return
         }
-
         setOrderInfo({
           merchantTradeNo,
           tradeNo,
@@ -55,44 +49,27 @@ export default function ECPayReturnPage() {
           paymentType,
           rtnMsg
         })
-
         if (rtnCode === '1') {
           setStatus('processing')
           setMessage('付款成功！正在處理您的訂單...')
-          
-          // 等待一小段時間讓後端處理回調
           await new Promise(resolve => setTimeout(resolve, 3000))
-          
           setStatus('success')
           setMessage('訂單處理完成！感謝您的購買。')
-          
-          // 5秒後自動跳轉到訂單列表
           setTimeout(() => {
             router.push('/account/orders')
           }, 5000)
-          
         } else {
           setStatus('error')
           setMessage(`付款失敗：${rtnMsg || '未知錯誤'}`)
         }
-
       } catch (error) {
         console.error('💥 處理付款回傳時發生錯誤:', error)
         setStatus('error')
         setMessage('處理付款資訊時發生錯誤，請聯繫客服。')
       }
     }
-
     processReturn()
   }, [searchParams, router])
-
-  const handleGoToOrders = () => {
-    router.push('/account/orders')
-  }
-
-  const handleGoHome = () => {
-    router.push('/')
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -109,7 +86,6 @@ export default function ECPayReturnPage() {
               </Text>
             </>
           )}
-
           {status === 'processing' && (
             <>
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
@@ -126,7 +102,6 @@ export default function ECPayReturnPage() {
               </Text>
             </>
           )}
-
           {status === 'success' && (
             <>
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
@@ -145,7 +120,6 @@ export default function ECPayReturnPage() {
               </Text>
             </>
           )}
-
           {status === 'error' && (
             <>
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
@@ -161,7 +135,6 @@ export default function ECPayReturnPage() {
               </Text>
             </>
           )}
-
           {orderInfo && (
             <div className="mt-6 bg-gray-100 rounded-lg p-4 text-left">
               <Text className="font-medium text-gray-900 mb-2">交易資訊：</Text>
@@ -185,22 +158,20 @@ export default function ECPayReturnPage() {
             </div>
           )}
         </div>
-
         <div className="flex space-x-4">
           {status === 'success' && (
             <>
-              <Button onClick={handleGoToOrders} className="flex-1">
+              <Button onClick={() => router.push('/account/orders')} className="flex-1">
                 查看訂單
               </Button>
-              <Button variant="secondary" onClick={handleGoHome} className="flex-1">
+              <Button variant="secondary" onClick={() => router.push('/')} className="flex-1">
                 返回首頁
               </Button>
             </>
           )}
-
           {status === 'error' && (
             <>
-              <Button variant="secondary" onClick={handleGoHome} className="flex-1">
+              <Button variant="secondary" onClick={() => router.push('/')} className="flex-1">
                 返回首頁
               </Button>
               <Button 
@@ -216,3 +187,11 @@ export default function ECPayReturnPage() {
     </div>
   )
 }
+export default function ECPayReturnPage() {
+  return (
+    <Suspense>
+      <ECPayReturnPageInner />
+    </Suspense>
+  )
+}
+// ...existing code...

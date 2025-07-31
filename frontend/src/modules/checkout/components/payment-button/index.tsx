@@ -1,6 +1,10 @@
 "use client"
 
-import { isManual, isStripe, isECPay } from "@lib/constants"
+import { isManual, isStripe } from "@lib/constants"
+// 與 payment/index.tsx 一致，檢查 providerId 是否為綠界
+const isEcpay = (providerId: string | undefined) => {
+  return providerId?.includes("ecpay_")
+}
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -11,13 +15,11 @@ import ErrorMessage from "../error-message"
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
   "data-testid": string
-  selectedPaymentMethod?: string
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
-  selectedPaymentMethod,
 }) => {
   const notReady =
     !cart ||
@@ -28,16 +30,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const paymentSession = cart.payment_collection?.payment_sessions?.[0]
 
-  // 優先使用傳入的 selectedPaymentMethod，否則使用 payment session，最後從localStorage獲取
-  let paymentMethod = selectedPaymentMethod || paymentSession?.provider_id
-  
-  // 如果沒有payment method，嘗試從localStorage獲取
-  if (!paymentMethod && typeof window !== 'undefined') {
-    paymentMethod = localStorage.getItem('selectedPaymentMethod') || undefined
+  // 銀行轉帳（ecpay_bank_transfer）直接建立訂單並跳轉 review
+  if (paymentSession?.provider_id === "ecpay_bank_transfer") {
+    return <BankTransferPaymentButton notReady={notReady} cart={cart} data-testid={dataTestId} />
   }
 
   switch (true) {
-    case isStripe(paymentMethod):
+    case isStripe(paymentSession?.provider_id):
       return (
         <StripePaymentButton
           notReady={notReady}
@@ -45,22 +44,73 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
           data-testid={dataTestId}
         />
       )
-    case isECPay(paymentMethod):
+    case isEcpay(paymentSession?.provider_id):
       return (
         <ECPayPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
-          selectedPaymentMethod={paymentMethod}
         />
       )
-    case isManual(paymentMethod):
+    case isManual(paymentSession?.provider_id):
       return (
         <ManualTestPaymentButton notReady={notReady} data-testid={dataTestId} />
       )
     default:
       return <Button disabled>請選擇付款方式</Button>
   }
+}
+
+// 銀行轉帳付款按鈕元件
+const BankTransferPaymentButton = ({ cart, notReady, "data-testid": dataTestId }: { cart: HttpTypes.StoreCart, notReady: boolean, "data-testid"?: string }) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  // 取得 Next.js router
+  const router = typeof window !== 'undefined' ? require('next/navigation').useRouter() : null
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+    setErrorMessage(null)
+    try {
+      await placeOrder()
+      // 跳轉到 review（第四步驟）
+      if (router) {
+        router.push("?step=review")
+      } else {
+        window.location.search = "?step=review"
+      }
+    } catch (err: any) {
+      // 嘗試顯示更詳細的錯誤內容
+      if (err?.response) {
+        // 若有 response 物件（如 axios），顯示 response.data
+        setErrorMessage(JSON.stringify(err.response.data));
+      } else if (err?.message) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("建立訂單失敗");
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        onClick={handlePayment}
+        size="large"
+        isLoading={submitting}
+        data-testid={dataTestId}
+      >
+        {submitting ? "處理中..." : "繼續檢視訂單"}
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="bank-transfer-payment-error-message"
+      />
+    </>
+  )
 }
 
 const StripePaymentButton = ({
@@ -174,12 +224,10 @@ const ECPayPaymentButton = ({
   cart,
   notReady,
   "data-testid": dataTestId,
-  selectedPaymentMethod,
 }: {
   cart: HttpTypes.StoreCart
   notReady: boolean
   "data-testid"?: string
-  selectedPaymentMethod?: string
 }) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -209,40 +257,33 @@ const ECPayPaymentButton = ({
     }
 
     try {
-      // 使用新的 Medusa payment provider 流程
-      const redirectUrl = paymentSession.data?.redirect_url
-      
-      if (!redirectUrl || typeof redirectUrl !== 'string') {
-        throw new Error("無法取得付款跳轉 URL")
-      }
-
-      // 準備購物車資料
-      const cartData = {
-        cart: {
-          id: cart.id,
-          total: cart.total || 0,
-          items: cart.items?.map(item => ({
-            title: item.title || item.variant?.title || item.variant?.product?.title || "商品",
-            quantity: item.quantity,
-          })) || []
-        },
-        customer: {
-          email: cart.email,
-          first_name: cart.billing_address?.first_name || cart.shipping_address?.first_name,
-          last_name: cart.billing_address?.last_name || cart.shipping_address?.last_name,
-        },
-        shippingAddress: cart.shipping_address,
-        choosePayment: "ALL" // ECPay 支持所有支付方式
-      }
-
-      // 調用 ECPay 創建付款端點
-      const response = await fetch(redirectUrl, {
+      // 建立ECPay付款
+      const response = await fetch(`${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/ecpay/create-payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "",
+          "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
         },
-        body: JSON.stringify(cartData),
+        credentials: "include",
+        body: JSON.stringify({
+          cart: {
+            id: cart.id,
+            items: cart.items,
+            total: cart.total,
+            subtotal: cart.subtotal,
+            tax_total: cart.tax_total,
+            shipping_total: cart.shipping_total,
+            region: cart.region,
+            email: cart.email,
+            shipping_address: cart.shipping_address,
+            billing_address: cart.billing_address,
+            shipping_methods: cart.shipping_methods
+          },
+          customer: cart.customer_id ? { id: cart.customer_id } : null,
+          shippingAddress: cart.shipping_address,
+          shippingMethod: cart.shipping_methods?.[0],
+          choosePayment: paymentSession.provider_id,
+        }),
       })
 
       if (!response.ok) {
@@ -251,27 +292,60 @@ const ECPayPaymentButton = ({
 
       const data = await response.json()
 
-      if (data.html) {
-        // 創建一個容器來放置 ECPay 表單
+      if (data.form_html) {
+        // 創建臨時div來解析HTML表單
         const tempDiv = document.createElement("div")
-        tempDiv.innerHTML = data.html
-        
-        // 找到表單並提交
+        tempDiv.innerHTML = data.form_html
         const form = tempDiv.querySelector("form")
         
         if (form) {
-          // 將表單添加到頁面並自動提交（會跳轉到 ECPay）
+          // 設置表單提交方式為POST
+          form.method = "POST"
+          
+          // 創建隱藏iframe來處理表單提交
+          const iframe = document.createElement("iframe")
+          iframe.name = "ecpay_iframe"
+          iframe.style.display = "none"
+          document.body.appendChild(iframe)
+          
+          // 設置表單target為iframe
+          form.target = "ecpay_iframe"
+          
+          // 添加表單到DOM並提交
           document.body.appendChild(form)
           form.submit()
           
-          // 清理
-          document.body.removeChild(form)
-        } else {
-          throw new Error("無效的 ECPay 付款表單")
+          // 監聽iframe加載完成事件
+          iframe.onload = () => {
+            // 檢查iframe內容是否為綠界頁面
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+              if (iframeDoc && iframeDoc.location.href.includes('ecpay.com.tw')) {
+                // 如果iframe加載了綠界頁面，則打開新窗口
+                const paymentWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+                if (paymentWindow) {
+                  paymentWindow.location.href = iframeDoc.location.href
+                }
+              }
+            } catch (e) {
+              console.log("無法訪問iframe內容:", e)
+            }
+            
+            // 清理DOM
+            setTimeout(() => {
+              document.body.removeChild(form)
+              document.body.removeChild(iframe)
+            }, 1000)
+            
+            setSubmitting(false)
+          }
+          
+          return
         }
-      } else {
-        throw new Error(data.error || "ECPay 付款建立失敗")
       }
+
+      // 如果沒有表單或其他付款方式，直接完成訂單
+      await onPaymentCompleted()
       
     } catch (error: any) {
       console.error("ECPay payment error:", error)
@@ -289,7 +363,7 @@ const ECPayPaymentButton = ({
         isLoading={submitting}
         data-testid={dataTestId}
       >
-        繼續到綠界付款
+        {submitting ? "處理中..." : "確認付款"}
       </Button>
       <ErrorMessage
         error={errorMessage}

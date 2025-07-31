@@ -4,11 +4,25 @@ import {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import cors from "cors"
 
 console.log('🔧 Middlewares.ts loaded')
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: "/webhooks/*",
+      middlewares: [
+        cors({ 
+          origin: "*", 
+          credentials: true,
+          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+          allowedHeaders: ["Content-Type", "Authorization"]
+        }),
+      ],
+      bodyParser: { preserveRawBody: true },
+      method: ["POST", "OPTIONS"],
+    },
     {
       matcher: "/store/ecpay/callback*",
       middlewares: [
