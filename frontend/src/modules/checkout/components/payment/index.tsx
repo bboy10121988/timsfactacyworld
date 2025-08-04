@@ -82,22 +82,38 @@ const Payment = ({
   }
 
   const handleSubmit = async () => {
+    //my-medusa-store
+  
     setIsLoading(true)
+
+
     try {
-      const shouldInputCard =
-        isStripeFunc(selectedPaymentMethod) && !activeSession
+
+      console.log("provider id ",selectedPaymentMethod)
+
+      const shouldInputCard =isStripeFunc(selectedPaymentMethod) && !activeSession
 
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
       if (!checkActiveSession) {
+        
+        // ecpay_bank_transfer
+        let currentPayment = selectedPaymentMethod
+        console.log("當前選擇的支付方式:", currentPayment)
+        currentPayment = "pp_system_default"
+        console.log("所以是錯誤在這裡？")
+        console.log("也就是說…我們帶入的selectedPaymentMethod是錯的？", currentPayment)
+        // selectedPaymentMethod = "default"
         await initiatePaymentSession(cart, {
-          provider_id: selectedPaymentMethod,
+          provider_id: currentPayment,
         })
       }
 
       // 處理綠界支付方式
       if (isEcpayMethod) {
+
+        console.log("綠界支付方式被選中", selectedPaymentMethod)
         // 對於綠界，我們會跳轉到完成訂單頁面，因為支付會在完成訂單後處理
         return router.push(
           pathname + "?" + createQueryString("step", "review"),
@@ -109,6 +125,8 @@ const Payment = ({
 
       // 處理 Stripe 等其他支付方式
       if (!shouldInputCard) {
+        console.log("非 Stripe 支付方式，跳轉到檢視訂單")
+
         return router.push(
           pathname + "?" + createQueryString("step", "review"),
           {
@@ -117,6 +135,7 @@ const Payment = ({
         )
       }
     } catch (err: any) {
+
       setError(err.message)
     } finally {
       setIsLoading(false)
