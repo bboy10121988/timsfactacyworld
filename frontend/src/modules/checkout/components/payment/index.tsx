@@ -98,29 +98,77 @@ const Payment = ({
 
       if (!checkActiveSession) {
         
-        // ecpay_bank_transfer
-        let currentPayment = selectedPaymentMethod
+        // 取得實際的支付方式
+        const currentPayment = selectedPaymentMethod
         console.log("當前選擇的支付方式:", currentPayment)
-        currentPayment = "pp_system_default"
-        console.log("所以是錯誤在這裡？")
-        console.log("也就是說…我們帶入的selectedPaymentMethod是錯的？", currentPayment)
-        // selectedPaymentMethod = "default"
+        
+        // 如果是綠界支付，使用選擇的支付方式；否則使用系統預設
+        const providerToUse = isEcpayMethod ? currentPayment : "pp_system_default"
+        console.log("使用的支付方式:", providerToUse)
+        
         await initiatePaymentSession(cart, {
-          provider_id: currentPayment,
+          provider_id: providerToUse,
         })
       }
 
       // 處理綠界支付方式
       if (isEcpayMethod) {
-
         console.log("綠界支付方式被選中", selectedPaymentMethod)
-        // 對於綠界，我們會跳轉到完成訂單頁面，因為支付會在完成訂單後處理
-        return router.push(
-          pathname + "?" + createQueryString("step", "review"),
-          {
-            scroll: false,
+        
+        try {
+          // 先確保後端有正確設定付款方式
+          await initiatePaymentSession(cart, {
+            provider_id: selectedPaymentMethod,
+          })
+          
+          // 建立訂單並取得導向綠界付款頁面的連結
+          const response = await fetch(`/api/ecpay/checkout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              cartId: cart.id,
+              paymentMethod: selectedPaymentMethod,
+            }),
+          })
+          
+          const data = await response.json()
+          
+          if (data.redirectUrl) {
+            // 如果有重定向 URL，直接跳轉到綠界付款頁面
+            window.location.href = data.redirectUrl
+            return
+          } else if (data.htmlForm) {
+            // 如果返回 HTML 表單，在頁面上創建一個表單並自動提交
+            // 創建一個臨時 div 來放置 HTML 表單
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = data.htmlForm
+            document.body.appendChild(tempDiv)
+            
+            // 找到表單並提交
+            const form = tempDiv.querySelector('form')
+            if (form) {
+              form.submit()
+            } else {
+              // 如果找不到表單，則跳轉到確認頁面
+              console.error('找不到綠界支付表單元素')
+              return router.push(
+                pathname + "?" + createQueryString("step", "review"),
+                { scroll: false }
+              )
+            }
+          } else {
+            // 如果沒有重定向 URL，繼續到訂單確認頁
+            return router.push(
+              pathname + "?" + createQueryString("step", "review"),
+              { scroll: false }
+            )
           }
-        )
+        } catch (error) {
+          console.error("綠界支付初始化錯誤:", error)
+          setError("綠界支付初始化失敗，請稍後再試")
+        }
       }
 
       // 處理 Stripe 等其他支付方式
