@@ -1,118 +1,142 @@
+import { AbstractPaymentProvider } from "@medusajs/framework/utils"
+import { InitiatePaymentInput, InitiatePaymentOutput, GetPaymentStatusInput, GetPaymentStatusOutput, ProviderWebhookPayload, WebhookActionResult, AuthorizePaymentInput, AuthorizePaymentOutput, RefundPaymentInput, RefundPaymentOutput, UpdatePaymentInput, UpdatePaymentOutput } from "@medusajs/types";
+import ECPayAIO from "ecpay_aio_nodejs"
+
 /**
  * ECPay 信用卡支付服務
  */
-class EcpayPaymentService {
+class EcpayPaymentService extends AbstractPaymentProvider {
   static identifier = "ecpay_credit_card";
-  protected options_: any;
-  protected ecpaySDK_: any;
+  private ecpaySDK_: any;
 
-  constructor(container, options) {
-    this.options_ = options;
+  constructor(
+    private readonly options: Record<string, unknown> = {}
+  ) {
+    super(options);
 
     try {
-      // 動態導入 ECPay SDK
-      const ecpay = require('ecpay_aio_nodejs');
-      
+      // 初始化 ECPay SDK
       const ecpayOptions = {
-        OperationMode: this.options_.is_production ? 'Production' : 'Test',
+        OperationMode: this.options.is_production ? 'Production' : 'Test',
         MercProfile: {
-          MerchantID: this.options_.merchant_id,
-          HashKey: this.options_.hash_key,
-          HashIV: this.options_.hash_iv,
+          MerchantID: this.options.merchant_id as string,
+          HashKey: this.options.hash_key as string,
+          HashIV: this.options.hash_iv as string,
         },
         IgnorePayment: [],
         IsProjectContractor: false,
       };
 
-      const builder = new ecpay.payment_client(ecpayOptions);
-      this.ecpaySDK_ = builder;
+      this.ecpaySDK_ = new ECPayAIO(ecpayOptions);
     } catch (error) {
       console.error("❌ ECPay SDK 初始化失敗：", error);
     }
   }
 
-  // Medusa v2 必要方法
-  async initiatePayment(input) {
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     console.log("🚀 initiatePayment 被調用，input:", input);
-    const { amount, currency_code, resource_id, customer } = input;
+    const { amount, currency_code } = input;
 
-    const paymentData = {
-      id: `ecpay_${Date.now()}`,
-      amount,
-      currency_code,
-      resource_id,
+    const paymentId = `ecpay_${Date.now()}`;
+    return {
+      id: paymentId,
       data: {
+        id: paymentId,
+        amount,
+        currency_code,
         status: "pending",
         payment_type: "Credit",
-        cart_id: resource_id,
-        merchant_id: this.options_.merchant_id,
+        merchant_id: this.options.merchant_id,
       },
     };
-
-    return paymentData;
   }
 
-  async updatePayment(input) {
-    console.log("🔄 updatePayment 被調用，input:", input);
-    return input;
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
+    console.log("� getPaymentStatus 被調用，input:", input);
+    // ECPay 需要透過 webhook 來獲取付款狀態
+    return {
+      status: "pending" // 預設為等待中，實際狀態透過 webhook 更新
+    };
   }
 
-  async getWebhookActionAndData(input) {
-    console.log("🔗 getWebhookActionAndData 被調用，input:", input);
-    const { data } = input;
-    
-    // 解析 ECPay 回調數據
-    const isSuccessful = data.RtnCode === "1";
-    
-    if (isSuccessful) {
-      return {
-        action: "captured",
-        data: {
-          resource_id: data.CustomField1,
-          amount: parseInt(data.TradeAmt, 10)
-        }
-      };
-    } else {
-      return {
-        action: "failed",
-        data: {
-          resource_id: data.CustomField1,
-          error: data.RtnMsg
-        }
-      };
-    }
+  async capturePayment(paymentData: Record<string, unknown>): Promise<Record<string, unknown>> {
+    console.log("� capturePayment 被調用，paymentData:", paymentData);
+    return {
+      id: paymentData.id,
+      status: "captured"
+    };
   }
 
-  async authorizePayment(input) {
+  async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
     console.log("🔐 authorizePayment 被調用，input:", input);
     // 對於 ECPay，我們無法在後端授權支付，因為它需要重定向到 ECPay 的頁面
     return { 
       status: "requires_more",
-      data: input.data
+      data: {
+        id: input.data?.id || `auth_${Date.now()}`,
+        status: "requires_more"
+      }
     };
   }
 
-  async cancelPayment(input) {
-    console.log("❌ cancelPayment 被調用，input:", input);
-    return input;
+  async cancelPayment(paymentData: Record<string, unknown>): Promise<Record<string, unknown>> {
+    console.log("❌ cancelPayment 被調用，paymentData:", paymentData);
+    return {
+      id: paymentData.id,
+      status: "canceled"
+    };
   }
 
-  async capturePayment(input) {
-    console.log("💰 capturePayment 被調用，input:", input);
-    return input;
+  async deletePayment(paymentSessionData: Record<string, unknown>): Promise<Record<string, unknown>> {
+    console.log("🗑️ deletePayment 被調用，paymentSessionData:", paymentSessionData);
+    return {
+      id: paymentSessionData.id,
+      status: "deleted"
+    };
   }
 
-  async refundPayment(input) {
-    console.log("💸 refundPayment 被調用，input:", input);
-    return input;
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
+    console.log("� refundPayment 被調用，input:", input);
+    // ECPay 的退款通常需要額外的 API 調用
+    return {
+      
+    };
   }
 
-  async deletePayment(input) {
-    console.log("🗑️ deletePayment 被調用，input:", input);
-    return input;
+  async retrievePayment(paymentData: Record<string, unknown>): Promise<Record<string, unknown>> {
+    console.log("🔍 retrievePayment 被調用，paymentData:", paymentData);
+    return {
+      id: paymentData.id,
+      status: "authorized" // 或其他適當的狀態
+    };
   }
 
-  async generateEcpayForm(cart) {
+  async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    console.log("� updatePayment 被調用，input:", input);
+    return {
+      
+    };
+  }
+
+  async getWebhookActionAndData(data: { data: Record<string, unknown>; rawData: string | Buffer<ArrayBufferLike>; headers: Record<string, unknown>; }): Promise<WebhookActionResult> {
+    console.log("� getWebhookActionAndData 被調用，data:", data);
+    const ecpayData = data.data;
+    
+    // 解析 ECPay 回調數據
+    const isSuccessful = ecpayData.RtnCode === "1";
+    
+    if (isSuccessful) {
+      return {
+        action: "captured",
+      };
+    } else {
+      return {
+        action: "failed",
+      };
+    }
+  }
+
+  async generateEcpayForm(cart: any) {
     if (!this.ecpaySDK_) {
       console.error("❌ ECPay SDK 尚未初始化");
       return null;
@@ -121,16 +145,16 @@ class EcpayPaymentService {
     try {
       console.log("🏗️ 生成 ECPay 表單，cart:", cart);
       // 生成將提交到 ECPay 的表單
-      const form = this.ecpaySDK_.aio_check_out_all({
+      const form = this.ecpaySDK_.payment_client.aio_check_out_all({
         MerchantTradeNo: `${cart.id}_${Date.now()}`,
         MerchantTradeDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
         TotalAmount: cart.total,
         TradeDesc: '來自商店的訂單',
-        ItemName: cart.items.map(item => `${item.title} x ${item.quantity}`).join('#'),
-        ReturnURL: this.options_.return_url || 'http://localhost:9000/ecpay/callback',
+        ItemName: cart.items?.map((item: any) => `${item.title} x ${item.quantity}`).join('#') || '商品',
+        ReturnURL: (this.options.return_url as string) || 'http://localhost:9000/ecpay/callback',
         ChoosePayment: 'Credit',
-        ClientBackURL: this.options_.client_back_url || 'http://localhost:3000/order/confirmation',
-        OrderResultURL: this.options_.client_back_url || 'http://localhost:3000/order/confirmation',
+        ClientBackURL: (this.options.client_back_url as string) || 'http://localhost:3000/order/confirmation',
+        OrderResultURL: (this.options.client_back_url as string) || 'http://localhost:3000/order/confirmation',
       });
       
       return form;

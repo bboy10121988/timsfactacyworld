@@ -85,6 +85,31 @@ const config = defineConfig({
         ]
       }
     },
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers:[
+          {
+            resolve: "./src/modules/payment-tester",
+            id: "my-payment-service",
+            name: "My Payment Service",
+            // options: {
+            //   merchant_id: process.env.ECPAY_MERCHANT_ID,
+            //   hash_key: process.env.ECPAY_HASH_KEY,
+            //   hash_iv: process.env.ECPAY_HASH_IV,
+            //   is_production: process.env.ECPAY_IS_PRODUCTION === 'true',
+            //   return_url: process.env.ECPAY_RETURN_URL,
+            //   client_back_url: process.env.ECPAY_CLIENT_BACK_URL
+            // }
+          },
+          {
+            resolve: "./src/modules/ecpay-payment",
+            id: "ecpay_credit_card",
+            name: "ECPay Payment Service"
+          }
+        ],
+      }
+    }, // ← 在這裡添加逗號
     // ECPay 支付模組 - 暫時停用以測試問題
     // {
     //   resolve: "./src/modules/ecpay-payment",
@@ -97,18 +122,6 @@ const config = defineConfig({
     //     client_back_url: process.env.ECPAY_CLIENT_BACK_URL
     //   }
     // },
-    // 如果需要銀行轉帳，取消註解
-    // {
-    //   resolve: "./src/modules/ecpay-payment-bank",
-    //   options: {
-    //     merchant_id: process.env.ECPAY_MERCHANT_ID,
-    //     hash_key: process.env.ECPAY_HASH_KEY,
-    //     hash_iv: process.env.ECPAY_HASH_IV,
-    //     is_production: process.env.ECPAY_IS_PRODUCTION === 'true',
-    //     return_url: process.env.ECPAY_RETURN_URL,
-    //     client_back_url: process.env.ECPAY_CLIENT_BACK_URL
-    //   }
-    // }
   ],
   plugins: [
     {
