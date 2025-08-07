@@ -6,7 +6,8 @@
     "moduleResolution": "Node16",
     "types": [
       "node",
-      "@medusajs/medusa"
+      "@medusajs/medusa",
+      "@medusajs/admin"
     ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

@@ -1,11 +1,7 @@
-import { defineWidgetConfig } from "@medusajs/admin-shared"
-import { Container } from "@medusajs/ui"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@medusajs/ui"
+import { defineWidgetConfig } from "@medusajs/admin"
+import { Container, Button } from "@medusajs/ui"
 
 const AffiliateWidget = () => {
-  const navigate = useNavigate()
-
   const openAffiliateManagement = () => {
     // 在新視窗開啟管理介面
     window.open('/admin/affiliate-management', '_blank')
