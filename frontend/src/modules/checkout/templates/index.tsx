@@ -29,11 +29,17 @@ const CheckoutTemplate = ({ cart, customer }: CheckoutTemplateProps) => {
       console.log("📞 呼叫 listCartShippingMethods...")
       listCartShippingMethods(cart.id).then((methods) => {
         console.log("📦 收到 shipping methods:", methods)
-        if (methods) {
+        if (methods && Array.isArray(methods)) {
           setAvailableShippingMethods(methods)
+        } else {
+          // 如果沒有找到配送方式，設置為空數組
+          console.log("⚠️ 沒有可用的配送方式或返回非數組，設置為空數組")
+          setAvailableShippingMethods([])
         }
       }).catch((error) => {
         console.error("❌ listCartShippingMethods 錯誤:", error)
+        // 錯誤時設置為空數組
+        setAvailableShippingMethods([])
       })
     }
   }, [cart?.id])
