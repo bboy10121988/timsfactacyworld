@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup, Radio } from "@headlessui/react"
-import { setShippingMethod } from "@lib/data/cart"
+import { setShippingMethod } from "@lib/data/cart-shipping"
 import { calculatePriceForShippingOption } from "@lib/data/fulfillment"
 import { convertToLocale } from "@lib/util/money"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
@@ -50,9 +50,23 @@ const Shipping: React.FC<ShippingProps> = ({
     Record<string, number>
   >({})
   const [error, setError] = useState<string | null>(null)
+  
+  // 安全地獲取最後一個配送方式
+  const lastShippingMethod = cart.shipping_methods && cart.shipping_methods.length > 0
+    ? cart.shipping_methods[cart.shipping_methods.length - 1]
+    : null
+  
   const [shippingMethodId, setShippingMethodId] = useState<string | null>(
-    cart.shipping_methods?.at(-1)?.shipping_option_id || null
+    lastShippingMethod?.shipping_option_id || null
   )
+
+  // 當可用配送方式載入且沒有選擇配送方式時，自動選擇第一個
+  useEffect(() => {
+    if (availableShippingMethods && availableShippingMethods.length > 0 && !shippingMethodId) {
+      console.log("🔄 自動選擇第一個配送方式:", availableShippingMethods[0].id)
+      handleSetShippingMethod(availableShippingMethods[0].id, "shipping")
+    }
+  }, [availableShippingMethods, shippingMethodId])
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -122,14 +136,17 @@ const Shipping: React.FC<ShippingProps> = ({
       return id
     })
 
-    await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
-      .catch((err) => {
-        setShippingMethodId(currentId)
-        setError(err.message)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    try {
+      console.log("🚢 嘗試設置配送方式:", id)
+      await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      console.log("✅ 配送方式設置成功!")
+    } catch (err: any) {
+      console.error("❌ 設置配送方式失敗:", err)
+      setShippingMethodId(currentId)
+      setError(err.message || "無法設置配送方式，請稍後再試。")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -366,9 +383,9 @@ const Shipping: React.FC<ShippingProps> = ({
                   Method
                 </Text>
                 <Text className="txt-medium text-ui-fg-subtle">
-                  {cart.shipping_methods?.at(-1)?.name}{" "}
-                  {cart.shipping_methods?.at(-1)?.amount && convertToLocale({
-                    amount: cart.shipping_methods.at(-1)!.amount!,
+                  {cart.shipping_methods && cart.shipping_methods.length > 0 && cart.shipping_methods[cart.shipping_methods.length - 1]?.name}{" "}
+                  {cart.shipping_methods && cart.shipping_methods.length > 0 && cart.shipping_methods[cart.shipping_methods.length - 1]?.amount && convertToLocale({
+                    amount: cart.shipping_methods[cart.shipping_methods.length - 1].amount!,
                     currency_code: cart?.currency_code,
                   })}
                 </Text>

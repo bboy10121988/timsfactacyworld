@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>聯盟系統測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, button { padding: 8px; margin: 5px 0; }
+        button { background: #007cba; color: white; border: none; cursor: pointer; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffebee; border: 1px solid #f44336; }
+        .success { background: #e8f5e8; border: 1px solid #4caf50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>聯盟系統 API 測試</h1>
+        
+        <h2>測試 1: 獲取所有聯盟夥伴</h2>
+        <button onclick="testGetPartners()">獲取夥伴列表</button>
+        <div id="partnersResult" class="result"></div>
+
+        <h2>測試 2: 註冊新夥伴</h2>
+        <div class="form-group">
+            <label>姓名:</label>
+            <input type="text" id="name" value="測試夥伴2" />
+        </div>
+        <div class="form-group">
+            <label>電子郵件:</label>
+            <input type="email" id="email" value="test2@example.com" />
+        </div>
+        <div class="form-group">
+            <label>電話:</label>
+            <input type="text" id="phone" value="0912345678" />
+        </div>
+        <div class="form-group">
+            <label>公司:</label>
+            <input type="text" id="company" value="測試公司2" />
+        </div>
+        <button onclick="testCreatePartner()">註冊夥伴</button>
+        <div id="createResult" class="result"></div>
+
+        <h2>測試 3: 模擬登入</h2>
+        <div class="form-group">
+            <label>電子郵件:</label>
+            <input type="email" id="loginEmail" value="test@example.com" />
+        </div>
+        <div class="form-group">
+            <label>聯盟代碼:</label>
+            <input type="text" id="loginCode" value="AFFZ8NQHH9P" />
+        </div>
+        <button onclick="testLogin()">測試登入</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:9000';
+        const API_KEY = 'pk_6a5b6f62e29baea8089628c7713ce56a388c5944011f43fcf15b8837b00464b7';
+
+        async function testGetPartners() {
+            const resultDiv = document.getElementById('partnersResult');
+            try {
+                const response = await fetch(`${API_BASE}/store/affiliate/partners`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h3>成功獲取 ${data.count} 個夥伴:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<h3>錯誤:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>網路錯誤:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testCreatePartner() {
+            const resultDiv = document.getElementById('createResult');
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/store/affiliate/partners`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': API_KEY
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `<h3>夥伴註冊成功:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<h3>註冊失敗:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>網路錯誤:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            const email = document.getElementById('loginEmail').value;
+            const code = document.getElementById('loginCode').value;
+
+            try {
+                // 先獲取所有夥伴
+                const response = await fetch(`${API_BASE}/store/affiliate/partners`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-publishable-api-key': API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // 查找匹配的夥伴
+                    const foundPartner = data.partners?.find(p => 
+                        p.email === email && p.affiliate_code === code
+                    );
+
+                    if (foundPartner) {
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML = `
+                            <h3>登入成功:</h3>
+                            <p>歡迎回來，${foundPartner.name}！</p>
+                            <pre>${JSON.stringify(foundPartner, null, 2)}</pre>
+                        `;
+                    } else {
+                        resultDiv.className = 'result error';
+                        resultDiv.innerHTML = `<h3>登入失敗:</h3><p>找不到匹配的電子郵件和聯盟代碼組合</p>`;
+                    }
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<h3>API 錯誤:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>網路錯誤:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        // 頁面載入時自動測試
+        window.onload = function() {
+            testGetPartners();
+        };
+    </script>
+</body>
+</html>

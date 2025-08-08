@@ -10,6 +10,7 @@ import { useState, useMemo, useEffect } from "react"
 import { addToCart } from "@lib/data/cart"
 import { getActivePromotionLabels, PromotionLabel } from "@lib/simple-promotion-utils"
 import MobileVariantSelector from "../mobile-variant-selector"
+import { toast } from "react-hot-toast"
 
 type ProductOption = {
   title: string
@@ -38,19 +39,19 @@ export default function ProductPreview({
     const loadPromotionLabels = async () => {
       setIsLoadingPromotions(true)
       try {
-        // 只使用 Medusa API 獲取促銷標籤
+        // 直接從商品數據中獲取促銷標籤
         const labels = await getActivePromotionLabels(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
         setPromotionLabels(labels)
         
         if (process.env.NODE_ENV === 'development') {
-          console.log(`【${product.title}】Medusa API 促銷標籤:`, labels)
+          console.log(`【${product.title}】商品促銷標籤:`, labels)
           console.log(`【${product.title}】標籤數量:`, labels.length)
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Failed to load Medusa API promotion labels:', error)
+          console.warn('Failed to load promotion labels:', error)
         }
-        // 如果 Medusa API 失敗，不顯示任何標籤
+        // 出錯時設置為空標籤
         setPromotionLabels([])
       } finally {
         setIsLoadingPromotions(false)
@@ -264,6 +265,25 @@ export default function ProductPreview({
       setError("請選擇所有必要的選項")
       return
     }
+    
+    // 檢查變體是否有價格 - 強化版檢查
+    const selectedVariant = product.variants?.find(v => v.id === variantId)
+    
+    // 更詳細檢查價格是否存在且有效
+    const hasPrice = selectedVariant?.calculated_price && 
+                    selectedVariant.calculated_price.calculated_amount && 
+                    selectedVariant.calculated_price.calculated_amount > 0
+    
+    if (!hasPrice) {
+      console.log("❌ 無法加入購物車：變體沒有有效價格", {
+        variantId,
+        hasCalculatedPrice: !!selectedVariant?.calculated_price,
+        calculatedAmount: selectedVariant?.calculated_price?.calculated_amount
+      })
+      setError("此商品尚未設定價格，請聯繫管理員")
+      toast.error("此商品尚未設定價格，請聯繫管理員")
+      return
+    }
 
     try {
       setError(null)
@@ -287,12 +307,20 @@ export default function ProductPreview({
       // 只觸發購物車更新事件
       window.dispatchEvent(new Event('cartUpdate'))
       setShowSuccessMessage(true)
+      toast.success("已加入購物車")
       setTimeout(() => {
         setShowSuccessMessage(false)
       }, 3000)
     } catch (error) {
       console.error("❌ ProductPreview 添加到購物車失敗:", error)
-      setError("添加到購物車失敗，請稍後再試")
+      // 顯示更友好的錯誤信息
+      if (error instanceof Error && error.message.includes("do not have a price")) {
+        setError("此商品尚未設定價格，請聯繫管理員")
+        toast.error("此商品尚未設定價格，請聯繫管理員")
+      } else {
+        setError("添加到購物車失敗，請稍後再試")
+        toast.error("加入購物車失敗，請稍後再試")
+      }
     } finally {
       setIsAdding(false)
     }
