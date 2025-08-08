@@ -5,16 +5,10 @@ import { Fragment } from "react"
 import { Button } from "@medusajs/ui"
 import XIcon from "@modules/common/icons/x"
 import { Text } from "@medusajs/ui"
-import {
-  ProductOption,
-  ProductVariant,
-} from "@medusajs/medusa"
+import { HttpTypes } from "@medusajs/types"
 
 type Props = {
-  product: {
-    options: ProductOption[]
-    variants: ProductVariant[]
-  }
+  product: HttpTypes.StoreProduct
   isOpen: boolean
   onClose: () => void
   countryCode?: string
@@ -75,7 +69,7 @@ export default function MobileVariantSelector({
                     <div key={option.id} className="mb-6">
                       <Text className="text-base mb-2">{option.title}</Text>
                       <div className="flex flex-wrap gap-2">
-                        {option.values?.map((value) => (
+                        {option.values?.map((value: any) => (
                           <Button
                             key={value.id}
                             variant="secondary"

@@ -10,6 +10,7 @@ import { useProductActions } from "@lib/context/product-context"
 import Divider from "@modules/common/components/divider"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
+import { toast } from "react-hot-toast"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -324,6 +325,17 @@ export default function ProductActions({
       return null
     }
     
+    // 檢查變體是否有價格
+    const hasPrice = selectedVariantMemo.calculated_price && 
+                    selectedVariantMemo.calculated_price.calculated_amount && 
+                    selectedVariantMemo.calculated_price.calculated_amount > 0
+    
+    if (!hasPrice) {
+      console.log("❌ 無法加入購物車：變體沒有價格")
+      toast.error("此商品尚未設定價格，請聯繫管理員")
+      return null
+    }
+    
     console.log("🛒 ProductActions 開始加入購物車:", {
       variantId: selectedVariantMemo.id,
       variantTitle: selectedVariantMemo.title,
@@ -338,14 +350,32 @@ export default function ProductActions({
         countryCode: "tw",
       })
       console.log("✅ ProductActions 成功加入購物車!")
+      toast.success("已加入購物車")
     } catch (error) {
       console.error("❌ ProductActions 加入購物車失敗:", error)
+      // 顯示更友好的錯誤信息
+      if (error instanceof Error && error.message.includes("do not have a price")) {
+        toast.error("此商品尚未設定價格，請聯繫管理員")
+      } else {
+        toast.error("加入購物車失敗，請稍後再試")
+      }
     }
   }
 
   const handleBuyNow = async () => {
     if (!selectedVariantMemo?.id) {
       console.log("❌ 無法立即購買：沒有選擇變體")
+      return null
+    }
+    
+    // 檢查變體是否有價格
+    const hasPrice = selectedVariantMemo.calculated_price && 
+                    selectedVariantMemo.calculated_price.calculated_amount && 
+                    selectedVariantMemo.calculated_price.calculated_amount > 0
+    
+    if (!hasPrice) {
+      console.log("❌ 無法立即購買：變體沒有價格")
+      toast.error("此商品尚未設定價格，請聯繫管理員")
       return null
     }
     
@@ -366,6 +396,12 @@ export default function ProductActions({
       router.push("/tw/cart")
     } catch (error) {
       console.error("❌ ProductActions 立即購買失敗:", error)
+      // 顯示更友好的錯誤信息
+      if (error instanceof Error && error.message.includes("do not have a price")) {
+        toast.error("此商品尚未設定價格，請聯繫管理員")
+      } else {
+        toast.error("立即購買失敗，請稍後再試")
+      }
     }
   }
 

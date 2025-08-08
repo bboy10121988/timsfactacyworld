@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
@@ -9,6 +10,7 @@ import Nav from "@modules/layout/templates/nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 import { getHeader } from "@lib/sanity"
 import { SanityHeader } from "../../../types/global"
+import AffiliateTracker from "@/components/affiliate/affiliate-tracker"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -42,6 +44,9 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <AffiliateTracker />
+      </Suspense>
       <Nav />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />
