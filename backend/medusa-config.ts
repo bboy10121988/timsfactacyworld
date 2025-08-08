@@ -109,6 +109,10 @@ const config = defineConfig({
     //     client_back_url: process.env.ECPAY_CLIENT_BACK_URL
     //   }
     // }
+    // Affiliate 行銷模組 - 暫時停用以解決相容性問題
+    // {
+    //   resolve: "./src/modules/affiliate"
+    // }
   ],
   plugins: [
     {

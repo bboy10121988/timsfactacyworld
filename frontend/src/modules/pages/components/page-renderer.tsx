@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import HeroSection from "@modules/home/components/hero-section"
-import BlogPosts from "@modules/blog/components/blog-posts"
+import BlogPostsClient from "@modules/blog/components/blog-posts-client"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import ImageTextBlock from "@modules/home/components/image-text-block"
 import YoutubeSection from "@modules/home/components/youtube-section"
@@ -267,9 +267,9 @@ export default function PageRenderer({ pageData }: PageRendererProps) {
                 
                 return (
                   <div key={index} className="mb-12">
-                    <BlogPosts 
+                    <BlogPostsClient 
+                      posts={[]} // 暫時傳遞空陣列，後續需要在伺服器端預取資料
                       title={blogSection.title || "最新文章"}
-                      category={blogSection.category}
                       limit={blogSection.limit || 6}
                       postsPerRow={blogSection.postsPerRow || 3}
                     />

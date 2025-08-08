@@ -10,8 +10,8 @@ async function getBlogPosts(category?: string, limit: number = 6) {
     // 2. 建立分類過濾條件
     const categoryFilter = category ? `&& $category in categories[]->title` : ''
     
-    // 3. 組合完整查詢
-    const query = `*[${baseQuery} ${categoryFilter}] | order(publishedAt desc) [0...${limit}] {
+    // 3. 組合完整查詢 - 使用 _createdAt 而不是 publishedAt
+    const query = `*[${baseQuery} ${categoryFilter}] | order(_createdAt desc) [0...${limit}] {
       title,
       slug,
       mainImage {
@@ -20,6 +20,7 @@ async function getBlogPosts(category?: string, limit: number = 6) {
         }
       },
       publishedAt,
+      _createdAt,
       categories[]->{
         title
       },
@@ -33,6 +34,7 @@ async function getBlogPosts(category?: string, limit: number = 6) {
 
     // 5. 執行查詢並傳入參數
     const posts = await client.fetch<BlogPost[]>(query, params)
+    console.log('BlogPosts - 查詢到的文章數量:', posts?.length)
     return posts
   } catch (error) {
     console.error('取得部落格文章時發生錯誤:', error)
@@ -56,12 +58,11 @@ export default async function BlogPosts({
   try {
     const posts = await getBlogPosts(category, limit)
 
-    // 檢查並過濾無效的文章
+    // 檢查並過濾無效的文章 - 移除對主圖片的強制要求
     const validPosts = posts?.filter(post => (
       post && 
       post.title && 
-      post.slug?.current &&
-      post.mainImage?.asset?.url
+      post.slug?.current
     ))
 
     // 根據 postsPerRow 設置網格樣式

@@ -47,13 +47,14 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
         <CartMismatchBanner customer={customer} cart={cart} />
       )}
 
-      {cart && (
+      {/* 暫時註釋免運費提示組件以修復 SSR 錯誤 */}
+      {/* {cart && (
         <FreeShippingPriceNudge
           variant="popup"
           cart={cart}
           shippingOptions={shippingOptions}
         />
-      )}
+      )} */}
       {/* 內容無上間距 - 直接貼齊 sticky 導覽列底部 */}
       <main>
         {props.children}

@@ -1,0 +1,1069 @@
+
+> medusa-ecpay-project@1.0.0 dev
+> cd backend && yarn dev
+
+[32minfo[39m:    Watching filesystem to reload dev server on file change
+[32minfo[39m:    Skipping instrumentation registration. No register function found.
+redisUrl not found. A fake redis instance will be used.
+[32minfo[39m:    No link to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/links. skipped.
+[34mdebug[39m:   Registering links from /Users/raychou/tim-web/medusa_0720/backend/src/links.
+[34mdebug[39m:   Links registered.
+[33mwarn[39m:    Local Event Bus installed. This is not recommended for production.
+[32minfo[39m:    Locking module: Using "in-memory" as default.
+[34mdebug[39m:   Loaded 250 countries
+[34mdebug[39m:   Loaded 121 currencies
+[32minfo[39m:    No workflow to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/workflows. skipped.
+[34mdebug[39m:   Workflows registered.
+[32minfo[39m:    No subscriber to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/subscribers. skipped.
+[34mdebug[39m:   Registering subscribers from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/dist/subscribers/configurable-notifications.js.
+[34mdebug[39m:   Registering subscribers from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/dist/subscribers/payment-webhook.js.
+[34mdebug[39m:   Subscribers registered.
+[32minfo[39m:    No job to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/dist/jobs. skipped.
+[32minfo[39m:    No job to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/jobs. skipped.
+[34mdebug[39m:   Jobs registered.
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/promotions/:id/rules/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/promotions/:id/target-rules/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/promotions/:id/buy-rules/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/hooks/payment/:provider
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/products/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/products/:id/variants/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/products/:id/variants/inventory-items/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/price-lists/:id/prices/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/inventory-items/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/inventory-items/location-levels/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/inventory-items/:id/location-levels/batch
+[34mdebug[39m:   using custom bodyparser config on matcher POST:/admin/shipping-options/:id/rules/batch
+📥 Loaded 9 trade mappings from file
+🔧 Middlewares.ts loaded
+[34mdebug[39m:   using custom bodyparser config on matcher POST,OPTIONS:/webhooks/*
+[34mdebug[39m:   Registering bodyparser middleware for prefix /
+[34mdebug[39m:   Registering auth middleware for prefix /admin
+[34mdebug[39m:   Registering publishable key middleware for namespace /store
+[34mdebug[39m:   Registering auth middleware for prefix /store
+[34mdebug[39m:   registering global middleware for /store/ecpay/callback*
+[34mdebug[39m:   registering global middleware for /store/ecpay/*
+[34mdebug[39m:   registering global middleware for /store/carts/*/complete
+[34mdebug[39m:   registering route POST /ecpay-webhook
+[34mdebug[39m:   registering route GET /health
+[34mdebug[39m:   registering route middleware POST /webhooks/*
+[34mdebug[39m:   registering route middleware OPTIONS /webhooks/*
+[34mdebug[39m:   registering route middleware POST /store/returns
+[34mdebug[39m:   registering route middleware POST /store/returns
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/customers
+[34mdebug[39m:   registering route middleware POST /store/customers
+[34mdebug[39m:   registering route middleware POST /store/customers
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware POST /store/carts
+[34mdebug[39m:   registering route middleware GET /store/collections
+[34mdebug[39m:   registering route middleware GET /store/product-categories
+[34mdebug[39m:   registering route middleware GET /store/product-categories
+[34mdebug[39m:   registering route middleware GET /store/product-tags
+[34mdebug[39m:   registering route middleware GET /store/product-types
+[34mdebug[39m:   registering route middleware GET /store/payment-providers
+[34mdebug[39m:   registering route middleware GET /store/shipping-options
+[34mdebug[39m:   registering route middleware POST /store/payment-collections
+[34mdebug[39m:   registering route middleware POST /store/payment-collections
+[34mdebug[39m:   registering route middleware GET /store/orders
+[34mdebug[39m:   registering route middleware GET /store/orders
+[34mdebug[39m:   registering route middleware GET /store/regions
+[34mdebug[39m:   registering route middleware GET /store/currencies
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/products
+[34mdebug[39m:   registering route middleware GET /store/return-reasons
+[34mdebug[39m:   registering route POST /store/carts
+[34mdebug[39m:   registering route GET /store/collections
+[34mdebug[39m:   registering route GET /store/currencies
+[34mdebug[39m:   registering route POST /store/customers
+[34mdebug[39m:   registering route GET /store/orders
+[34mdebug[39m:   registering route POST /store/payment-collections
+[34mdebug[39m:   registering route GET /store/payment-providers
+[34mdebug[39m:   registering route GET /store/product-categories
+[34mdebug[39m:   registering route GET /store/product-tags
+[34mdebug[39m:   registering route GET /store/product-types
+[34mdebug[39m:   registering route GET /store/products
+[34mdebug[39m:   registering route GET /store/regions
+[34mdebug[39m:   registering route GET /store/return-reasons
+[34mdebug[39m:   registering route POST /store/returns
+[34mdebug[39m:   registering route GET /store/shipping-options
+[34mdebug[39m:   registering route GET /store/custom
+[34mdebug[39m:   registering route middleware ALL /store/customers/me*
+[34mdebug[39m:   registering route middleware GET /store/customers/me
+[34mdebug[39m:   registering route middleware POST /store/customers/me
+[34mdebug[39m:   registering route middleware POST /store/customers/me
+[34mdebug[39m:   registering route GET /store/customers/me
+[34mdebug[39m:   registering route POST /store/customers/me
+[34mdebug[39m:   registering route POST /store/customers/google
+[34mdebug[39m:   registering route middleware GET /store/customers/me/addresses
+[34mdebug[39m:   registering route middleware POST /store/customers/me/addresses
+[34mdebug[39m:   registering route middleware POST /store/customers/me/addresses
+[34mdebug[39m:   registering route GET /store/customers/me/addresses
+[34mdebug[39m:   registering route POST /store/customers/me/addresses
+[34mdebug[39m:   registering route middleware GET /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route middleware POST /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route middleware POST /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route middleware DELETE /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route GET /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route POST /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route DELETE /store/customers/me/addresses/:address_id
+[34mdebug[39m:   registering route POST /store/customers/google/auth
+[34mdebug[39m:   registering route GET /store/orders/by-merchant-trade-no/:merchantTradeNo
+[34mdebug[39m:   registering route POST /store/bank-transfer/create-order
+[34mdebug[39m:   registering route GET /store/debug/cart-order-status
+[34mdebug[39m:   registering route POST /store/ecpay/create-payment
+[34mdebug[39m:   registering route middleware GET /store/carts/:id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id
+[34mdebug[39m:   registering route middleware GET /store/carts/:id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id
+[34mdebug[39m:   registering route GET /store/carts/:id
+[34mdebug[39m:   registering route POST /store/carts/:id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/taxes
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/taxes
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/shipping-methods
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/shipping-methods
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/complete
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/customer
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/taxes
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/taxes
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/shipping-methods
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/shipping-methods
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/promotions
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/complete
+[34mdebug[39m:   registering route POST /store/carts/:id/complete
+[34mdebug[39m:   registering route POST /store/carts/:id/customer
+[34mdebug[39m:   registering route POST /store/carts/:id/line-items
+[34mdebug[39m:   registering route POST /store/carts/:id/promotions
+[34mdebug[39m:   registering route DELETE /store/carts/:id/promotions
+[34mdebug[39m:   registering route POST /store/carts/:id/shipping-methods
+[34mdebug[39m:   registering route POST /store/carts/:id/taxes
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware POST /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware DELETE /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route POST /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route DELETE /store/carts/:id/line-items/:line_id
+[34mdebug[39m:   registering route middleware GET /store/collections/:id
+[34mdebug[39m:   registering route GET /store/collections/:id
+[34mdebug[39m:   registering route middleware GET /store/product-categories/:id
+[34mdebug[39m:   registering route middleware GET /store/product-categories/:id
+[34mdebug[39m:   registering route GET /store/product-categories/:id
+[34mdebug[39m:   registering route middleware GET /store/product-tags/:id
+[34mdebug[39m:   registering route GET /store/product-tags/:id
+[34mdebug[39m:   registering route middleware GET /store/product-types/:id
+[34mdebug[39m:   registering route GET /store/product-types/:id
+[34mdebug[39m:   registering route middleware POST /store/shipping-options/:id/calculate
+[34mdebug[39m:   registering route middleware POST /store/shipping-options/:id/calculate
+[34mdebug[39m:   registering route POST /store/shipping-options/:id/calculate
+[34mdebug[39m:   registering route middleware POST /store/payment-collections/:id/payment-sessions
+[34mdebug[39m:   registering route middleware POST /store/payment-collections/:id/payment-sessions
+[34mdebug[39m:   registering route POST /store/payment-collections/:id/payment-sessions
+[34mdebug[39m:   registering route middleware GET /store/orders/:id
+[34mdebug[39m:   registering route GET /store/orders/:id
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/request
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/request
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/request
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/accept
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/accept
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/decline
+[34mdebug[39m:   registering route middleware POST /store/orders/:id/transfer/decline
+[34mdebug[39m:   registering route POST /store/orders/:id/transfer/accept
+[34mdebug[39m:   registering route POST /store/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route POST /store/orders/:id/transfer/decline
+[34mdebug[39m:   registering route POST /store/orders/:id/transfer/request
+[34mdebug[39m:   registering route middleware GET /store/regions/:id
+[34mdebug[39m:   registering route GET /store/regions/:id
+[34mdebug[39m:   registering route middleware GET /store/currencies/:code
+[34mdebug[39m:   registering route GET /store/currencies/:code
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/products/:id
+[34mdebug[39m:   registering route GET /store/products/:id
+[34mdebug[39m:   registering route middleware GET /store/return-reasons/:id
+[34mdebug[39m:   registering route GET /store/return-reasons/:id
+[34mdebug[39m:   registering route middleware GET /admin/customer-groups
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups
+[34mdebug[39m:   registering route middleware GET /admin/customers
+[34mdebug[39m:   registering route middleware POST /admin/customers
+[34mdebug[39m:   registering route middleware POST /admin/customers
+[34mdebug[39m:   registering route middleware GET /admin/promotions
+[34mdebug[39m:   registering route middleware POST /admin/promotions
+[34mdebug[39m:   registering route middleware POST /admin/promotions
+[34mdebug[39m:   registering route middleware GET /admin/campaigns
+[34mdebug[39m:   registering route middleware POST /admin/campaigns
+[34mdebug[39m:   registering route middleware POST /admin/campaigns
+[34mdebug[39m:   registering route middleware GET /admin/workflows-executions
+[34mdebug[39m:   registering route middleware GET /admin/returns
+[34mdebug[39m:   registering route middleware POST /admin/returns
+[34mdebug[39m:   registering route middleware POST /admin/returns
+[34mdebug[39m:   registering route middleware GET /admin/regions
+[34mdebug[39m:   registering route middleware POST /admin/regions
+[34mdebug[39m:   registering route middleware POST /admin/regions
+[34mdebug[39m:   registering route middleware GET /admin/returns
+[34mdebug[39m:   registering route middleware POST /admin/returns
+[34mdebug[39m:   registering route middleware POST /admin/returns
+[34mdebug[39m:   registering route middleware GET /admin/users
+[34mdebug[39m:   registering route middleware GET /admin/users
+[34mdebug[39m:   registering route middleware GET /admin/invites
+[34mdebug[39m:   registering route middleware GET /admin/invites
+[34mdebug[39m:   registering route middleware POST /admin/invites
+[34mdebug[39m:   registering route middleware POST /admin/invites
+[34mdebug[39m:   registering route middleware POST /admin/invites
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates
+[34mdebug[39m:   registering route middleware GET /admin/tax-rates
+[34mdebug[39m:   registering route middleware POST /admin/tax-regions
+[34mdebug[39m:   registering route middleware POST /admin/tax-regions
+[34mdebug[39m:   registering route middleware GET /admin/tax-regions
+[34mdebug[39m:   registering route middleware GET /admin/api-keys
+[34mdebug[39m:   registering route middleware POST /admin/api-keys
+[34mdebug[39m:   registering route middleware POST /admin/api-keys
+[34mdebug[39m:   registering route middleware GET /admin/stores
+[34mdebug[39m:   registering route middleware GET /admin/currencies
+[34mdebug[39m:   registering route middleware GET /admin/products
+[34mdebug[39m:   registering route middleware GET /admin/products
+[34mdebug[39m:   registering route middleware GET /admin/products
+[34mdebug[39m:   registering route middleware POST /admin/products
+[34mdebug[39m:   registering route middleware POST /admin/products
+[34mdebug[39m:   registering route middleware GET /admin/payments
+[34mdebug[39m:   registering route middleware GET /admin/price-lists
+[34mdebug[39m:   registering route middleware POST /admin/price-lists
+[34mdebug[39m:   registering route middleware POST /admin/price-lists
+[34mdebug[39m:   registering route middleware GET /admin/price-preferences
+[34mdebug[39m:   registering route middleware POST /admin/price-preferences
+[34mdebug[39m:   registering route middleware POST /admin/price-preferences
+[34mdebug[39m:   registering route middleware GET /admin/inventory-items
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items
+[34mdebug[39m:   registering route middleware GET /admin/collections
+[34mdebug[39m:   registering route middleware POST /admin/collections
+[34mdebug[39m:   registering route middleware POST /admin/collections
+[34mdebug[39m:   registering route middleware GET /admin/shipping-options
+[34mdebug[39m:   registering route middleware GET /admin/shipping-options
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options
+[34mdebug[39m:   registering route middleware GET /admin/draft-orders
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders
+[34mdebug[39m:   registering route middleware GET /admin/sales-channels
+[34mdebug[39m:   registering route middleware GET /admin/sales-channels
+[34mdebug[39m:   registering route middleware GET /admin/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations
+[34mdebug[39m:   registering route middleware GET /admin/stock-locations
+[34mdebug[39m:   registering route middleware GET /admin/stock-locations
+[34mdebug[39m:   registering route middleware GET /admin/product-types
+[34mdebug[39m:   registering route middleware POST /admin/product-types
+[34mdebug[39m:   registering route middleware POST /admin/product-types
+[34mdebug[39m:   registering route middleware GET /admin/product-tags
+[34mdebug[39m:   registering route middleware POST /admin/product-tags
+[34mdebug[39m:   registering route middleware POST /admin/product-tags
+[34mdebug[39m:   registering route middleware POST /admin/uploads
+[34mdebug[39m:   registering route middleware POST /admin/uploads
+[34mdebug[39m:   registering route middleware GET /admin/notifications
+[34mdebug[39m:   registering route middleware GET /admin/orders
+[34mdebug[39m:   registering route middleware GET /admin/reservations
+[34mdebug[39m:   registering route middleware POST /admin/reservations
+[34mdebug[39m:   registering route middleware POST /admin/reservations
+[34mdebug[39m:   registering route middleware GET /admin/product-categories
+[34mdebug[39m:   registering route middleware POST /admin/product-categories
+[34mdebug[39m:   registering route middleware POST /admin/product-categories
+[34mdebug[39m:   registering route middleware POST /admin/shipping-profiles
+[34mdebug[39m:   registering route middleware POST /admin/shipping-profiles
+[34mdebug[39m:   registering route middleware GET /admin/shipping-profiles
+[34mdebug[39m:   registering route middleware POST /admin/fulfillments
+[34mdebug[39m:   registering route middleware POST /admin/fulfillments
+[34mdebug[39m:   registering route middleware GET /admin/fulfillment-providers
+[34mdebug[39m:   registering route middleware GET /admin/fulfillment-providers
+[34mdebug[39m:   registering route middleware GET /admin/return-reasons
+[34mdebug[39m:   registering route middleware POST /admin/return-reasons
+[34mdebug[39m:   registering route middleware POST /admin/return-reasons
+[34mdebug[39m:   registering route middleware GET /admin/claims
+[34mdebug[39m:   registering route middleware POST /admin/claims
+[34mdebug[39m:   registering route middleware POST /admin/claims
+[34mdebug[39m:   registering route middleware GET /admin/refund-reasons
+[34mdebug[39m:   registering route middleware POST /admin/refund-reasons
+[34mdebug[39m:   registering route middleware POST /admin/refund-reasons
+[34mdebug[39m:   registering route middleware GET /admin/exchanges
+[34mdebug[39m:   registering route middleware POST /admin/exchanges
+[34mdebug[39m:   registering route middleware POST /admin/exchanges
+[34mdebug[39m:   registering route middleware GET /admin/product-variants
+[34mdebug[39m:   registering route middleware GET /admin/tax-providers
+[34mdebug[39m:   registering route middleware POST /admin/order-edits
+[34mdebug[39m:   registering route middleware POST /admin/payment-collections
+[34mdebug[39m:   registering route middleware POST /admin/payment-collections
+[34mdebug[39m:   registering route GET /admin/api-keys
+[34mdebug[39m:   registering route POST /admin/api-keys
+[34mdebug[39m:   registering route GET /admin/campaigns
+[34mdebug[39m:   registering route POST /admin/campaigns
+[34mdebug[39m:   registering route GET /admin/claims
+[34mdebug[39m:   registering route POST /admin/claims
+[34mdebug[39m:   registering route GET /admin/collections
+[34mdebug[39m:   registering route POST /admin/collections
+[34mdebug[39m:   registering route GET /admin/currencies
+[34mdebug[39m:   registering route GET /admin/customer-groups
+[34mdebug[39m:   registering route POST /admin/customer-groups
+[34mdebug[39m:   registering route GET /admin/customers
+[34mdebug[39m:   registering route POST /admin/customers
+[34mdebug[39m:   registering route GET /admin/draft-orders
+[34mdebug[39m:   registering route POST /admin/draft-orders
+[34mdebug[39m:   registering route GET /admin/exchanges
+[34mdebug[39m:   registering route POST /admin/exchanges
+[34mdebug[39m:   registering route GET /admin/fulfillment-providers
+[34mdebug[39m:   registering route POST /admin/fulfillments
+[34mdebug[39m:   registering route POST /admin/inventory-items
+[34mdebug[39m:   registering route GET /admin/inventory-items
+[34mdebug[39m:   registering route GET /admin/invites
+[34mdebug[39m:   registering route POST /admin/invites
+[34mdebug[39m:   registering route GET /admin/notifications
+[34mdebug[39m:   registering route POST /admin/order-edits
+[34mdebug[39m:   registering route GET /admin/orders
+[34mdebug[39m:   registering route POST /admin/payment-collections
+[34mdebug[39m:   registering route GET /admin/payments
+[34mdebug[39m:   registering route GET /admin/plugins
+[34mdebug[39m:   registering route GET /admin/price-lists
+[34mdebug[39m:   registering route POST /admin/price-lists
+[34mdebug[39m:   registering route GET /admin/price-preferences
+[34mdebug[39m:   registering route POST /admin/price-preferences
+[34mdebug[39m:   registering route GET /admin/product-categories
+[34mdebug[39m:   registering route POST /admin/product-categories
+[34mdebug[39m:   registering route GET /admin/product-tags
+[34mdebug[39m:   registering route POST /admin/product-tags
+[34mdebug[39m:   registering route GET /admin/product-types
+[34mdebug[39m:   registering route POST /admin/product-types
+[34mdebug[39m:   registering route GET /admin/product-variants
+[34mdebug[39m:   registering route GET /admin/products
+[34mdebug[39m:   registering route POST /admin/products
+[34mdebug[39m:   registering route GET /admin/promotions
+[34mdebug[39m:   registering route POST /admin/promotions
+[34mdebug[39m:   registering route GET /admin/refund-reasons
+[34mdebug[39m:   registering route POST /admin/refund-reasons
+[34mdebug[39m:   registering route GET /admin/regions
+[34mdebug[39m:   registering route POST /admin/regions
+[34mdebug[39m:   registering route GET /admin/reservations
+[34mdebug[39m:   registering route POST /admin/reservations
+[34mdebug[39m:   registering route GET /admin/return-reasons
+[34mdebug[39m:   registering route POST /admin/return-reasons
+[34mdebug[39m:   registering route GET /admin/returns
+[34mdebug[39m:   registering route POST /admin/returns
+[34mdebug[39m:   registering route GET /admin/sales-channels
+[34mdebug[39m:   registering route POST /admin/sales-channels
+[34mdebug[39m:   registering route GET /admin/shipping-options
+[34mdebug[39m:   registering route POST /admin/shipping-options
+[34mdebug[39m:   registering route POST /admin/shipping-profiles
+[34mdebug[39m:   registering route GET /admin/shipping-profiles
+[34mdebug[39m:   registering route POST /admin/stock-locations
+[34mdebug[39m:   registering route GET /admin/stock-locations
+[34mdebug[39m:   registering route GET /admin/stores
+[34mdebug[39m:   registering route GET /admin/tax-providers
+[34mdebug[39m:   registering route POST /admin/tax-rates
+[34mdebug[39m:   registering route GET /admin/tax-rates
+[34mdebug[39m:   registering route POST /admin/tax-regions
+[34mdebug[39m:   registering route GET /admin/tax-regions
+[34mdebug[39m:   registering route POST /admin/uploads
+[34mdebug[39m:   registering route GET /admin/users
+[34mdebug[39m:   registering route GET /admin/workflows-executions
+[34mdebug[39m:   registering route GET /admin/custom
+[34mdebug[39m:   registering route middleware GET /admin/promotions/rule-value-options/:rule_type/:rule_attribute_id
+[34mdebug[39m:   registering route GET /admin/promotions/rule-value-options/:rule_type/:rule_attribute_id
+[34mdebug[39m:   registering route middleware GET /admin/promotions/rule-attribute-options/:rule_type
+[34mdebug[39m:   registering route GET /admin/promotions/rule-attribute-options/:rule_type
+[34mdebug[39m:   registering route middleware GET /admin/users/me
+[34mdebug[39m:   registering route middleware GET /admin/users/me
+[34mdebug[39m:   registering route GET /admin/users/me
+[34mdebug[39m:   registering route middleware POST /admin/invites/accept
+[34mdebug[39m:   registering route middleware POST /admin/invites/accept
+[34mdebug[39m:   registering route middleware POST /admin/invites/accept
+[34mdebug[39m:   registering route POST /admin/invites/accept
+[34mdebug[39m:   registering route middleware POST /admin/products/batch
+[34mdebug[39m:   registering route middleware POST /admin/products/batch
+[34mdebug[39m:   registering route middleware POST /admin/products/export
+[34mdebug[39m:   registering route middleware POST /admin/products/import
+[34mdebug[39m:   registering route middleware POST /admin/products/imports
+[34mdebug[39m:   registering route POST /admin/products/batch
+[34mdebug[39m:   registering route POST /admin/products/export
+[34mdebug[39m:   registering route POST /admin/products/import
+[34mdebug[39m:   registering route POST /admin/products/imports
+[34mdebug[39m:   registering route POST /admin/products/import/:transaction_id/confirm
+[34mdebug[39m:   registering route POST /admin/products/imports/:transaction_id/confirm
+[34mdebug[39m:   registering route middleware GET /admin/payments/payment-providers
+[34mdebug[39m:   registering route GET /admin/payments/payment-providers
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/batch
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/location-levels/batch
+[34mdebug[39m:   registering route POST /admin/inventory-items/location-levels/batch
+[34mdebug[39m:   registering route middleware POST /admin/uploads/presigned-urls
+[34mdebug[39m:   registering route POST /admin/uploads/presigned-urls
+[34mdebug[39m:   registering route middleware GET /admin/customer-groups/:id
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups/:id
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups/:id
+[34mdebug[39m:   registering route GET /admin/customer-groups/:id
+[34mdebug[39m:   registering route POST /admin/customer-groups/:id
+[34mdebug[39m:   registering route DELETE /admin/customer-groups/:id
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups/:id/customers
+[34mdebug[39m:   registering route middleware POST /admin/customer-groups/:id/customers
+[34mdebug[39m:   registering route POST /admin/customer-groups/:id/customers
+[34mdebug[39m:   registering route middleware GET /admin/customers/:id
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id
+[34mdebug[39m:   registering route GET /admin/customers/:id
+[34mdebug[39m:   registering route POST /admin/customers/:id
+[34mdebug[39m:   registering route DELETE /admin/customers/:id
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/addresses
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/addresses
+[34mdebug[39m:   registering route middleware GET /admin/customers/:id/addresses
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/customer-groups
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/customer-groups
+[34mdebug[39m:   registering route GET /admin/customers/:id/addresses
+[34mdebug[39m:   registering route POST /admin/customers/:id/addresses
+[34mdebug[39m:   registering route POST /admin/customers/:id/customer-groups
+[34mdebug[39m:   registering route middleware GET /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route middleware POST /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route middleware DELETE /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route GET /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route POST /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route DELETE /admin/customers/:id/addresses/:address_id
+[34mdebug[39m:   registering route middleware GET /admin/promotions/:id
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id
+[34mdebug[39m:   registering route GET /admin/promotions/:id
+[34mdebug[39m:   registering route POST /admin/promotions/:id
+[34mdebug[39m:   registering route DELETE /admin/promotions/:id
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/rules/batch
+[34mdebug[39m:   registering route POST /admin/promotions/:id/rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/target-rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/target-rules/batch
+[34mdebug[39m:   registering route POST /admin/promotions/:id/target-rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/buy-rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/promotions/:id/buy-rules/batch
+[34mdebug[39m:   registering route POST /admin/promotions/:id/buy-rules/batch
+[34mdebug[39m:   registering route middleware GET /admin/promotions/:id/:rule_type
+[34mdebug[39m:   registering route GET /admin/promotions/:id/:rule_type
+[34mdebug[39m:   registering route middleware GET /admin/campaigns/:id
+[34mdebug[39m:   registering route middleware POST /admin/campaigns/:id
+[34mdebug[39m:   registering route middleware POST /admin/campaigns/:id
+[34mdebug[39m:   registering route GET /admin/campaigns/:id
+[34mdebug[39m:   registering route POST /admin/campaigns/:id
+[34mdebug[39m:   registering route DELETE /admin/campaigns/:id
+[34mdebug[39m:   registering route middleware POST /admin/campaigns/:id/promotions
+[34mdebug[39m:   registering route middleware POST /admin/campaigns/:id/promotions
+[34mdebug[39m:   registering route POST /admin/campaigns/:id/promotions
+[34mdebug[39m:   registering route middleware GET /admin/workflows-executions/:id
+[34mdebug[39m:   registering route GET /admin/workflows-executions/:id
+[34mdebug[39m:   registering route middleware POST /admin/workflows-executions/:workflow_id/run
+[34mdebug[39m:   registering route POST /admin/workflows-executions/:workflow_id/run
+[34mdebug[39m:   registering route GET /admin/workflows-executions/:workflow_id/subscribe
+[34mdebug[39m:   registering route middleware POST /admin/workflows-executions/:workflow_id/steps/success
+[34mdebug[39m:   registering route middleware POST /admin/workflows-executions/:workflow_id/steps/failure
+[34mdebug[39m:   registering route POST /admin/workflows-executions/:workflow_id/steps/failure
+[34mdebug[39m:   registering route POST /admin/workflows-executions/:workflow_id/steps/success
+[34mdebug[39m:   registering route middleware GET /admin/workflows-executions/:workflow_id/:transaction_id
+[34mdebug[39m:   registering route GET /admin/workflows-executions/:workflow_id/:transaction_id
+[34mdebug[39m:   registering route GET /admin/workflows-executions/:workflow_id/:transaction_id/:step_id/subscribe
+[34mdebug[39m:   registering route middleware GET /admin/returns/:id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id
+[34mdebug[39m:   registering route middleware GET /admin/returns/:id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id
+[34mdebug[39m:   registering route GET /admin/returns/:id
+[34mdebug[39m:   registering route POST /admin/returns/:id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items
+[34mdebug[39m:   registering route POST /admin/returns/:id/cancel
+[34mdebug[39m:   registering route POST /admin/returns/:id/dismiss-items
+[34mdebug[39m:   registering route POST /admin/returns/:id/receive
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/receive
+[34mdebug[39m:   registering route POST /admin/returns/:id/receive-items
+[34mdebug[39m:   registering route POST /admin/returns/:id/request
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/request
+[34mdebug[39m:   registering route POST /admin/returns/:id/request-items
+[34mdebug[39m:   registering route POST /admin/returns/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive/confirm
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive/confirm
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive/confirm
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive/confirm
+[34mdebug[39m:   registering route POST /admin/returns/:id/receive/confirm
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route POST /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/request-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route POST /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/receive-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route POST /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/returns/:id/dismiss-items/:action_id
+[34mdebug[39m:   registering route middleware GET /admin/regions/:id
+[34mdebug[39m:   registering route middleware POST /admin/regions/:id
+[34mdebug[39m:   registering route middleware POST /admin/regions/:id
+[34mdebug[39m:   registering route GET /admin/regions/:id
+[34mdebug[39m:   registering route POST /admin/regions/:id
+[34mdebug[39m:   registering route DELETE /admin/regions/:id
+[34mdebug[39m:   registering route middleware GET /admin/users/:id
+[34mdebug[39m:   registering route middleware GET /admin/users/:id
+[34mdebug[39m:   registering route middleware POST /admin/users/:id
+[34mdebug[39m:   registering route middleware POST /admin/users/:id
+[34mdebug[39m:   registering route middleware POST /admin/users/:id
+[34mdebug[39m:   registering route middleware DELETE /admin/users/:id
+[34mdebug[39m:   registering route GET /admin/users/:id
+[34mdebug[39m:   registering route POST /admin/users/:id
+[34mdebug[39m:   registering route DELETE /admin/users/:id
+[34mdebug[39m:   registering route middleware GET /admin/invites/:id
+[34mdebug[39m:   registering route middleware GET /admin/invites/:id
+[34mdebug[39m:   registering route middleware DELETE /admin/invites/:id
+[34mdebug[39m:   registering route GET /admin/invites/:id
+[34mdebug[39m:   registering route DELETE /admin/invites/:id
+[34mdebug[39m:   registering route middleware POST /admin/invites/:id/resend
+[34mdebug[39m:   registering route middleware POST /admin/invites/:id/resend
+[34mdebug[39m:   registering route POST /admin/invites/:id/resend
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates/:id
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates/:id
+[34mdebug[39m:   registering route middleware GET /admin/tax-rates/:id
+[34mdebug[39m:   registering route POST /admin/tax-rates/:id
+[34mdebug[39m:   registering route GET /admin/tax-rates/:id
+[34mdebug[39m:   registering route DELETE /admin/tax-rates/:id
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates/:id/rules
+[34mdebug[39m:   registering route middleware POST /admin/tax-rates/:id/rules
+[34mdebug[39m:   registering route POST /admin/tax-rates/:id/rules
+[34mdebug[39m:   registering route middleware DELETE /admin/tax-rates/:id/rules/:rule_id
+[34mdebug[39m:   registering route DELETE /admin/tax-rates/:id/rules/:rule_id
+[34mdebug[39m:   registering route middleware POST /admin/tax-regions/:id
+[34mdebug[39m:   registering route middleware POST /admin/tax-regions/:id
+[34mdebug[39m:   registering route middleware GET /admin/tax-regions/:id
+[34mdebug[39m:   registering route GET /admin/tax-regions/:id
+[34mdebug[39m:   registering route POST /admin/tax-regions/:id
+[34mdebug[39m:   registering route DELETE /admin/tax-regions/:id
+[34mdebug[39m:   registering route middleware GET /admin/api-keys/:id
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id
+[34mdebug[39m:   registering route GET /admin/api-keys/:id
+[34mdebug[39m:   registering route POST /admin/api-keys/:id
+[34mdebug[39m:   registering route DELETE /admin/api-keys/:id
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id/revoke
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id/revoke
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/api-keys/:id/sales-channels
+[34mdebug[39m:   registering route POST /admin/api-keys/:id/revoke
+[34mdebug[39m:   registering route POST /admin/api-keys/:id/sales-channels
+[34mdebug[39m:   registering route middleware GET /admin/stores/:id
+[34mdebug[39m:   registering route middleware POST /admin/stores/:id
+[34mdebug[39m:   registering route middleware POST /admin/stores/:id
+[34mdebug[39m:   registering route GET /admin/stores/:id
+[34mdebug[39m:   registering route POST /admin/stores/:id
+[34mdebug[39m:   registering route middleware GET /admin/currencies/:code
+[34mdebug[39m:   registering route GET /admin/currencies/:code
+[34mdebug[39m:   registering route middleware GET /admin/products/:id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id
+[34mdebug[39m:   registering route middleware DELETE /admin/products/:id
+[34mdebug[39m:   registering route GET /admin/products/:id
+[34mdebug[39m:   registering route POST /admin/products/:id
+[34mdebug[39m:   registering route DELETE /admin/products/:id
+[34mdebug[39m:   registering route middleware GET /admin/products/:id/variants
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants
+[34mdebug[39m:   registering route middleware GET /admin/products/:id/options
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/options
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/options
+[34mdebug[39m:   registering route GET /admin/products/:id/options
+[34mdebug[39m:   registering route POST /admin/products/:id/options
+[34mdebug[39m:   registering route GET /admin/products/:id/variants
+[34mdebug[39m:   registering route POST /admin/products/:id/variants
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/batch
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/batch
+[34mdebug[39m:   registering route POST /admin/products/:id/variants/batch
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/inventory-items/batch
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/inventory-items/batch
+[34mdebug[39m:   registering route POST /admin/products/:id/variants/inventory-items/batch
+[34mdebug[39m:   registering route middleware GET /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route middleware DELETE /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route GET /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route POST /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route DELETE /admin/products/:id/variants/:variant_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id/inventory-items
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id/inventory-items
+[34mdebug[39m:   registering route POST /admin/products/:id/variants/:variant_id/inventory-items
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id/inventory-items/:inventory_item_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/variants/:variant_id/inventory-items/:inventory_item_id
+[34mdebug[39m:   registering route middleware DELETE /admin/products/:id/variants/:variant_id/inventory-items/:inventory_item_id
+[34mdebug[39m:   registering route POST /admin/products/:id/variants/:variant_id/inventory-items/:inventory_item_id
+[34mdebug[39m:   registering route DELETE /admin/products/:id/variants/:variant_id/inventory-items/:inventory_item_id
+[34mdebug[39m:   registering route middleware GET /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route middleware POST /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route middleware DELETE /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route GET /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route POST /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route DELETE /admin/products/:id/options/:option_id
+[34mdebug[39m:   registering route middleware GET /admin/payments/:id
+[34mdebug[39m:   registering route GET /admin/payments/:id
+[34mdebug[39m:   registering route middleware POST /admin/payments/:id/capture
+[34mdebug[39m:   registering route middleware POST /admin/payments/:id/capture
+[34mdebug[39m:   registering route middleware POST /admin/payments/:id/refund
+[34mdebug[39m:   registering route middleware POST /admin/payments/:id/refund
+[34mdebug[39m:   registering route POST /admin/payments/:id/capture
+[34mdebug[39m:   registering route POST /admin/payments/:id/refund
+[34mdebug[39m:   registering route middleware GET /admin/price-lists/:id
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id
+[34mdebug[39m:   registering route GET /admin/price-lists/:id
+[34mdebug[39m:   registering route POST /admin/price-lists/:id
+[34mdebug[39m:   registering route DELETE /admin/price-lists/:id
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id/products
+[34mdebug[39m:   registering route POST /admin/price-lists/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id/prices/batch
+[34mdebug[39m:   registering route middleware POST /admin/price-lists/:id/prices/batch
+[34mdebug[39m:   registering route POST /admin/price-lists/:id/prices/batch
+[34mdebug[39m:   registering route middleware GET /admin/price-preferences/:id
+[34mdebug[39m:   registering route middleware POST /admin/price-preferences/:id
+[34mdebug[39m:   registering route middleware POST /admin/price-preferences/:id
+[34mdebug[39m:   registering route GET /admin/price-preferences/:id
+[34mdebug[39m:   registering route POST /admin/price-preferences/:id
+[34mdebug[39m:   registering route DELETE /admin/price-preferences/:id
+[34mdebug[39m:   registering route middleware GET /admin/inventory-items/:id
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id
+[34mdebug[39m:   registering route GET /admin/inventory-items/:id
+[34mdebug[39m:   registering route POST /admin/inventory-items/:id
+[34mdebug[39m:   registering route DELETE /admin/inventory-items/:id
+[34mdebug[39m:   registering route middleware GET /admin/inventory-items/:id/location-levels
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels
+[34mdebug[39m:   registering route POST /admin/inventory-items/:id/location-levels
+[34mdebug[39m:   registering route GET /admin/inventory-items/:id/location-levels
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels/batch
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels/batch
+[34mdebug[39m:   registering route POST /admin/inventory-items/:id/location-levels/batch
+[34mdebug[39m:   registering route middleware DELETE /admin/inventory-items/:id/location-levels/:location_id
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels/:location_id
+[34mdebug[39m:   registering route middleware POST /admin/inventory-items/:id/location-levels/:location_id
+[34mdebug[39m:   registering route DELETE /admin/inventory-items/:id/location-levels/:location_id
+[34mdebug[39m:   registering route POST /admin/inventory-items/:id/location-levels/:location_id
+[34mdebug[39m:   registering route middleware GET /admin/collections/:id
+[34mdebug[39m:   registering route middleware POST /admin/collections/:id
+[34mdebug[39m:   registering route middleware POST /admin/collections/:id
+[34mdebug[39m:   registering route GET /admin/collections/:id
+[34mdebug[39m:   registering route POST /admin/collections/:id
+[34mdebug[39m:   registering route DELETE /admin/collections/:id
+[34mdebug[39m:   registering route middleware POST /admin/collections/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/collections/:id/products
+[34mdebug[39m:   registering route POST /admin/collections/:id/products
+[34mdebug[39m:   registering route middleware GET /admin/shipping-options/:id
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options/:id
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options/:id
+[34mdebug[39m:   registering route GET /admin/shipping-options/:id
+[34mdebug[39m:   registering route POST /admin/shipping-options/:id
+[34mdebug[39m:   registering route DELETE /admin/shipping-options/:id
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options/:id/rules/batch
+[34mdebug[39m:   registering route middleware POST /admin/shipping-options/:id/rules/batch
+[34mdebug[39m:   registering route POST /admin/shipping-options/:id/rules/batch
+[34mdebug[39m:   registering route middleware GET /admin/draft-orders/:id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id
+[34mdebug[39m:   registering route GET /admin/draft-orders/:id
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/convert-to-order
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/convert-to-order
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id/edit
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/items
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/promotions
+[34mdebug[39m:   registering route middleware DELETE /admin/draft-orders/:id/edit/promotions
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/shipping-methods
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/confirm
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/items
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/promotions
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id/edit/promotions
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/request
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/shipping-methods
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/items/item/:item_id
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/items/item/:item_id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/shipping-methods/method/:method_id
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/shipping-methods/method/:method_id
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id/edit/shipping-methods/method/:method_id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/items/:action_id
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id/edit/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/draft-orders/:id/edit/shipping-methods/:action_id
+[34mdebug[39m:   registering route POST /admin/draft-orders/:id/edit/shipping-methods/:action_id
+[34mdebug[39m:   registering route DELETE /admin/draft-orders/:id/edit/shipping-methods/:action_id
+[34mdebug[39m:   registering route middleware GET /admin/sales-channels/:id
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels/:id
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels/:id
+[34mdebug[39m:   registering route GET /admin/sales-channels/:id
+[34mdebug[39m:   registering route POST /admin/sales-channels/:id
+[34mdebug[39m:   registering route DELETE /admin/sales-channels/:id
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/sales-channels/:id/products
+[34mdebug[39m:   registering route POST /admin/sales-channels/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id
+[34mdebug[39m:   registering route middleware GET /admin/stock-locations/:id
+[34mdebug[39m:   registering route POST /admin/stock-locations/:id
+[34mdebug[39m:   registering route GET /admin/stock-locations/:id
+[34mdebug[39m:   registering route DELETE /admin/stock-locations/:id
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/fulfillment-sets
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/fulfillment-sets
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/sales-channels
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/fulfillment-providers
+[34mdebug[39m:   registering route middleware POST /admin/stock-locations/:id/fulfillment-providers
+[34mdebug[39m:   registering route POST /admin/stock-locations/:id/fulfillment-providers
+[34mdebug[39m:   registering route POST /admin/stock-locations/:id/fulfillment-sets
+[34mdebug[39m:   registering route POST /admin/stock-locations/:id/sales-channels
+[34mdebug[39m:   registering route middleware GET /admin/product-types/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-types/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-types/:id
+[34mdebug[39m:   registering route GET /admin/product-types/:id
+[34mdebug[39m:   registering route POST /admin/product-types/:id
+[34mdebug[39m:   registering route DELETE /admin/product-types/:id
+[34mdebug[39m:   registering route middleware GET /admin/product-tags/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-tags/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-tags/:id
+[34mdebug[39m:   registering route GET /admin/product-tags/:id
+[34mdebug[39m:   registering route POST /admin/product-tags/:id
+[34mdebug[39m:   registering route DELETE /admin/product-tags/:id
+[34mdebug[39m:   registering route middleware GET /admin/uploads/:id
+[34mdebug[39m:   registering route GET /admin/uploads/:id
+[34mdebug[39m:   registering route DELETE /admin/uploads/:id
+[34mdebug[39m:   registering route DELETE /admin/fulfillment-sets/:id
+[34mdebug[39m:   registering route middleware POST /admin/fulfillment-sets/:id/service-zones
+[34mdebug[39m:   registering route middleware POST /admin/fulfillment-sets/:id/service-zones
+[34mdebug[39m:   registering route POST /admin/fulfillment-sets/:id/service-zones
+[34mdebug[39m:   registering route middleware DELETE /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route middleware POST /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route middleware POST /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route middleware GET /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route GET /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route POST /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route DELETE /admin/fulfillment-sets/:id/service-zones/:zone_id
+[34mdebug[39m:   registering route middleware GET /admin/notifications/:id
+[34mdebug[39m:   registering route GET /admin/notifications/:id
+[34mdebug[39m:   registering route middleware GET /admin/orders/:id
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id
+[34mdebug[39m:   registering route GET /admin/orders/:id
+[34mdebug[39m:   registering route POST /admin/orders/:id
+[34mdebug[39m:   registering route middleware GET /admin/orders/:id/line-items
+[34mdebug[39m:   registering route middleware GET /admin/orders/:id/changes
+[34mdebug[39m:   registering route middleware GET /admin/orders/:id/preview
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/archive
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/complete
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/complete
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/credit-lines
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/credit-lines
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/transfer
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/transfer
+[34mdebug[39m:   registering route POST /admin/orders/:id/archive
+[34mdebug[39m:   registering route POST /admin/orders/:id/cancel
+[34mdebug[39m:   registering route GET /admin/orders/:id/changes
+[34mdebug[39m:   registering route POST /admin/orders/:id/complete
+[34mdebug[39m:   registering route POST /admin/orders/:id/credit-lines
+[34mdebug[39m:   registering route POST /admin/orders/:id/fulfillments
+[34mdebug[39m:   registering route GET /admin/orders/:id/line-items
+[34mdebug[39m:   registering route GET /admin/orders/:id/preview
+[34mdebug[39m:   registering route POST /admin/orders/:id/transfer
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route POST /admin/orders/:id/transfer/cancel
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/shipments
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/shipments
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/mark-as-delivered
+[34mdebug[39m:   registering route middleware POST /admin/orders/:id/fulfillments/:fulfillment_id/mark-as-delivered
+[34mdebug[39m:   registering route POST /admin/orders/:id/fulfillments/:fulfillment_id/cancel
+[34mdebug[39m:   registering route POST /admin/orders/:id/fulfillments/:fulfillment_id/mark-as-delivered
+[34mdebug[39m:   registering route POST /admin/orders/:id/fulfillments/:fulfillment_id/shipments
+[34mdebug[39m:   registering route middleware GET /admin/reservations/:id
+[34mdebug[39m:   registering route middleware POST /admin/reservations/:id
+[34mdebug[39m:   registering route middleware POST /admin/reservations/:id
+[34mdebug[39m:   registering route GET /admin/reservations/:id
+[34mdebug[39m:   registering route POST /admin/reservations/:id
+[34mdebug[39m:   registering route DELETE /admin/reservations/:id
+[34mdebug[39m:   registering route middleware GET /admin/product-categories/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-categories/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-categories/:id
+[34mdebug[39m:   registering route GET /admin/product-categories/:id
+[34mdebug[39m:   registering route POST /admin/product-categories/:id
+[34mdebug[39m:   registering route DELETE /admin/product-categories/:id
+[34mdebug[39m:   registering route middleware POST /admin/product-categories/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/product-categories/:id/products
+[34mdebug[39m:   registering route POST /admin/product-categories/:id/products
+[34mdebug[39m:   registering route middleware POST /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route middleware POST /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route middleware GET /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route GET /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route DELETE /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route POST /admin/shipping-profiles/:id
+[34mdebug[39m:   registering route middleware POST /admin/fulfillments/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/fulfillments/:id/shipment
+[34mdebug[39m:   registering route middleware POST /admin/fulfillments/:id/shipment
+[34mdebug[39m:   registering route POST /admin/fulfillments/:id/cancel
+[34mdebug[39m:   registering route POST /admin/fulfillments/:id/shipment
+[34mdebug[39m:   registering route middleware GET /admin/return-reasons/:id
+[34mdebug[39m:   registering route middleware POST /admin/return-reasons/:id
+[34mdebug[39m:   registering route middleware POST /admin/return-reasons/:id
+[34mdebug[39m:   registering route GET /admin/return-reasons/:id
+[34mdebug[39m:   registering route POST /admin/return-reasons/:id
+[34mdebug[39m:   registering route DELETE /admin/return-reasons/:id
+[34mdebug[39m:   registering route middleware GET /admin/claims/:id
+[34mdebug[39m:   registering route GET /admin/claims/:id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/claim-items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/claim-items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/cancel
+[34mdebug[39m:   registering route POST /admin/claims/:id/cancel
+[34mdebug[39m:   registering route POST /admin/claims/:id/claim-items
+[34mdebug[39m:   registering route POST /admin/claims/:id/request
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/shipping-method
+[34mdebug[39m:   registering route POST /admin/claims/:id/inbound/items
+[34mdebug[39m:   registering route POST /admin/claims/:id/inbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/claims/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route POST /admin/claims/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/claims/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/claims/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/items
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/shipping-method
+[34mdebug[39m:   registering route POST /admin/claims/:id/outbound/items
+[34mdebug[39m:   registering route POST /admin/claims/:id/outbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/claims/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route POST /admin/claims/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/claims/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/claims/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/claim-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/claims/:id/claim-items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/claims/:id/claim-items/:action_id
+[34mdebug[39m:   registering route POST /admin/claims/:id/claim-items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/claims/:id/claim-items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/refund-reasons/:id
+[34mdebug[39m:   registering route middleware POST /admin/refund-reasons/:id
+[34mdebug[39m:   registering route middleware GET /admin/refund-reasons/:id
+[34mdebug[39m:   registering route middleware DELETE /admin/refund-reasons/:id
+[34mdebug[39m:   registering route GET /admin/refund-reasons/:id
+[34mdebug[39m:   registering route POST /admin/refund-reasons/:id
+[34mdebug[39m:   registering route DELETE /admin/refund-reasons/:id
+[34mdebug[39m:   registering route middleware GET /admin/exchanges/:id
+[34mdebug[39m:   registering route GET /admin/exchanges/:id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/cancel
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/cancel
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/cancel
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/request
+[34mdebug[39m:   registering route DELETE /admin/exchanges/:id/request
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/items
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/items
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/shipping-method
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/inbound/items
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/inbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/exchanges/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/exchanges/:id/inbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/exchanges/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/exchanges/:id/inbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/items
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/items
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/shipping-method
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/outbound/items
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/outbound/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/exchanges/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/exchanges/:id/outbound/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/exchanges/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route middleware DELETE /admin/exchanges/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/exchanges/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/exchanges/:id/outbound/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/order-edits/:id
+[34mdebug[39m:   registering route middleware POST /admin/order-edits/:id/items
+[34mdebug[39m:   registering route middleware POST /admin/order-edits/:id/shipping-method
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/confirm
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/items
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/request
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/shipping-method
+[34mdebug[39m:   registering route middleware POST /admin/order-edits/:id/items/item/:item_id
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/items/item/:item_id
+[34mdebug[39m:   registering route middleware POST /admin/order-edits/:id/items/:action_id
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/items/:action_id
+[34mdebug[39m:   registering route DELETE /admin/order-edits/:id/items/:action_id
+[34mdebug[39m:   registering route middleware POST /admin/order-edits/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route POST /admin/order-edits/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/order-edits/:id/shipping-method/:action_id
+[34mdebug[39m:   registering route DELETE /admin/payment-collections/:id
+[34mdebug[39m:   registering route middleware POST /admin/payment-collections/:id/mark-as-paid
+[34mdebug[39m:   registering route middleware POST /admin/payment-collections/:id/mark-as-paid
+[34mdebug[39m:   registering route POST /admin/payment-collections/:id/mark-as-paid
+[34mdebug[39m:   registering route GET /admin/fulfillment-providers/:id/options
+[34mdebug[39m:   registering route middleware POST /auth/session
+[34mdebug[39m:   registering route middleware DELETE /auth/session
+[34mdebug[39m:   registering route POST /auth/session
+[34mdebug[39m:   registering route DELETE /auth/session
+[34mdebug[39m:   registering route GET /auth/google
+[34mdebug[39m:   registering route middleware POST /auth/token/refresh
+[34mdebug[39m:   registering route POST /auth/token/refresh
+[34mdebug[39m:   registering route POST /auth/google/callback
+[34mdebug[39m:   registering route OPTIONS /webhooks/ecpay
+[34mdebug[39m:   registering route POST /webhooks/ecpay
+[34mdebug[39m:   registering route POST /hooks/ecpay/callback
+[34mdebug[39m:   registering route POST /hooks/payment/:provider
+[34mdebug[39m:   registering route GET /app/orders
+[34mdebug[39m:   registering route POST /app/orders
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider
+[34mdebug[39m:   registering route middleware GET /auth/:actor_type/:auth_provider
+[34mdebug[39m:   registering route GET /auth/:actor_type/:auth_provider
+[34mdebug[39m:   registering route POST /auth/:actor_type/:auth_provider
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/callback
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/register
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/reset-password
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/reset-password
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/update
+[34mdebug[39m:   registering route middleware POST /auth/:actor_type/:auth_provider/update
+[34mdebug[39m:   registering route GET /auth/:actor_type/:auth_provider/callback
+[34mdebug[39m:   registering route POST /auth/:actor_type/:auth_provider/callback
+[34mdebug[39m:   registering route POST /auth/:actor_type/:auth_provider/register
+[34mdebug[39m:   registering route POST /auth/:actor_type/:auth_provider/reset-password
+[34mdebug[39m:   registering route POST /auth/:actor_type/:auth_provider/update
+[34mdebug[39m:   Generated container types
+[34mdebug[39m:   Generated modules types
+- Creating server
+Error: listen EADDRINUSE: address already in use :::9000
+    at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+    at listenInCluster (node:net:1965:12)
+    at Server.listen (node:net:2067:7)
+    at internalStart (/Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/src/commands/start.ts:208:15)
+    at async start (/Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/src/commands/start.ts:290:5) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 9000
+}
