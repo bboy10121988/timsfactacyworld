@@ -83,7 +83,7 @@ export async function POST(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-publishable-api-key': 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+            'x-publishable-api-key': 'pk_12345678901234567890123456789012'
           },
           body: JSON.stringify({
             payment_captured: true  // 標記付款已捕獲

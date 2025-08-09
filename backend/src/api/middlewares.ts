@@ -36,7 +36,7 @@ export default defineMiddlewares({
           console.log('📋 Request headers:', Object.keys(req.headers))
           
           // 設定有效的 publishable API key
-          req.headers['x-publishable-api-key'] = 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+          req.headers['x-publishable-api-key'] = 'pk_12345678901234567890123456789012'
           
           console.log('✅ API key set, proceeding to next middleware')
           next()
@@ -59,7 +59,7 @@ export default defineMiddlewares({
             console.log('🔓 Setting API key for ECPay cart completion')
             
             // 設定有效的 publishable API key
-            req.headers['x-publishable-api-key'] = 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+            req.headers['x-publishable-api-key'] = 'pk_12345678901234567890123456789012'
           }
           
           next()
@@ -79,7 +79,7 @@ export default defineMiddlewares({
           if (req.path.includes('/ecpay/callback')) {
             console.log('🔓 Bypassing API key for ECPay callback')
             // 設定有效的 publishable API key
-            req.headers['x-publishable-api-key'] = 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+            req.headers['x-publishable-api-key'] = 'pk_12345678901234567890123456789012'
           }
           
           next()

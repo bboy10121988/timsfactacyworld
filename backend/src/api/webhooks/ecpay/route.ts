@@ -133,7 +133,7 @@ export const POST = async (
       
       // 使用 node-fetch 調用 Store API 完成購物車
       const fetch = require('node-fetch')
-      const apiKey = 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+      const apiKey = 'pk_12345678901234567890123456789012'
       
       // 先檢查購物車狀態
       const cartResponse = await fetch(`http://localhost:9000/store/carts/${cartId}`, {
