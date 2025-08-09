@@ -73,6 +73,71 @@ const config = defineConfig({
     }
   },
   modules: [
+    // 核心模組 - 按 Medusa v2 要求順序註冊
+    {
+      resolve: "@medusajs/medusa/auth",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/auth-emailpass",
+            id: "emailpass",
+            options: {
+              jwt_secret: process.env.JWT_SECRET || "supersecret",
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: "@medusajs/medusa/api-key",
+    },
+    {
+      resolve: "@medusajs/medusa/store",
+    },
+    {
+      resolve: "@medusajs/medusa/user",
+      options: {
+        jwt_secret: process.env.JWT_SECRET || "supersecret",
+      },
+    },
+    {
+      resolve: "@medusajs/medusa/customer",
+    },
+    {
+      resolve: "@medusajs/medusa/region",
+    },
+    {
+      resolve: "@medusajs/medusa/sales-channel",
+    },
+    {
+      resolve: "@medusajs/medusa/currency",
+    },
+    {
+      resolve: "@medusajs/medusa/product",
+    },
+    {
+      resolve: "@medusajs/medusa/pricing",
+    },
+    {
+      resolve: "@medusajs/medusa/cart",
+    },
+    {
+      resolve: "@medusajs/medusa/promotion",
+    },
+    {
+      resolve: "@medusajs/medusa/tax",
+    },
+    {
+      resolve: "@medusajs/medusa/order",
+    },
+    // 庫存和庫存位置模組 - 這是必需的
+    {
+      resolve: "@medusajs/medusa/stock-location",
+    },
+    {
+      resolve: "@medusajs/medusa/inventory",
+    },
+    // 物流模組
     {
       resolve: "@medusajs/fulfillment",
       options: {
@@ -85,33 +150,28 @@ const config = defineConfig({
         ]
       }
     },
-    // ECPay 支付模組 - 暫時停用以測試問題
+    // 付款模組
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/ecpay-payment",
+            id: "ecpay",
+            options: {
+              merchant_id: process.env.ECPAY_MERCHANT_ID,
+              hash_key: process.env.ECPAY_HASH_KEY,
+              hash_iv: process.env.ECPAY_HASH_IV,
+              is_production: process.env.ECPAY_IS_PRODUCTION === 'true'
+            }
+          }
+        ]
+      }
+    },
+    // 自定義聯盟模組 - 暫時禁用
     // {
-    //   resolve: "./src/modules/ecpay-payment",
-    //   options: {
-    //     merchant_id: process.env.ECPAY_MERCHANT_ID,
-    //     hash_key: process.env.ECPAY_HASH_KEY,
-    //     hash_iv: process.env.ECPAY_HASH_IV,
-    //     is_production: process.env.ECPAY_IS_PRODUCTION === 'true',
-    //     return_url: process.env.ECPAY_RETURN_URL,
-    //     client_back_url: process.env.ECPAY_CLIENT_BACK_URL
-    //   }
-    // },
-    // 如果需要銀行轉帳，取消註解
-    // {
-    //   resolve: "./src/modules/ecpay-payment-bank",
-    //   options: {
-    //     merchant_id: process.env.ECPAY_MERCHANT_ID,
-    //     hash_key: process.env.ECPAY_HASH_KEY,
-    //     hash_iv: process.env.ECPAY_HASH_IV,
-    //     is_production: process.env.ECPAY_IS_PRODUCTION === 'true',
-    //     return_url: process.env.ECPAY_RETURN_URL,
-    //     client_back_url: process.env.ECPAY_CLIENT_BACK_URL
-    //   }
-    // }
-    // Affiliate 行銷模組 - 暫時停用以解決相容性問題
-    // {
-    //   resolve: "./src/modules/affiliate"
+    //   resolve: "./src/modules/affiliate",
+    //   key: "affiliate"
     // }
   ],
   plugins: [
