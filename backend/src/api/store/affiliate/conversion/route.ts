@@ -1,7 +1,4 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
-import AffiliateService from "../../../../services/affiliate-real"
-
-const affiliateService = new AffiliateService()
 
 /**
  * POST /store/affiliate/conversion
@@ -9,35 +6,28 @@ const affiliateService = new AffiliateService()
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
-    const body = req.body as {
-      partnerId: string
-      orderId: string
-      productId?: string
-      orderValue: number
-      commissionRate: number
-    }
+    const body = req.body as { affiliate_code: string; order_id: string; order_total: number; click_id?: string }
+    const { affiliate_code, order_id, order_total, click_id } = body
 
-    const { partnerId, orderId, productId, orderValue, commissionRate } = body
-
-    if (!partnerId || !orderId || !orderValue || !commissionRate) {
+    if (!affiliate_code || !order_id || !order_total) {
       return res.status(400).json({
         success: false,
-        message: "缺少必要參數：partnerId, orderId, orderValue, commissionRate"
+        message: "缺少必要參數：affiliate_code, order_id, order_total"
       })
     }
 
+    const affiliateService = req.scope.resolve("affiliate") as any
     const result = await affiliateService.recordConversion({
-      partnerId,
-      orderId,
-      productId,
-      orderValue,
-      commissionRate
+      affiliate_code,
+      order_id,
+      order_total,
+      click_id,
     })
 
     return res.json({
       success: true,
       message: "轉換已記錄",
-      conversion: result
+  conversion: result
     })
 
   } catch (error: any) {

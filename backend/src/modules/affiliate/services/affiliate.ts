@@ -1,6 +1,9 @@
 import { MedusaService } from "@medusajs/framework/utils"
-import { AffiliatePartnerStatus } from "../models/affiliate-partner"
-import { ConversionStatus } from "../models/affiliate-conversion"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import PartnerModel, { AffiliatePartnerStatus } from "../models/affiliate-partner"
+import ClickModel from "../models/affiliate-click"
+import ConversionModel, { ConversionStatus } from "../models/affiliate-conversion"
 
 interface CreateAffiliatePartnerData {
   name: string
@@ -11,6 +14,8 @@ interface CreateAffiliatePartnerData {
   website?: string
   social_media?: string
   address?: string
+  // 可能來自 ?ref= 的推薦代碼
+  referred_by_code?: string | null
 }
 
 interface AffiliateStats {
@@ -22,89 +27,67 @@ interface AffiliateStats {
   thisMonthEarnings: number
 }
 
-export default class AffiliateService extends MedusaService({}) {
+export default class AffiliateService extends MedusaService({
+  AffiliatePartner: PartnerModel,
+  AffiliateClick: ClickModel,
+  AffiliateConversion: ConversionModel,
+}) {
   
   /**
    * 註冊新的聯盟夥伴
    */
   async createPartner(data: CreateAffiliatePartnerData) {
-    const { password, ...rest } = data
-    
-    // TODO: 檢查 email 是否已存在
-    // const existingPartner = await this.container.resolve("affiliatePartnerService").retrieve({ email: data.email })
-    
-    // TODO: 加密密碼 - 需要安裝 bcrypt
-    // const hashedPassword = await bcrypt.hash(password, 10)
-    const hashedPassword = password // 臨時使用明文，生產環境必須加密
-    
-    // 生成聯盟代碼
-    const affiliateCode = this.generateAffiliateCode()
-    
-    // 生成推薦連結
-    const referralLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}?ref=${affiliateCode}`
+    const { password, referred_by_code = null, ...rest } = data
+    // 檢查 email 是否已存在
+    const dup = await this.listAffiliatePartners({ filters: { email: rest.email } })
+    if (dup.length) throw new Error("此電子郵件已被使用")
 
-    // TODO: 使用正確的 Medusa v2 方式創建實體
-    const partnerData = {
-      ...rest,
-      password: hashedPassword,
+    const hashed = await bcrypt.hash(password, 10)
+    const affiliateCode = await this.generateUniqueAffiliateCode()
+    const referralLink = `${process.env.FRONTEND_URL || 'http://localhost:8000'}?ref=${affiliateCode}`
+
+    const created = await this.createAffiliatePartners({
+      name: rest.name,
+      email: rest.email,
+      password: hashed,
+      phone: rest.phone ?? null,
+      company: rest.company ?? null,
+      website: rest.website ?? null,
+      social_media: rest.social_media ?? null,
+      address: rest.address ?? null,
       affiliate_code: affiliateCode,
       referral_link: referralLink,
+      referred_by_code: referred_by_code ?? null,
       status: AffiliatePartnerStatus.PENDING,
-      commission_rate: 0.08, // 預設 8% 佣金
-      created_at: new Date(),
-      updated_at: new Date()
-    }
+      commission_rate: 0.08,
+    })
 
-    console.log('Creating affiliate partner:', partnerData)
-    
-    // 返回時排除敏感資訊
-    const { password: _, ...result } = partnerData
-    return result
+    const { password: _omit, ...safe } = created
+    return safe
   }
 
   /**
    * 聯盟夥伴登入
    */
   async loginPartner(email: string, password: string) {
-    // TODO: 實作實際的資料庫查詢和密碼驗證
-    // const partner = await this.container.resolve("affiliatePartnerService").retrieve({ email })
-    
-    // 臨時模擬登入邏輯
-    const mockPartner = {
-      id: "partner_123",
-      email: email,
-      name: "Test Partner",
-      affiliate_code: "TEST123",
-      status: AffiliatePartnerStatus.APPROVED
-    }
-
-    // TODO: 生成真實的 JWT Token
-    // const token = jwt.sign(...)
-    const token = "mock-jwt-token"
-
-    return { partner: mockPartner, token }
+    const partners = await this.listAffiliatePartners({ filters: { email } })
+    if (!partners.length) throw new Error("找不到此聯盟夥伴帳號")
+    const partner = partners[0] as any
+    const ok = await bcrypt.compare(password, partner.password)
+    if (!ok) throw new Error("密碼錯誤")
+    const token = jwt.sign({ partnerId: partner.id, email: partner.email, affiliate_code: partner.affiliate_code }, process.env.JWT_SECRET || "dev-secret", { expiresIn: "7d" })
+    const { password: _omit, ...safe } = partner
+    return { partner: safe, token }
   }
 
   /**
    * 取得聯盟夥伴資料
    */
   async getPartner(partnerId: string) {
-    // TODO: 實作實際的資料庫查詢
-    console.log('Getting partner:', partnerId)
-    
-    const mockPartner = {
-      id: partnerId,
-      name: "Test Partner",
-      email: "test@example.com",
-      affiliate_code: "TEST123",
-      referral_link: "http://localhost:3000?ref=TEST123",
-      status: AffiliatePartnerStatus.APPROVED,
-      commission_rate: 0.08,
-      created_at: new Date(),
-      updated_at: new Date()
-    }
-
-    return mockPartner
+    const partner = await this.retrieveAffiliatePartner(partnerId)
+    if (!partner) throw new Error("找不到此聯盟夥伴")
+    const { password, ...safe } = partner as any
+    return safe
   }
 
   /**
@@ -126,74 +109,71 @@ export default class AffiliateService extends MedusaService({}) {
   /**
    * 追蹤點擊
    */
-  async trackClick(data: {
-    affiliate_code: string
-    product_id?: string
-    ip_address?: string
-    user_agent?: string
-    referrer_url?: string
-    session_id?: string
-  }) {
-    // TODO: 檢查聯盟代碼是否存在並記錄點擊
-    console.log('Tracking click:', data)
-
-    const clickData = {
-      id: `click_${Date.now()}`,
-      ...data,
+  async trackClick(data: { affiliate_code: string; product_id?: string; ip_address?: string; user_agent?: string; referrer_url?: string; session_id?: string }) {
+    const click = await this.createAffiliateClicks({
+      affiliate_code: data.affiliate_code,
+      product_id: data.product_id ?? null,
+      ip_address: data.ip_address ?? null,
+      user_agent: data.user_agent ?? null,
+      referrer_url: data.referrer_url ?? null,
+      session_id: data.session_id ?? null,
       converted: false,
-      created_at: new Date()
-    }
-
-    return clickData
+    })
+    return click
   }
 
   /**
    * 記錄轉換（訂單完成時）
    */
-  async recordConversion(data: {
-    affiliate_code: string
-    order_id: string
-    order_total: number
-    click_id?: string
-  }) {
-    // TODO: 檢查是否已記錄過此訂單並計算佣金
-    console.log('Recording conversion:', data)
-
-    const commissionAmount = Math.round(data.order_total * 0.08 * 100) / 100
-
-    const conversionData = {
-      id: `conversion_${Date.now()}`,
+  async recordConversion(data: { affiliate_code: string; order_id: string; order_total: number; click_id?: string }) {
+    const exist = await this.listAffiliateConversions({ filters: { order_id: data.order_id } })
+    if (exist.length) return exist[0]
+    const partners = await this.listAffiliatePartners({ filters: { affiliate_code: data.affiliate_code } })
+    if (!partners.length) throw new Error("找不到聯盟夥伴")
+    const p: any = partners[0]
+    const commission_amount = Math.round(Number(data.order_total) * Number(p.commission_rate) * 100) / 100
+    const conv = await this.createAffiliateConversions({
       affiliate_code: data.affiliate_code,
       order_id: data.order_id,
-      order_total: data.order_total,
-      commission_rate: 0.08,
-      commission_amount: commissionAmount,
+      order_total: data.order_total as any,
+      commission_rate: p.commission_rate as any,
+      commission_amount: commission_amount as any,
       status: ConversionStatus.PENDING,
-      click_id: data.click_id,
-      created_at: new Date()
+      click_id: data.click_id ?? null,
+    })
+    if (data.click_id) {
+      try { await this.updateAffiliateClicks({ id: data.click_id, converted: true }) } catch {}
     }
-
-    return conversionData
+    return conv
   }
 
   /**
    * 取得聯盟夥伴統計資料
    */
   async getPartnerStats(partnerId: string): Promise<AffiliateStats> {
-    // TODO: 實作實際的統計查詢
-    console.log('Getting partner stats:', partnerId)
-
-    // 模擬統計資料
-    const stats = {
-      totalClicks: 156,
-      totalConversions: 12,
-      conversionRate: 7.69,
-      totalEarnings: 2840.50,
-      pendingEarnings: 480.20,
-      thisMonthEarnings: 890.30
+    const partner = await this.retrieveAffiliatePartner(partnerId)
+    if (!partner) throw new Error('找不到聯盟夥伴')
+    
+    // 暫時返回模擬數據，因為 AffiliateClick 和 AffiliateConversion 表還未創建
+    // TODO: 當表創建後，替換為實際的資料庫查詢
+    
+    return {
+      totalClicks: 0,
+      totalConversions: 0,
+      conversionRate: 0,
+      totalEarnings: 0,
+      pendingEarnings: 0,
+      thisMonthEarnings: 0,
     }
+  }
 
-    return stats
+  private async generateUniqueAffiliateCode(): Promise<string> {
+    for (let i = 0; i < 10; i++) {
+      const code = this.generateAffiliateCode()
+      const hit = await this.listAffiliatePartners({ filters: { affiliate_code: code } })
+      if (!hit.length) return code
+    }
+    throw new Error('無法生成唯一的聯盟代碼')
   }
 
   /**
@@ -288,14 +268,16 @@ export default class AffiliateService extends MedusaService({}) {
    * 驗證 JWT Token
    */
   async verifyToken(token: string) {
-    // TODO: 實作 JWT 驗證
-    console.log('Verifying token:', token)
-    
-    if (token === "mock-jwt-token") {
-      return await this.getPartner("partner_123")
+    try {
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "dev-secret")
+      // 對齊現有路由期望的欄位名稱
+      if (decoded && decoded.partnerId && !decoded.id) {
+        decoded.id = decoded.partnerId
+      }
+      return decoded
+    } catch (error) {
+      throw new Error('Token 驗證失敗')
     }
-    
-    throw new Error("無效的認證令牌")
   }
 
   /**

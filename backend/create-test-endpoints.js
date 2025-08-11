@@ -14,7 +14,7 @@ const testEndpointContent = `import type {
   MedusaResponse
 } from '@medusajs/framework'
 
-import { AffiliateService } from '../../../services/affiliate-real'
+import { AffiliateService } from './src/modules/affiliate/services/affiliate'
 
 const affiliateService = new AffiliateService()
 
@@ -168,7 +168,7 @@ try {
 }
 
 // 創建測試腳本
-const testScriptContent = \`#!/usr/bin/env node
+const testScriptContent = `#!/usr/bin/env node
 
 /**
  * 使用測試端點驗證聯盟行銷系統的完整功能
@@ -449,7 +449,7 @@ async function main() {
 if (require.main === module) {
   main().catch(console.error)
 }
-\`
+`
 
 // 寫入測試腳本
 const testScriptPath = '/Users/raychou/tim-web/medusa_0720/backend/test-affiliate-api.js'
@@ -458,6 +458,6 @@ fs.writeFileSync(testScriptPath, testScriptContent)
 console.log('✅ 測試腳本已創建:', testScriptPath)
 console.log('')
 console.log('🚀 現在可以執行 API 測試:')
-console.log(\`cd /Users/raychou/tim-web/medusa_0720/backend && node test-affiliate-api.js\`)
+console.log(`cd /Users/raychou/tim-web/medusa_0720/backend && node test-affiliate-api.js`)
 console.log('')
 console.log('⚠️  請確認 Medusa 伺服器正在運行 (npm run dev)')

@@ -1,12 +1,12 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
-import AffiliateService from "../../../../../../services/affiliate-real"
+import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import AffiliateService from "../../../../../../modules/affiliate/services/affiliate";
 import { 
   apiRateLimit, 
   verifyAdminToken, 
   validateUpdateCommission,
   checkValidationResult,
   requestLogger 
-} from "../../../../../../middleware/security"
+} from "../../../../../../middleware/security";
 
 const affiliateService = new AffiliateService()
 

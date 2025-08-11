@@ -25,9 +25,10 @@ interface PartnerStats {
 }
 
 /**
- * 聯盟行銷服務 - 完整實作版本
+ * 聯盟行銷服務 - 完整實作版本 (單例模式)
  */
-export default class AffiliateService {
+class AffiliateService {
+  private static instance: AffiliateService | null = null
   private readonly JWT_SECRET = process.env.AFFILIATE_JWT_SECRET || 'default-secret-key'
   private readonly SALT_ROUNDS = 10
 
@@ -35,9 +36,22 @@ export default class AffiliateService {
    * 生成唯一推廣碼
    */
   private generateUniqueCode(name: string): string {
+    // 使用名字的前3個字符，時間戳和隨機字符串
+    const namePrefix = name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase()
     const timestamp = Date.now().toString(36)
-    const random = Math.random().toString(36).substring(2, 6)
-    return `${name.substring(0, 3).toUpperCase()}${timestamp}${random}`.toUpperCase()
+    const random = Math.random().toString(36).substring(2, 8)
+    
+    // 確保代碼是唯一的，如果重複則重新生成
+    let uniqueCode = `${namePrefix}${timestamp}${random}`.toUpperCase()
+    
+    // 檢查是否已存在相同的代碼
+    while (Array.from(partners.values()).some((p: any) => p.uniqueCode === uniqueCode)) {
+      const newRandom = Math.random().toString(36).substring(2, 8)
+      uniqueCode = `${namePrefix}${timestamp}${newRandom}`.toUpperCase()
+    }
+    
+    console.log("生成的唯一推薦代碼:", uniqueCode)
+    return uniqueCode
   }
 
   /**
@@ -45,6 +59,10 @@ export default class AffiliateService {
    */
   async createPartner(data: CreatePartnerData): Promise<any> {
     try {
+      console.log("=== createPartner 開始 ===")
+      console.log("註冊資料:", { ...data, password: "***" })
+      console.log("當前會員數量:", partners.size)
+      
       // 檢查 email 是否已存在
       const existingPartner = Array.from(partners.values()).find(
         (p: any) => p.email === data.email
@@ -56,10 +74,13 @@ export default class AffiliateService {
 
       // 加密密碼
       const hashedPassword = await bcrypt.hash(data.password, this.SALT_ROUNDS)
+      console.log("密碼加密完成")
       
       // 生成唯一 ID 和推廣碼
       const partnerId = uuidv4()
       const uniqueCode = this.generateUniqueCode(data.name)
+      console.log("生成的 ID:", partnerId)
+      console.log("推廣代碼:", uniqueCode)
       
       // 創建夥伴記錄
       const partner = {
@@ -69,7 +90,7 @@ export default class AffiliateService {
         phone: data.phone,
         website: data.website,
         password: hashedPassword,
-        status: "pending",
+        status: "approved", // 直接設為已核准狀態，方便測試
         commissionRate: 0.05, // 預設 5% 佣金
         uniqueCode,
         createdAt: new Date(),
@@ -77,12 +98,15 @@ export default class AffiliateService {
       }
       
       partners.set(partnerId, partner)
+      console.log("會員已加入，當前總數:", partners.size)
+      console.log("所有會員 Email:", Array.from(partners.values()).map(p => p.email))
       
       // 回傳時不包含密碼
       const { password, ...partnerWithoutPassword } = partner
       return partnerWithoutPassword
       
     } catch (error) {
+      console.error("createPartner 錯誤:", error.message)
       throw new Error(`創建夥伴失敗: ${error.message}`)
     }
   }
@@ -105,10 +129,17 @@ export default class AffiliateService {
     token: string
   }> {
     try {
+      console.log("=== loginPartner 開始 ===")
+      console.log("登入 Email:", email)
+      console.log("當前會員數量:", partners.size)
+      console.log("所有會員:", Array.from(partners.values()).map(p => ({ id: p.id, email: p.email, status: p.status })))
+      
       // 查找夥伴
       const partner = Array.from(partners.values()).find(
         (p: any) => p.email === email
       )
+      
+      console.log("找到的會員:", partner ? { id: partner.id, email: partner.email, status: partner.status } : null)
       
       if (!partner) {
         throw new Error("找不到此 email 的夥伴帳號")
@@ -119,7 +150,10 @@ export default class AffiliateService {
       }
       
       // 驗證密碼
+      console.log("開始驗證密碼...")
       const isValidPassword = await bcrypt.compare(password, partner.password)
+      console.log("密碼驗證結果:", isValidPassword)
+      
       if (!isValidPassword) {
         throw new Error("密碼錯誤")
       }
@@ -138,12 +172,14 @@ export default class AffiliateService {
       // 回傳時不包含密碼
       const { password: _, ...partnerWithoutPassword } = partner
       
+      console.log("登入成功，返回會員資料")
       return {
         partner: partnerWithoutPassword,
         token
       }
       
     } catch (error) {
+      console.error("loginPartner 錯誤:", error.message)
       throw new Error(`登入失敗: ${error.message}`)
     }
   }
@@ -243,8 +279,16 @@ export default class AffiliateService {
    */
   async getPartnerStats(partnerId: string): Promise<PartnerStats> {
     try {
+      console.log("=== getPartnerStats 開始 ===")
+      console.log("要查找的 partnerId:", partnerId)
+      console.log("當前 partners Map 大小:", partners.size)
+      console.log("所有 partners IDs:", Array.from(partners.keys()))
+      console.log("所有 partners 資料:", Array.from(partners.values()).map(p => ({ id: p.id, email: p.email })))
+      
       // 驗證夥伴是否存在
       const partner = partners.get(partnerId)
+      console.log("找到的 partner:", partner ? { id: partner.id, email: partner.email } : null)
+      
       if (!partner) {
         throw new Error("找不到夥伴")
       }
@@ -480,4 +524,18 @@ export default class AffiliateService {
       .slice(0, limit)
       .map(({ password, ...partner }) => partner) // 移除密碼欄位
   }
+
+  /**
+   * 取得單例實例
+   */
+  static getInstance(): AffiliateService {
+    if (!AffiliateService.instance) {
+      AffiliateService.instance = new AffiliateService()
+    }
+    return AffiliateService.instance
+  }
 }
+
+// 導出類別和單例實例
+export default AffiliateService
+export const affiliateServiceInstance = AffiliateService.getInstance()

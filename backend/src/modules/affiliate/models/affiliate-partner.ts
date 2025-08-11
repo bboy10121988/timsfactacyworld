@@ -7,7 +7,7 @@ export enum AffiliatePartnerStatus {
   SUSPENDED = "suspended"
 }
 
-export const AffiliatePartner = model.define("affiliate_partner", {
+const AffiliatePartner = model.define("affiliate_partner", {
   id: model.id().primaryKey(),
   name: model.text(),
   email: model.text().unique(),
@@ -16,6 +16,8 @@ export const AffiliatePartner = model.define("affiliate_partner", {
   company: model.text().nullable(),
   affiliate_code: model.text().unique(),
   referral_link: model.text(),
+  // 註冊時透過 ref 帶入的推薦人代碼（記錄誰推薦了此夥伴）
+  referred_by_code: model.text().nullable(),
   status: model.enum(AffiliatePartnerStatus).default(AffiliatePartnerStatus.PENDING),
   commission_rate: model.bigNumber().default(0.08),
   website: model.text().nullable(),
@@ -28,12 +30,6 @@ export const AffiliatePartner = model.define("affiliate_partner", {
   notes: model.text().nullable(),
   approved_at: model.dateTime().nullable(),
   approved_by: model.text().nullable(),
-  created_at: model.dateTime(),
-  updated_at: model.dateTime(),
 })
 
-// 定義關聯
-export const affiliatePartnerRelations = model.define("affiliate_partner_relations", {
-  clicks: model.hasMany(() => require("./affiliate-click").AffiliateClick),
-  conversions: model.hasMany(() => require("./affiliate-conversion").AffiliateConversion),
-})
+export default AffiliatePartner

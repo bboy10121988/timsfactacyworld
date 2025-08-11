@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import AffiliateService from "../../../services/affiliate-real";
+import AffiliateService from "../../../modules/affiliate/services/affiliate";
 import { 
   apiRateLimit, 
   validatePagination,

@@ -168,12 +168,15 @@ const config = defineConfig({
         ]
       }
     },
-    // 自定義聯盟模組 - 暫時禁用
-    // {
-    //   resolve: "./src/modules/affiliate",
-    //   key: "affiliate"
-    // }
+    // 自定義聯盟模組
+    {
+      resolve: "./src/modules/affiliate",
+      key: "affiliate"
+    }
   ],
+  admin: {
+    disable: false,
+  },
   plugins: [
     {
       resolve: "@medusajs/file-local",

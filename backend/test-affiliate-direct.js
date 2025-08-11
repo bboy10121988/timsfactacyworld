@@ -135,7 +135,7 @@ async function testAffiliateService() {
   
   try {
     // 模擬加載我們的服務
-    const affiliateServicePath = '/Users/raychou/tim-web/medusa_0720/backend/src/services/affiliate-real.ts'
+    const affiliateServicePath = '/Users/raychou/tim-web/medusa_0720/backend/src/modules/affiliate/services/affiliate.ts'
     
     log('直接測試服務功能...', 'INFO')
     

@@ -76,4 +76,4 @@ export default async function checkDatabaseIntegrity({ container }) {
   }
 }
 
-checkDatabaseIntegrity()
+// checkDatabaseIntegrity() // 這需要在有 container 的環境中呼叫

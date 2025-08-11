@@ -1,35 +1,36 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
-import AffiliateService from "../../../../../../services/affiliate-real"
-
-const affiliateService = new AffiliateService()
 
 /**
  * GET /store/affiliate/partners/{id}/stats
  * 取得聯盟夥伴統計資料
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
+  console.log("=== 統計 API GET 請求 ===")
+  console.log("URL params:", req.params)
+  console.log("Query params:", req.query)
+  console.log("Headers:", req.headers)
+  
   try {
     const { id } = req.params
+    console.log("要獲取統計的 partner ID:", id)
 
-    // JWT 驗證
-    const token = req.headers.authorization?.replace('Bearer ', '')
-    if (token) {
-      try {
-        const decoded = affiliateService.verifyToken(token)
-        // 驗證是否為同一個夥伴或管理員
-        if (decoded.partnerId !== id) {
-          return res.status(403).json({ success: false, message: "權限不足" })
-        }
-      } catch (tokenError) {
-        return res.status(401).json({ success: false, message: "無效的認證 token" })
-      }
+    // 暫時返回模擬統計資料，直到完整的聯盟追蹤系統建置完成
+    // TODO: 實作真實的統計查詢（點擊數、轉換數、傭金等）
+    const stats = {
+      totalClicks: 0,
+      totalConversions: 0,
+      conversionRate: 0,
+      totalEarnings: 0,
+      pendingEarnings: 0,
+      thisMonthEarnings: 0,
     }
 
-    const stats = await affiliateService.getPartnerStats(id)
+    console.log("獲取統計成功:", stats)
 
     return res.json({
       success: true,
-      stats
+      stats,
+      note: "統計功能開發中 - 目前顯示模擬數據"
     })
 
   } catch (error: any) {

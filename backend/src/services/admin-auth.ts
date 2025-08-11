@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
+const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
+
 interface AdminUser {
   id: string;
   username: string;

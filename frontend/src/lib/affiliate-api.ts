@@ -52,8 +52,9 @@ export interface AffiliateEarning {
 
 class AffiliateAPI {
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    // For development purposes, bypass actual API calls and return mock data
-    if (process.env.NODE_ENV === 'development') {
+    // Temporarily disable mock data to use real API
+    // if (process.env.NODE_ENV === 'development') {
+    if (false) {
       console.log('使用模擬數據 (開發模式):', endpoint)
       
       // Simulate delay
@@ -112,22 +113,27 @@ class AffiliateAPI {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('API 錯誤回應:', errorText)
+        console.log('API 錯誤回應:', errorText)
         
         // 嘗試解析 JSON 錯誤訊息
         try {
           const errorData = JSON.parse(errorText)
-          if (errorData.message) {
-            throw new Error(errorData.message)
-          }
-          if (errorData.error) {
-            throw new Error(errorData.error)
+          if (errorData.message || errorData.error) {
+            // 不拋出錯誤，而是返回錯誤訊息
+            return {
+              success: false,
+              message: errorData.message || errorData.error,
+              hint: errorData.hint // 包含測試帳號提示
+            }
           }
         } catch (parseError) {
           // 如果不是 JSON 格式，使用原始錯誤
         }
         
-        throw new Error(`API Error: ${response.status} - ${errorText}`)
+        return {
+          success: false,
+          message: `API Error: ${response.status} - ${errorText}`
+        }
       }
 
       const result = await response.json()
@@ -154,26 +160,40 @@ class AffiliateAPI {
     })
   }
 
-  async loginPartner(email: string, password: string): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string }> {
+  async loginPartner(email: string, password: string): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string; hint?: string }> {
     try {
-      // First check if partner exists with this email
-      const checkResponse = await this.checkEmailExists(email)
-      
-      if (!checkResponse.exists || !checkResponse.partner) {
+      const response = await this.makeRequest('/store/affiliate/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      })
+
+      if (response.success && response.partner) {
+        // 轉換後端資料格式為前端介面格式
+        const transformedPartner: AffiliatePartner = {
+          id: response.partner.id,
+          name: response.partner.name,
+          email: response.partner.email,
+          phone: response.partner.phone,
+          website: response.partner.website,
+          referralCode: response.partner.uniqueCode || response.partner.referralCode,
+          referral_link: `http://localhost:8000/tw?ref=${response.partner.uniqueCode || response.partner.referralCode}`,
+          status: response.partner.status === 'approved' ? 'active' : response.partner.status,
+          commission_rate: response.partner.commissionRate || response.partner.commission_rate || 0.05,
+          createdAt: response.partner.createdAt,
+          updatedAt: response.partner.updatedAt
+        }
+
+        return {
+          success: true,
+          partner: transformedPartner,
+          message: response.message || "Login successful"
+        }
+      } else {
         return {
           success: false,
-          message: "Email or password is incorrect"
+          message: response.message || "Login failed",
+          hint: response.hint // 傳遞 hint 訊息
         }
-      }
-
-      // For now, we'll use a simple validation approach
-      // In a real implementation, you'd want proper authentication
-      const partner = checkResponse.partner
-      
-      return {
-        success: true,
-        partner: partner,
-        message: "Login successful"
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -191,10 +211,31 @@ class AffiliateAPI {
     phone?: string
     company?: string
   }): Promise<{ partner: AffiliatePartner }> {
-    return this.makeRequest('/store/affiliate/partners', {
+    const response = await this.makeRequest('/store/affiliate/partners', {
       method: 'POST',
       body: JSON.stringify(data)
     })
+    
+    if (response.success && response.partner) {
+      // 轉換後端資料格式為前端介面格式
+      const transformedPartner: AffiliatePartner = {
+        id: response.partner.id,
+        name: response.partner.name,
+        email: response.partner.email,
+        phone: response.partner.phone,
+        website: response.partner.website,
+        referralCode: response.partner.uniqueCode || response.partner.referralCode,
+        referral_link: `http://localhost:8000/tw?ref=${response.partner.uniqueCode || response.partner.referralCode}`,
+        status: response.partner.status === 'approved' ? 'active' : response.partner.status,
+        commission_rate: response.partner.commissionRate || response.partner.commission_rate || 0.05,
+        createdAt: response.partner.createdAt,
+        updatedAt: response.partner.updatedAt
+      }
+      
+      return { partner: transformedPartner }
+    }
+    
+    throw new Error(response.message || '創建合作夥伴失敗')
   }
 
   async trackClick(affiliateCode: string, productId?: string): Promise<void> {
@@ -256,45 +297,77 @@ class AffiliateAPI {
     }
   }
 
-  // Mock authentication and profile methods for development
+  // Authentication and profile methods using real API
   async isAuthenticated(): Promise<boolean> {
     if (typeof window === 'undefined') return false
-    return localStorage.getItem('affiliate_token') !== null
+    const token = localStorage.getItem('affiliate_token')
+    if (!token) return false
+    
+    try {
+      // 嘗試獲取 profile 來驗證 token 是否有效
+      await this.getProfile()
+      return true
+    } catch (error) {
+      // Token 無效，清除它
+      localStorage.removeItem('affiliate_token')
+      return false
+    }
   }
 
   async getProfile(): Promise<AffiliatePartner> {
-    // Mock partner data for development
-    return {
-      id: 'partner-123',
-      name: '王小明',
-      email: 'affiliate@example.com',
-      phone: '0912345678',
-      website: 'https://myblog.com',
-      socialMedia: 'Instagram: @myaccount',
-      address: '台北市信義區信義路五段7號',
-      accountName: '王小明',
-      bankCode: '822',
-      accountNumber: '1234567890',
-      taxId: '12345678',
-      referralCode: 'AFFILIATE123',
-      referral_link: 'https://example.com?ref=AFFILIATE123',
-      status: 'active',
-      commission_rate: 0.08,
-      createdAt: '2024-01-01T00:00:00.000Z',
-      updatedAt: '2024-01-15T00:00:00.000Z'
+    if (typeof window === 'undefined') {
+      throw new Error('無法在服務器端獲取 profile')
     }
+    
+    const token = localStorage.getItem('affiliate_token')
+    const partnerData = localStorage.getItem('affiliate_partner')
+    
+    if (!token) {
+      throw new Error('未找到認證 token')
+    }
+    
+    if (partnerData) {
+      try {
+        const partner = JSON.parse(partnerData) as AffiliatePartner
+        return partner
+      } catch (error) {
+        console.error('解析 partner 資料失敗:', error)
+      }
+    }
+    
+    throw new Error('找不到合作夥伴資料，請重新登入')
   }
 
-  async login(email: string, password: string): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string }> {
-    // Mock login for development
-    if (email === 'affiliate@example.com' && password === 'password') {
-      const partner = await this.getProfile()
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('affiliate_token', 'mock-token-123')
+  async login(email: string, password: string): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string; hint?: string }> {
+    try {
+      const response = await this.loginPartner(email, password)
+      
+      if (response.success && response.partner) {
+        // 儲存 token 和 partner 資料到 localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('affiliate_token', 'token-' + response.partner.id)
+          localStorage.setItem('affiliate_partner', JSON.stringify(response.partner))
+        }
+        
+        return { 
+          success: true, 
+          partner: response.partner, 
+          message: response.message || '登入成功！' 
+        }
+      } else {
+        return { 
+          success: false, 
+          message: response.message || '電子郵件或密碼錯誤',
+          hint: response.hint // 傳遞 hint
+        }
       }
-      return { success: true, partner }
+    } catch (error: any) {
+      console.error('Login error:', error)
+      return { 
+        success: false, 
+        message: error.message || '登入過程中發生錯誤' 
+      }
     }
-    return { success: false, message: '電子郵件或密碼錯誤' }
   }
 
   async register(data: {
@@ -304,26 +377,40 @@ class AffiliateAPI {
     phone?: string
     website?: string
   }): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string }> {
-    // Mock registration for development
-    const partner: AffiliatePartner = {
-      id: 'partner-new',
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      website: data.website,
-      referralCode: `REF${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      referral_link: `https://example.com?ref=REF${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      status: 'active',
-      commission_rate: 0.08,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+    try {
+      const response = await this.createPartner({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        company: data.website // 將 website 作為 company 傳送
+      })
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('affiliate_token', 'mock-token-new')
+      if (response.partner) {
+        // 儲存 token 和 partner 資料到 localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('affiliate_token', 'temp-token-' + response.partner.id)
+          localStorage.setItem('affiliate_partner', JSON.stringify(response.partner))
+        }
+        
+        return { 
+          success: true, 
+          partner: response.partner, 
+          message: '註冊成功！' 
+        }
+      } else {
+        return { 
+          success: false, 
+          message: '註冊失敗，請稍後再試' 
+        }
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      return { 
+        success: false, 
+        message: error.message || '註冊過程中發生錯誤' 
+      }
     }
-    
-    return { success: true, partner, message: '註冊成功！' }
   }
 
   async updateProfile(data: Partial<AffiliatePartner>): Promise<AffiliatePartner> {
@@ -389,6 +476,7 @@ class AffiliateAPI {
   async logout(): Promise<void> {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('affiliate_token')
+      localStorage.removeItem('affiliate_partner')
     }
   }
 }

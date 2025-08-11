@@ -3,7 +3,7 @@ import type {
   MedusaResponse
 } from '@medusajs/framework'
 
-import AffiliateService from '../../services/affiliate-real'
+import AffiliateService from '../../modules/affiliate/services/affiliate'
 
 const affiliateService = new AffiliateService()
 
@@ -76,7 +76,7 @@ export const POST = async (
 
       case 'approve-partner':
         const { partnerId, status, reason } = data as { partnerId: string, status: string, reason: string }
-        const approveResult = await affiliateService.approvePartner(partnerId, status, reason)
+        const approveResult = await affiliateService.approvePartner(partnerId, status as 'approved' | 'rejected', reason)
         res.json({ success: true, partner: approveResult })
         break
 
@@ -92,7 +92,7 @@ export const POST = async (
 
       case 'update-commission':
         const { conversionId, newStatus, updateReason } = data as { conversionId: string, newStatus: string, updateReason: string }
-        const updateResult = await affiliateService.updateCommissionStatus(conversionId, newStatus, updateReason)
+        const updateResult = await affiliateService.updateCommissionStatus(conversionId, newStatus as 'approved' | 'paid' | 'rejected', updateReason)
         res.json({ success: true, conversion: updateResult })
         break
 

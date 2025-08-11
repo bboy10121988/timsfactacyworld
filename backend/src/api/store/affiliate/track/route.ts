@@ -1,7 +1,4 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
-import AffiliateService from "../../../../services/affiliate-real"
-
-const affiliateService = new AffiliateService()
 
 /**
  * POST /store/affiliate/track
@@ -9,30 +6,24 @@ const affiliateService = new AffiliateService()
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
-    const body = req.body as {
-      partnerId: string
-      productId?: string
-      url: string
-      userAgent?: string
-      referrer?: string
-    }
+    const body = req.body as { affiliate_code: string; product_id?: string; url: string; user_agent?: string; referrer_url?: string; session_id?: string }
+    const { affiliate_code, product_id, url, user_agent, referrer_url, session_id } = body
 
-    const { partnerId, productId, url, userAgent, referrer } = body
-
-    if (!partnerId || !url) {
+    if (!affiliate_code || !url) {
       return res.status(400).json({
         success: false,
-        message: "缺少必要參數：partnerId, url"
+        message: "缺少必要參數：affiliate_code, url"
       })
     }
 
+    const affiliateService = req.scope.resolve("affiliate") as any
     const result = await affiliateService.trackClick({
-      partnerId,
-      productId,
-      url,
-      userAgent,
-      referrer,
-      ipAddress: req.ip || req.socket.remoteAddress
+      affiliate_code,
+      product_id,
+      user_agent,
+      referrer_url,
+      session_id,
+      ip_address: req.ip || req.socket.remoteAddress,
     })
 
     return res.json({
