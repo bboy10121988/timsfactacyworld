@@ -1,25 +1,41 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework"
-import AffiliateService from "../../../../modules/affiliate/services/affiliate"
 
 /**
  * POST /store/affiliate/register
- * 註冊聯盟夥伴（支援 ?ref= 或 body.referred_by_code）
+ * 註冊聯盟夥伴（支援推薦制 ?ref= 或 body.referred_by_code）
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const body = (req.body || {}) as any
-    const { name, email, password } = body
+    const { name, email, password, phone, website } = body
     // 從 query 或 body 取得 ref 推薦碼
     const referred_by_code = (req.query?.ref as string) || body.referred_by_code || null
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: "缺少必要資料：name, email, password" })
+    console.log("=== 收到註冊請求 ===")
+    console.log("Body:", { name, email, phone, website, referred_by_code })
+
+    if (!name || !email) {
+      return res.status(400).json({ success: false, message: "缺少必要資料：name, email" })
     }
 
-    // 使用資料庫版本的服務
+    // 使用更新的聯盟服務
     const affiliateService = req.scope.resolve("affiliate") as any
-    const partner = await affiliateService.createPartner({ ...body, referred_by_code })
-    return res.json({ success: true, message: "註冊成功，請等待審核", partner })
+    const result = await affiliateService.createPartner({ 
+      name, 
+      email, 
+      phone,
+      website,
+      referred_by_code 
+    })
+
+    if (result.success) {
+      console.log(`✅ 聯盟夥伴註冊成功: ${name} (${email})`)
+      if (referred_by_code) {
+        console.log(`🔗 推薦人: ${referred_by_code}`)
+      }
+    }
+    
+    return res.json(result)
   } catch (error: any) {
     console.error("註冊錯誤:", error)
     

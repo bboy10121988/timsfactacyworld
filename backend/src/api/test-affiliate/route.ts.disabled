@@ -3,15 +3,20 @@ import type {
   MedusaResponse
 } from '@medusajs/framework'
 
-import AffiliateService from '../../modules/affiliate/services/affiliate'
+// import AffiliateService from '../../modules/affiliate/services/affiliate'
 
-const affiliateService = new AffiliateService()
+// const affiliateService = new AffiliateService()
 
 export const GET = async (
   req: MedusaRequest,
   res: MedusaResponse
 ) => {
   try {
+    return res.json({
+      success: false,
+      message: "聯盟測試功能暫時停用"
+    })
+    
     const { action } = req.query
 
     switch (action) {

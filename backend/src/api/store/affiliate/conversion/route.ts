@@ -16,6 +16,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
     }
 
+    // 使用支援多層佣金的聯盟服務
     const affiliateService = req.scope.resolve("affiliate") as any
     const result = await affiliateService.recordConversion({
       affiliate_code,
@@ -24,10 +25,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       click_id,
     })
 
+    console.log(`💰 佣金分配完成:`, result)
+    
     return res.json({
       success: true,
       message: "轉換已記錄",
-  conversion: result
+      conversion: result
     })
 
   } catch (error: any) {

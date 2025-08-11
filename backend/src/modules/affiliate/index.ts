@@ -1,8 +1,8 @@
 import { Module } from "@medusajs/framework/utils"
-import AffiliateService from "./services/affiliate-clean"
+import AffiliateMinimalService from "./services/affiliate-minimal"
 
 export const AFFILIATE_MODULE = "affiliate"
 
 export default Module(AFFILIATE_MODULE, {
-  service: AffiliateService,
+  service: AffiliateMinimalService,
 })
