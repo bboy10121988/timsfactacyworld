@@ -43,5 +43,45 @@
     "cartId": "test",
     "createdAt": "2025-07-29T12:37:18.115Z",
     "amount": 100
+  },
+  "TIM590774205QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:17:57.420Z",
+    "amount": 20
+  },
+  "TIM591594715QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:19:19.471Z",
+    "amount": 20
+  },
+  "TIM592264255QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:20:26.425Z",
+    "amount": 20
+  },
+  "TIM592812415QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:21:21.241Z",
+    "amount": 20
+  },
+  "TIM593342815QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:22:14.282Z",
+    "amount": 20
+  },
+  "TIM593510495QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:22:31.049Z",
+    "amount": 20
+  },
+  "TIM594925945QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:24:52.594Z",
+    "amount": 20
+  },
+  "TIM596241795QEH04C2": {
+    "cartId": "cart_01K1T73CSWSSHVDXSR5QEH04C2",
+    "createdAt": "2025-08-08T13:27:04.179Z",
+    "amount": 20
   }
 }

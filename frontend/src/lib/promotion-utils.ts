@@ -575,7 +575,7 @@ export function generateMockPromotionLabels(productId?: string): PromotionLabel[
  */
 export async function getRealPromotionLabels(
   product: HttpTypes.StoreProduct,
-  regionId: string = 'reg_01JW1S1F7GB4ZP322G2DMETETH'
+  regionId: string = 'reg_01K2F5FXBPECD625WCT3MJXM4Y'
 ): Promise<PromotionLabel[]> {
   try {
     const [promotionData, inventoryData] = await Promise.all([
@@ -791,7 +791,7 @@ export function shouldUseMockLabels(): boolean {
  */
 export async function getActivePromotionLabels(
   product: HttpTypes.StoreProduct,
-  regionId: string = 'reg_01JW1S1F7GB4ZP322G2DMETETH'
+  regionId: string = 'reg_01K2F5FXBPECD625WCT3MJXM4Y'
 ): Promise<PromotionLabel[]> {
   try {
     const labels: PromotionLabel[] = []

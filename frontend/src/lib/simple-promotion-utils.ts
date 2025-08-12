@@ -58,7 +58,7 @@ const LABEL_PRIORITIES: Record<PromotionLabelType, number> = {
  */
 export async function getActivePromotionLabels(
   product: HttpTypes.StoreProduct,
-  regionId: string = 'reg_01JW1S1F7GB4ZP322G2DMETETH'
+  regionId: string = 'reg_01K2F5FXBPECD625WCT3MJXM4Y'
 ): Promise<PromotionLabel[]> {
   const labels: PromotionLabel[] = []
   const baseUrl = 'http://localhost:9000' // 直接使用後端地址

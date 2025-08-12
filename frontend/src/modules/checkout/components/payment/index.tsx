@@ -5,7 +5,7 @@ import { isStripe as isStripeFunc, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
-
+import { sdk } from "@lib/config"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import PaymentContainer, { StripeCardContainer } from "@modules/checkout/components/payment-container"
 import Divider from "@modules/common/components/divider"
@@ -140,61 +140,104 @@ const Payment = ({
       // 處理綠界支付方式
       if (selectedPaymentMethod === "ecpay") {
         console.log("綠界支付方式被選中", selectedPaymentMethod)
-        
+
         try {
-          // 調用後端 provider 的 authorizePayment 方法
-          const authResponse = await fetch(`/api/payment/authorize`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              cartId: cart.id,
-              providerId: "pp_my-payment-service_my-payment-service",
-            }),
-          })
-          
-          const authData = await authResponse.json()
-          
-          if (authData.status === "requires_more" && authData.data?.redirect_url) {
-            // 如果需要重定向，直接跳轉到 ECPay 付款頁面
-            window.location.href = authData.data.redirect_url
-            return
+          // 1. 確保有有效的付款會話
+          const currentActiveSession = cart.payment_collection?.payment_sessions?.find(
+            (session: any) => session.provider_id === "pp_my-payment-service_my-payment-service" && session.status === "pending"
+          )
+
+          console.log("here1")
+
+          if (!currentActiveSession) {
+            console.log("沒有找到有效的 ECPay 付款會話，正在建立...")
+            await initiatePaymentSession(cart, {
+              provider_id: "pp_my-payment-service_my-payment-service",
+            })
+
+            
+            // 重新獲取購物車以取得最新的付款會話
+            const updatedCart = await sdk.store.cart.retrieve(cart.id)
+            const newSession = (updatedCart as any).payment_collection?.payment_sessions?.find(
+              (session: any) => session.provider_id === "pp_my-payment-service_my-payment-service"
+            )
+
+            
+            if (!newSession) {
+              throw new Error('無法建立 ECPay 付款會話')
+            }
+            console.log("ECPay 付款會話建立成功:", newSession.id)
           }
-          
-          // 如果沒有重定向 URL，嘗試生成 ECPay 表單
-          const formResponse = await fetch(`/api/payment/ecpay-form`, {
+
+          // 2. 建立 ECPay 付款表單
+          console.log("正在建立 ECPay 付款表單...")
+          const ecpayResponse = await fetch('/api/ecpay/payment', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              cartId: cart.id,
+              cart: cart,
+              customer: cart.customer,
+              shippingAddress: cart.shipping_address,
+              shippingMethod: cart.shipping_methods?.[0],
+              selectedStore: null, // 暫時不使用門市
             }),
           })
-          
-          const formData = await formResponse.json()
-          
-          if (formData.htmlForm) {
-            // 創建一個臨時 div 來放置 HTML 表單
-            const tempDiv = document.createElement('div')
-            tempDiv.innerHTML = formData.htmlForm
-            document.body.appendChild(tempDiv)
+
+          console.log("ECPay 付款表單建立請求已發送")
+
+          if (!ecpayResponse.ok) {
+            const errorText = await ecpayResponse.text()
+            throw new Error(`ECPay 付款建立失敗: ${ecpayResponse.status} - ${errorText}`)
+          }
+
+          const ecpayData = await ecpayResponse.json()
+          console.log("ECPay 回應:", ecpayData)
+
+          // 3. 處理 ECPay 表單並提交
+          if (ecpayData.html) {
+            console.log("收到 ECPay HTML 表單，準備提交...")
+            
+            // 建立隱藏的 div 容器
+            const formContainer = document.createElement('div')
+            formContainer.style.display = 'none'
+            formContainer.innerHTML = ecpayData.html
+            
+            // 將容器加到頁面
+            document.body.appendChild(formContainer)
             
             // 找到表單並提交
-            const form = tempDiv.querySelector('form')
-            if (form) {
-              form.submit()
+            const ecpayForm = formContainer.querySelector('form')
+            if (ecpayForm) {
+              console.log("找到 ECPay 表單，正在提交...")
+              console.log("表單 action:", ecpayForm.action)
+              console.log("表單 method:", ecpayForm.method)
+              console.log("表單 ID:", ecpayForm.id)
+              
+              // 移除 script 標籤避免自動執行
+              const scripts = formContainer.querySelectorAll('script')
+              scripts.forEach(script => script.remove())
+              
+              // 手動提交表單跳轉到綠界
+              ecpayForm.submit()
+              return // 提交表單後結束函數執行
             } else {
-              console.error('找不到綠界支付表單元素')
-              setError("無法生成 ECPay 支付表單")
+              throw new Error('ECPay 回應中的 HTML 沒有包含有效的表單')
             }
+          } else if (ecpayData.paymentUrl) {
+            console.log("收到 ECPay 付款 URL，跳轉到:", ecpayData.paymentUrl)
+            window.location.href = ecpayData.paymentUrl
+            return // 跳轉後結束函數執行
           } else {
-            setError("無法生成 ECPay 支付表單")
+            console.error("ECPay 回應格式錯誤:", ecpayData)
+            throw new Error('ECPay 回應中沒有找到有效的表單或付款 URL')
           }
+
         } catch (error) {
-          console.error("綠界支付初始化錯誤:", error)
-          setError("綠界支付初始化失敗，請稍後再試")
+          console.error('ECPay 付款初始化失敗:', error)
+          setError(`ECPay 付款初始化失敗: ${error instanceof Error ? error.message : '未知錯誤'}`)
+          return // 發生錯誤時結束函數執行
         }
       }
 

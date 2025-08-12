@@ -10,7 +10,7 @@ async function createNewCart(baseUrl: string, publishableKey: string | undefined
       'x-publishable-api-key': publishableKey || ''
     },
     body: JSON.stringify({
-      region_id: 'reg_01JW1S1F7GB4ZP322G2DMETETH'
+      region_id: 'reg_01K2F5FXBPECD625WCT3MJXM4Y'
     })
   })
 

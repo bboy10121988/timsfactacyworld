@@ -39,7 +39,7 @@ export default function ProductPreview({
       setIsLoadingPromotions(true)
       try {
         // 只使用 Medusa API 獲取促銷標籤
-        const labels = await getActivePromotionLabels(product, 'reg_01JW1S1F7GB4ZP322G2DMETETH')
+        const labels = await getActivePromotionLabels(product, 'reg_01K2F5FXBPECD625WCT3MJXM4Y')
         setPromotionLabels(labels)
         
         if (process.env.NODE_ENV === 'development') {
