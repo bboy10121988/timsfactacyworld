@@ -1,0 +1,27 @@
+[32minfo[39m:    Watching filesystem to reload dev server on file change
+[32minfo[39m:    Skipping instrumentation registration. No register function found.
+redisUrl not found. A fake redis instance will be used.
+[32minfo[39m:    No link to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/links. skipped.
+[33mwarn[39m:    Local Event Bus installed. This is not recommended for production.
+[32minfo[39m:    Locking module: Using "in-memory" as default.
+[32minfo[39m:    No workflow to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/workflows. skipped.
+[32minfo[39m:    No subscriber to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/subscribers. skipped.
+[33mwarn[39m:    The subscriber in /Users/raychou/tim-web/medusa_0720/backend/src/subscribers/order-completed.ts is not a function. skipped.
+[32minfo[39m:    No job to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/file-local/.medusa/server/src/jobs. skipped.
+[32minfo[39m:    No job to load from /Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/dist/jobs. skipped.
+📥 Loaded 9 trade mappings from file
+🔧 Middlewares.ts loaded
+- Creating server
+Error: listen EADDRINUSE: address already in use :::9000
+    at Server.setupListenHandle [as _listen2] (node:net:1908:16)
+    at listenInCluster (node:net:1965:12)
+    at Server.listen (node:net:2067:7)
+    at internalStart (/Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/src/commands/start.ts:208:15)
+    at async start (/Users/raychou/tim-web/medusa_0720/backend/node_modules/@medusajs/medusa/src/commands/start.ts:290:5) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 9000
+}
+[32minfo[39m:    Gracefully shutting down server

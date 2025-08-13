@@ -1,7 +1,7 @@
 import { Container, Heading } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { useEffect, useState } from "react"
-import { BarChart3, Users, DollarSign, Search, Calendar } from "lucide-react"
+import { BarChart3, Users, DollarSign, Search, Calendar, Settings } from "lucide-react"
 
 interface PerformanceData {
   partner_id: string
@@ -197,11 +197,11 @@ const AffiliateDashboard = () => {
           <Heading level="h1" className="text-2xl font-bold">聯盟夥伴系統</Heading>
           <div className="flex gap-4">
             <button
-              onClick={() => window.location.href = '/app/affiliate'}
+              onClick={() => window.location.href = '/app/affiliate/settings'}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             >
-              <Users className="w-4 h-4" />
-              夥伴管理
+              <Settings className="w-4 h-4" />
+              系統設定
             </button>
             <button
               onClick={() => window.location.href = '/app/affiliate/dashboard'}

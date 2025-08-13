@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowLeft, DollarSign, TrendingUp, Users, Calendar } from "lucide-react"
+import { ArrowLeft, DollarSign, TrendingUp, Users, Calendar, ChevronDown } from "lucide-react"
 import { affiliateAPI, AffiliateStats, AffiliateEarning, AffiliatePartner } from "@/lib/affiliate-api"
 
 interface EarningsPageClientProps {
@@ -18,16 +18,18 @@ export default function EarningsPageClient({ countryCode }: EarningsPageClientPr
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [selectedMonth, setSelectedMonth] = useState<string>("all")
+  const [earningsType, setEarningsType] = useState<'all' | 'self' | 'referral'>('all')
 
   useEffect(() => {
     loadData()
-  }, [currentPage, filterStatus])
+  }, [currentPage, filterStatus, selectedMonth, earningsType])
 
   const loadData = async () => {
     try {
       const [partner, earnings] = await Promise.all([
         affiliateAPI.getProfile(),
-        affiliateAPI.getEarnings(currentPage, 10)
+        affiliateAPI.getEarnings(currentPage, 10, earningsType, selectedMonth)
       ])
 
       const stats = await affiliateAPI.getPartnerStats(partner.id)
@@ -40,6 +42,24 @@ export default function EarningsPageClient({ countryCode }: EarningsPageClientPr
     } finally {
       setLoading(false)
     }
+  }
+
+  // 生成月份選項 (過去12個月)
+  const generateMonthOptions = () => {
+    const options = [{ value: "all", label: "全部月份" }]
+    const today = new Date()
+    
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const monthStr = month.toString().padStart(2, '0')
+      const value = `${year}-${monthStr}`
+      const label = `${year}年${month}月`
+      options.push({ value, label })
+    }
+    
+    return options
   }
 
   const getStatusColor = (status: string) => {
@@ -171,6 +191,59 @@ export default function EarningsPageClient({ countryCode }: EarningsPageClientPr
 
         {/* 過濾器 */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+          {/* 月份篩選 */}
+          <div className="flex flex-wrap gap-4 items-center mb-4">
+            <span className="text-sm font-medium text-gray-700 flex items-center">
+              <Calendar className="w-4 h-4 mr-2" />
+              月份篩選：
+            </span>
+            <div className="relative">
+              <select
+                value={selectedMonth}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value)
+                  setCurrentPage(1) // 重置到第一頁
+                }}
+                className="appearance-none pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors cursor-pointer min-w-[140px]"
+              >
+                {generateMonthOptions().map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
+          
+          {/* 收益類型篩選 */}
+          <div className="flex flex-wrap gap-4 items-center mb-4">
+            <span className="text-sm font-medium text-gray-700">收益類型：</span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "all", label: "全部收益" },
+                { value: "self", label: "自己收益" },
+                { value: "referral", label: "下線收益" }
+              ].map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => {
+                    setEarningsType(filter.value as any)
+                    setCurrentPage(1) // 重置到第一頁
+                  }}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    earningsType === filter.value
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* 狀態篩選 */}
           <div className="flex flex-wrap gap-4 items-center">
             <span className="text-sm font-medium text-gray-700">篩選狀態：</span>
             <div className="flex flex-wrap gap-2">

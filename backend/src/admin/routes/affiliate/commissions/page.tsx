@@ -47,6 +47,86 @@ const AffiliateCommissions = () => {
     return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
   })
 
+  // 導出佣金數據
+  const handleExportCommissions = async () => {
+    try {
+      const response = await fetch('/admin/affiliate/export/commissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          to: new Date(),
+          month: selectedMonth
+        })
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.href = url
+        a.download = `commissions-${selectedMonth}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        alert('佣金資料已成功導出')
+      } else {
+        // Fallback to client-side generation
+        const csvContent = generateCommissionCSV(monthlyCommissions)
+        downloadCSV(csvContent, `commissions-${selectedMonth}.csv`)
+        alert('使用本地資料導出 CSV')
+      }
+    } catch (error) {
+      console.error('導出失敗:', error)
+      const csvContent = generateCommissionCSV(monthlyCommissions)
+      downloadCSV(csvContent, `commissions-${selectedMonth}.csv`)
+      alert('API 不可用，使用本地資料導出 CSV')
+    }
+  }
+
+  const generateCommissionCSV = (data: MonthlyCommission[]) => {
+    const headers = ['夥伴名稱', '夥伴代碼', '結算月份', '訂單數', '訂單金額', '佣金率', '佣金金額', '狀態', '處理時間']
+    const csvData = [
+      headers.join(','),
+      ...data.map(comm => [
+        comm.partner_name,
+        comm.partner_code,
+        comm.settlement_month,
+        comm.total_orders.toString(),
+        `NT$${comm.total_order_value.toLocaleString()}`,
+        `${(comm.commission_rate * 100).toFixed(1)}%`,
+        `NT$${comm.total_commission.toLocaleString()}`,
+        getStatusText(comm.status),
+        comm.processed_at ? new Date(comm.processed_at).toLocaleDateString('zh-TW') : '未處理'
+      ].map(field => `"${field}"`).join(','))
+    ]
+    return csvData.join('\n')
+  }
+
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const getStatusText = (status: string) => {
+    const statusMap: {[key: string]: string} = {
+      pending: '待處理',
+      approved: '已核准',
+      paid: '已付款',
+      rejected: '已拒絕',
+      processing: '處理中'
+    }
+    return statusMap[status] || status
+  }
+
   // 獲取月結佣金數據
   useEffect(() => {
     const fetchMonthlyCommissions = async () => {
@@ -446,26 +526,38 @@ const AffiliateCommissions = () => {
         </div>
       </div>
 
-      {/* 月份選擇器 */}
+      {/* 月份選擇器和控制項 */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <label htmlFor="month-select" className="text-sm font-medium text-gray-700">
-            選擇結算月份:
-          </label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <label htmlFor="month-select" className="text-sm font-medium text-gray-700">
+                選擇結算月份:
+              </label>
+            </div>
+            <select
+              id="month-select"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              {getMonthOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <button
+            onClick={handleExportCommissions}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+          >
+            <DollarSign className="w-4 h-4" />
+            導出佣金 CSV
+          </button>
         </div>
-        <select
-          id="month-select"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          {getMonthOptions().map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* 統計卡片 */}

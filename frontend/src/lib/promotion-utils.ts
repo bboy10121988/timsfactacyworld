@@ -469,103 +469,7 @@ export function debugPromotionLabels(product: HttpTypes.StoreProduct) {
   }
 }
 
-// 假資料促銷標籤生成器（用於預覽和測試）
-export function generateMockPromotionLabels(productId?: string): PromotionLabel[] {
-  // 基於產品ID生成一致的數值用於變化（用於演示）
-  const seed = productId ? productId.length + productId.charCodeAt(0) : Math.random() * 100
-  const randomValue = (seed * 9301 + 49297) % 233280 / 233280
-  
-  const mockLabels: PromotionLabel[] = []
-  
-  // 顯示所有6種 Medusa 行銷模組標籤
-  
-  // 1. Percentage off product (商品百分比折扣) - 使用脈動金色效果
-  const discountPercent = Math.floor((randomValue * 5 + 1) * 10) // 10%-60%
-  const taiwanDiscount = (100 - discountPercent) / 10 // 轉換成幾折 (4折-9折)
-  const discountText = taiwanDiscount === Math.floor(taiwanDiscount) 
-    ? `${taiwanDiscount}折` 
-    : `${taiwanDiscount.toFixed(1)}折`
-  
-  mockLabels.push({
-    type: 'auto-discount',
-    text: discountText,
-    priority: LABEL_PRIORITIES['auto-discount'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white',
-    isDiscount: true
-  })
-  
-  // 2. Amount off products (商品金額折扣) - 使用新的黑底白字樣式
-  const discountAmount = Math.floor((randomValue * 10 + 1) * 50) // NT$50-500
-  mockLabels.push({
-    type: 'manual-discount',
-    text: `-NT$${discountAmount}`,
-    priority: LABEL_PRIORITIES['manual-discount'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
-  })
-  
-  // 3. Percentage off order (訂單百分比折扣) - 使用基礎金色效果
-  const orderDiscountPercent = Math.floor((randomValue * 3 + 1) * 5) // 5%-20%
-  const orderTaiwanDiscount = (100 - orderDiscountPercent) / 10 // 轉換成幾折 (8折-9.5折)
-  const orderDiscountText = orderTaiwanDiscount === Math.floor(orderTaiwanDiscount) 
-    ? `滿額享${orderTaiwanDiscount}折` 
-    : `滿額享${orderTaiwanDiscount.toFixed(1)}折`
-    
-  mockLabels.push({
-    type: 'campaign',
-    text: orderDiscountText,
-    priority: LABEL_PRIORITIES['campaign'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
-  })
-  
-  // 4. Amount off order (訂單金額折扣) - 使用新的黑底白字樣式
-  const orderDiscountAmount = Math.floor((randomValue * 5 + 1) * 100) // NT$100-600
-  mockLabels.push({
-    type: 'special-event',
-    text: `滿額折NT$${orderDiscountAmount}`,
-    priority: LABEL_PRIORITIES['special-event'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
-  })
-  
-  // 5. Buy X Get Y (買X送Y優惠) - 只顯示「送Y」部分
-  const buyXGetYOptions = [
-    // 以「送」為主的表達方式
-    '送禮品',      // 送贈品
-    '送好禮',      // 送好禮
-    '加碼送',      // 加碼贈送
-    '限量送',      // 限量贈送
-    '滿額送',      // 滿額贈送
-    '買就送',      // 購買即送
-    '送驚喜',      // 送驚喜禮品
-    '送配件',      // 送配件
-    
-    // 具體數量的表達（重點在「送」）
-    '送1件',       // 買X送1件
-    '送2件',       // 買X送2件
-    '加送1',       // 加送1件
-    '多送1',       // 多送1件
-  ]
-  
-  const selectedBuyXGetY = buyXGetYOptions[Math.floor(randomValue * buyXGetYOptions.length)]
-  mockLabels.push({
-    type: 'buy-x-get-y',
-    text: selectedBuyXGetY,
-    priority: LABEL_PRIORITIES['buy-x-get-y'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
-  })
-  
-  // 6. Flash Sale (限時特價) - 使用新的黑底白字樣式
-  mockLabels.push({
-    type: 'flash-sale',
-    text: '限時特價',
-    priority: LABEL_PRIORITIES['flash-sale'],
-    className: 'px-2 py-1 text-xs font-semibold rounded-md shadow-lg border bg-stone-800/90 text-white border-white'
-  })
-  
-  // 注意：不生成售完/預訂假標籤，這些由真實庫存狀態決定
-  
-  // 按優先級排序，顯示所有標籤
-  return mockLabels.sort((a, b) => a.priority - b.priority)
-}
+
 
 /**
  * 從真實 Medusa API 獲取促銷標籤
@@ -742,8 +646,8 @@ export async function getRealPromotionLabels(
 
   } catch (error) {
     console.error('Error fetching real promotion labels:', error)
-    // 如果 API 出錯，回退到假資料
-    return generateMockPromotionLabels(product.id)
+    // 如果 API 出錯，返回空陣列
+    return []
   }
 }
 
@@ -778,10 +682,7 @@ export async function getPromotionLabelsAsync(
   }
 }
 
-// 切換假資料模式的環境變數檢查（已棄用，保留向後相容）
-export function shouldUseMockLabels(): boolean {
-  return false // 不再使用假資料模式
-}
+
 
 /**
  * 直接從 Medusa API 獲取商品的促銷資訊

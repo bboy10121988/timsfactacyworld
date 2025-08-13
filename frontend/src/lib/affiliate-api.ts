@@ -52,41 +52,6 @@ export interface AffiliateEarning {
 
 class AffiliateAPI {
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    // Temporarily disable mock data to use real API
-    // if (process.env.NODE_ENV === 'development') {
-    if (false) {
-      console.log('使用模擬數據 (開發模式):', endpoint)
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Return mock responses based on endpoint
-      if (endpoint.includes('/stats')) {
-        return {
-          success: true,
-          stats: {
-            totalClicks: 1250,
-            totalConversions: 87,
-            totalReferrals: 142,
-            totalCommissions: 25800,
-            monthlyCommissions: 8500,
-            conversionRate: 6.96,
-            totalEarnings: 25800,
-            pendingEarnings: 8500,
-            thisMonthEarnings: 8500
-          }
-        }
-      }
-      
-      if (endpoint.includes('/partners') && endpoint.includes('email=')) {
-        return {
-          exists: false
-        }
-      }
-      
-      return { success: true }
-    }
-
     const url = `${BACKEND_URL}${endpoint}`
     
     const defaultHeaders = {
@@ -266,34 +231,23 @@ class AffiliateAPI {
           thisMonthEarnings: response.stats.thisMonthEarnings || 0
         }
       }
-      
-      // Fallback to mock data if API fails
+
+      // 如果沒有數據，返回空統計
       return {
-        totalClicks: 1250,
-        totalConversions: 87,
-        totalReferrals: 142,
-        totalCommissions: 25800,
-        monthlyCommissions: 8500,
-        conversionRate: 6.96,
-        totalEarnings: 25800,
-        pendingEarnings: 8500,
-        thisMonthEarnings: 8500
+        totalClicks: 0,
+        totalConversions: 0,
+        totalReferrals: 0,
+        totalCommissions: 0,
+        monthlyCommissions: 0,
+        conversionRate: 0,
+        totalEarnings: 0,
+        pendingEarnings: 0,
+        thisMonthEarnings: 0
       }
+      
     } catch (error) {
       console.error('Failed to fetch partner stats:', error)
-      
-      // Return mock stats for demo purposes
-      return {
-        totalClicks: 1250,
-        totalConversions: 87,
-        totalReferrals: 142,
-        totalCommissions: 25800,
-        monthlyCommissions: 8500,
-        conversionRate: 6.96,
-        totalEarnings: 25800,
-        pendingEarnings: 8500,
-        thisMonthEarnings: 8500
-      }
+      throw error
     }
   }
 
@@ -326,9 +280,23 @@ class AffiliateAPI {
       throw new Error('未找到認證 token')
     }
     
+    // 嘗試從 localStorage 獲取暫存資料
     if (partnerData) {
       try {
         const partner = JSON.parse(partnerData) as AffiliatePartner
+        
+        // 嘗試從 API 更新最新資料
+        try {
+          const response = await this.makeRequest(`/store/affiliate/profile?partnerId=${partner.id}`)
+          if (response.success && response.partner) {
+            const updatedPartner = this.transformPartnerData(response.partner)
+            localStorage.setItem('affiliate_partner', JSON.stringify(updatedPartner))
+            return updatedPartner
+          }
+        } catch (apiError) {
+          console.warn('無法從 API 獲取最新資料，使用暫存資料:', apiError)
+        }
+        
         return partner
       } catch (error) {
         console.error('解析 partner 資料失敗:', error)
@@ -336,6 +304,29 @@ class AffiliateAPI {
     }
     
     throw new Error('找不到合作夥伴資料，請重新登入')
+  }
+
+  private transformPartnerData(partnerData: any): AffiliatePartner {
+    return {
+      id: partnerData.id,
+      name: partnerData.name,
+      email: partnerData.email,
+      phone: partnerData.phone,
+      company: partnerData.company,
+      website: partnerData.website,
+      socialMedia: partnerData.socialMedia,
+      address: partnerData.address,
+      accountName: partnerData.accountName,
+      bankCode: partnerData.bankCode,
+      accountNumber: partnerData.accountNumber,
+      taxId: partnerData.taxId,
+      referralCode: partnerData.uniqueCode || partnerData.referralCode,
+      referral_link: partnerData.referral_link || `http://localhost:8000/tw?ref=${partnerData.uniqueCode || partnerData.referralCode}`,
+      status: partnerData.status === 'approved' ? 'active' : partnerData.status,
+      commission_rate: partnerData.commissionRate || partnerData.commission_rate || 0.05,
+      createdAt: partnerData.createdAt,
+      updatedAt: partnerData.updatedAt
+    }
   }
 
   async login(email: string, password: string): Promise<{ success: boolean; partner?: AffiliatePartner; message?: string; hint?: string }> {
@@ -414,17 +405,70 @@ class AffiliateAPI {
   }
 
   async updateProfile(data: Partial<AffiliatePartner>): Promise<AffiliatePartner> {
-    // Mock profile update
-    const currentProfile = await this.getProfile()
-    return { ...currentProfile, ...data, updatedAt: new Date().toISOString() }
+    try {
+      const currentProfile = await this.getProfile()
+      
+      const response = await this.makeRequest('/store/affiliate/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          partnerId: currentProfile.id,
+          name: data.name,
+          phone: data.phone,
+          website: data.website,
+          socialMedia: data.socialMedia,
+          address: data.address
+        })
+      })
+
+      if (response.success && response.partner) {
+        const updatedPartner = this.transformPartnerData(response.partner)
+        
+        // 更新 localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('affiliate_partner', JSON.stringify(updatedPartner))
+        }
+        
+        return updatedPartner
+      } else {
+        throw new Error(response.message || '更新個人資料失敗')
+      }
+    } catch (error: any) {
+      console.error('更新個人資料錯誤:', error)
+      throw new Error(error.message || '更新個人資料失敗')
+    }
   }
 
   async updatePassword(data: { currentPassword: string; newPassword: string }): Promise<{ success: boolean; message?: string }> {
-    // Mock password update
-    if (data.currentPassword === 'password') {
-      return { success: true, message: '密碼更新成功' }
+    try {
+      const currentProfile = await this.getProfile()
+      
+      const response = await this.makeRequest('/store/affiliate/password', {
+        method: 'PUT',
+        body: JSON.stringify({
+          partnerId: currentProfile.id,
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword
+        })
+      })
+
+      if (response.success) {
+        return { 
+          success: true, 
+          message: response.message || '密碼更新成功' 
+        }
+      } else {
+        return { 
+          success: false, 
+          message: response.message || '密碼更新失敗'
+        }
+      }
+    } catch (error: any) {
+      console.error('更新密碼錯誤:', error)
+      return { 
+        success: false, 
+        message: error.message || '更新密碼失敗' 
+      }
     }
-    return { success: false, message: '目前密碼錯誤' }
   }
 
   async updatePaymentInfo(data: {
@@ -433,43 +477,88 @@ class AffiliateAPI {
     accountNumber: string
     taxId?: string
   }): Promise<AffiliatePartner> {
-    // Mock payment info update
-    const currentProfile = await this.getProfile()
-    return { 
-      ...currentProfile, 
-      ...data, 
-      updatedAt: new Date().toISOString() 
+    try {
+      const currentProfile = await this.getProfile()
+      
+      const response = await this.makeRequest('/store/affiliate/payment', {
+        method: 'PUT',
+        body: JSON.stringify({
+          partnerId: currentProfile.id,
+          accountName: data.accountName,
+          bankCode: data.bankCode,
+          accountNumber: data.accountNumber,
+          taxId: data.taxId
+        })
+      })
+
+      if (response.success && response.partner) {
+        const updatedPartner = this.transformPartnerData(response.partner)
+        
+        // 更新 localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('affiliate_partner', JSON.stringify(updatedPartner))
+        }
+        
+        return updatedPartner
+      } else {
+        throw new Error(response.message || '更新付款資訊失敗')
+      }
+    } catch (error: any) {
+      console.error('更新付款資訊錯誤:', error)
+      throw new Error(error.message || '更新付款資訊失敗')
     }
   }
 
-  async getEarnings(page: number = 1, limit: number = 20): Promise<{
+  async getEarnings(
+    page: number = 1, 
+    limit: number = 20,
+    type: 'all' | 'self' | 'referral' = 'all',
+    month: string = 'all'
+  ): Promise<{
     earnings: AffiliateEarning[]
     total: number
     totalPages: number
   }> {
-    // Mock earnings data
-    const mockEarnings: AffiliateEarning[] = Array.from({ length: 15 }, (_, i) => ({
-      id: `earning-${i + 1}`,
-      partnerId: 'partner-123',
-      orderId: `order-${i + 1}`,
-      orderNumber: `TIM${(1000 + i).toString()}`,
-      customerEmail: `customer${i + 1}@example.com`,
-      productName: i % 3 === 0 ? '綠色經典罐裝' : i % 3 === 1 ? '黃色經典罐裝' : '紅色經典罐裝',
-      orderAmount: 480 + (i * 20),
-      commissionAmount: Math.floor((480 + (i * 20)) * 0.08),
-      commissionRate: 0.08,
-      status: i % 4 === 0 ? 'paid' : i % 4 === 1 ? 'cancelled' : 'pending',
-      createdAt: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)).toISOString(),
-      paidAt: i % 4 === 0 ? new Date(Date.now() - (i * 24 * 60 * 60 * 1000) + (7 * 24 * 60 * 60 * 1000)).toISOString() : undefined
-    }))
+    try {
+      // 獲取當前合作夥伴信息
+      const partnerData = await this.getProfile()
+      if (!partnerData?.id) {
+        throw new Error('未找到合作夥伴信息，請重新登入')
+      }
 
-    const start = (page - 1) * limit
-    const end = start + limit
-    
-    return {
-      earnings: mockEarnings.slice(start, end),
-      total: mockEarnings.length,
-      totalPages: Math.ceil(mockEarnings.length / limit)
+      // 調用真實的後端 API，添加 type 和 month 參數
+      let apiUrl = `/store/affiliate/earnings?partnerId=${partnerData.id}&page=${page}&limit=${limit}&type=${type}`
+      if (month !== 'all') {
+        apiUrl += `&month=${month}`
+      }
+      const response = await this.makeRequest(apiUrl)
+      
+      if (response.success && response.data && response.data.earnings) {
+        return {
+          earnings: response.data.earnings.map((earning: any) => ({
+            id: earning.id || earning.orderId || `earning_${Date.now()}`,
+            partnerId: earning.partnerId || partnerData.id,
+            orderId: earning.orderId || '',
+            orderNumber: earning.orderNumber || earning.order_number || '',
+            customerEmail: earning.customerEmail || earning.customer_email || '客戶信息保密',
+            productName: earning.productName || earning.product_name || '商品信息',
+            orderAmount: typeof earning.orderAmount === 'number' ? earning.orderAmount : (earning.order_amount || 0),
+            commissionAmount: typeof earning.commissionAmount === 'number' ? earning.commissionAmount : (earning.commission_amount || 0),
+            commissionRate: earning.commissionRate || earning.commission_rate || 0.05,
+            status: earning.status || 'pending',
+            createdAt: earning.createdAt || earning.created_at || new Date().toISOString(),
+            paidAt: earning.paidAt || earning.paid_at
+          })),
+          total: response.data.total || 0,
+          totalPages: response.data.totalPages || 1
+        }
+      } else {
+        throw new Error('API 未返回收益數據')
+      }
+
+    } catch (error) {
+      console.error('獲取收益歷史失敗:', error)
+      throw error // 直接拋出錯誤，不再使用備用數據
     }
   }
 

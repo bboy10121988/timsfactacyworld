@@ -26,20 +26,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
 
   const loadPartnerData = async () => {
     try {
-      // 模擬獲取合作夥伴資料
-      const partnerData = {
-        id: 'partner-123',
-        name: '王小明',
-        email: 'affiliate@example.com',
-        phone: '0912345678',
-        company: '個人工作室',
-        affiliate_code: 'AFFILIATE123',
-        referral_link: 'https://example.com?ref=AFFILIATE123',
-        status: 'approved' as const,
-        commission_rate: 0.08,
-        created_at: '2024-01-01T00:00:00.000Z',
-        updated_at: '2024-01-15T00:00:00.000Z'
-      }
+      const partnerData = await affiliateAPI.getProfile()
       setPartner(partnerData)
     } catch (error) {
       console.error('載入合作夥伴資料失敗:', error)
@@ -88,7 +75,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
       }
       
       // 添加或更新 ref 參數
-      url.searchParams.set('ref', partner?.affiliate_code || 'AFFILIATE123')
+      url.searchParams.set('ref', partner?.referralCode || 'AFFILIATE123')
       
       setGeneratedUrl(url.toString())
       
@@ -231,7 +218,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• <strong>相對路徑</strong>：直接輸入 <code>/products/item-name</code></li>
                 <li>• <strong>完整網址</strong>：輸入 <code>https://yourdomain.com/page</code></li>
-                <li>• <strong>自動添加</strong>：系統會自動添加您的推薦代碼 <code>?ref={partner?.affiliate_code}</code></li>
+                <li>• <strong>自動添加</strong>：系統會自動添加您的推薦代碼 <code>?ref={partner?.referralCode}</code></li>
                 <li>• <strong>追蹤功能</strong>：通過此連結的訪問和購買都會計入您的推薦統計</li>
               </ul>
             </div>
@@ -274,12 +261,12 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
             
             <div className="bg-gray-50 rounded-md p-3 mb-4">
               <code className="text-xl font-mono text-center block">
-                {partner.affiliate_code}
+                {partner.referralCode}
               </code>
             </div>
             
             <UnifiedButton
-              onClick={() => copyToClipboard(partner.affiliate_code, 'code')}
+              onClick={() => copyToClipboard(partner.referralCode, 'code')}
               className="w-full"
               variant="secondary"
             >
@@ -327,7 +314,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
             
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-md p-4 mb-4 text-white text-center">
               <div className="text-sm font-medium">Tim's Fantasy World</div>
-              <div className="text-xs mt-1">使用代碼: {partner.affiliate_code}</div>
+              <div className="text-xs mt-1">使用代碼: {partner.referralCode}</div>
             </div>
             
             <UnifiedButton
@@ -351,7 +338,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
             <div className="bg-gradient-to-br from-green-500 to-blue-600 rounded-md p-4 mb-4 text-white text-center aspect-square flex flex-col justify-center">
               <div className="text-sm font-medium">Tim's Fantasy</div>
               <div className="text-xs mt-1">推薦代碼</div>
-              <div className="text-xs font-mono">{partner.affiliate_code}</div>
+              <div className="text-xs font-mono">{partner.referralCode}</div>
             </div>
             
             <UnifiedButton
@@ -374,7 +361,7 @@ export default function ToolsPageClient({ countryCode }: ToolsPageClientProps) {
             
             <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-md p-3 mb-4 text-white text-center">
               <div className="text-xs font-medium">Tim's Fantasy World</div>
-              <div className="text-xs mt-1">優惠代碼: {partner.affiliate_code}</div>
+              <div className="text-xs mt-1">優惠代碼: {partner.referralCode}</div>
               <div className="text-xs mt-1">立即購買 →</div>
             </div>
             

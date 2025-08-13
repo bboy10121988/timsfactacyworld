@@ -50,27 +50,7 @@ export default function SettingsPageClient({ countryCode }: SettingsPageClientPr
 
   const loadPartnerData = async () => {
     try {
-      // 模擬獲取合作夥伴資料
-      const partnerData = {
-        id: 'partner-123',
-        name: '王小明',
-        email: 'affiliate@example.com',
-        phone: '0912345678',
-        website: 'https://myblog.com',
-        socialMedia: 'Instagram: @myaccount',
-        address: '台北市信義區信義路五段7號',
-        accountName: '王小明',
-        bankCode: '822',
-        accountNumber: '1234567890',
-        taxId: '12345678',
-        referralCode: 'AFFILIATE123',
-        referral_link: 'https://example.com?ref=AFFILIATE123',
-        status: 'active' as const,
-        commission_rate: 0.08,
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: '2024-01-15T00:00:00.000Z'
-      }
-      
+      const partnerData = await affiliateAPI.getProfile()
       setPartner(partnerData)
       
       // 填入表單
@@ -91,7 +71,7 @@ export default function SettingsPageClient({ countryCode }: SettingsPageClientPr
       })
     } catch (error) {
       console.error('載入合作夥伴資料失敗:', error)
-      setError('載入資料失敗')
+      setError('載入資料失敗，請重新登入')
     } finally {
       setLoading(false)
     }
@@ -103,11 +83,11 @@ export default function SettingsPageClient({ countryCode }: SettingsPageClientPr
     setSuccess("")
 
     try {
-      // 模擬更新成功
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const updatedPartner = await affiliateAPI.updateProfile(profileForm)
+      setPartner(updatedPartner)
       setSuccess("個人資料更新成功！")
-    } catch (error) {
-      setError("個人資料更新失敗")
+    } catch (error: any) {
+      setError(error.message || "個人資料更新失敗")
       console.error('更新個人資料失敗:', error)
     } finally {
       setSaving(false)
@@ -130,18 +110,25 @@ export default function SettingsPageClient({ countryCode }: SettingsPageClientPr
     setSuccess("")
 
     try {
-      // 模擬更新成功
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setSuccess("密碼更新成功！")
-      setPasswordForm({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-        showCurrentPassword: false,
-        showNewPassword: false
+      const result = await affiliateAPI.updatePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
       })
-    } catch (error) {
-      setError("密碼更新失敗，請檢查目前密碼是否正確")
+
+      if (result.success) {
+        setSuccess(result.message || "密碼更新成功！")
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+          showCurrentPassword: false,
+          showNewPassword: false
+        })
+      } else {
+        setError(result.message || "密碼更新失敗")
+      }
+    } catch (error: any) {
+      setError(error.message || "密碼更新失敗")
       console.error('更新密碼失敗:', error)
     } finally {
       setSaving(false)
@@ -154,12 +141,12 @@ export default function SettingsPageClient({ countryCode }: SettingsPageClientPr
     setSuccess("")
 
     try {
-      // 模擬更新成功
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setSuccess("支付資訊更新成功！")
-    } catch (error) {
-      setError("支付資訊更新失敗")
-      console.error('更新支付資訊失敗:', error)
+      const updatedPartner = await affiliateAPI.updatePaymentInfo(paymentForm)
+      setPartner(updatedPartner)
+      setSuccess("付款資訊更新成功！")
+    } catch (error: any) {
+      setError(error.message || "付款資訊更新失敗")
+      console.error('更新付款資訊失敗:', error)
     } finally {
       setSaving(false)
     }

@@ -8,6 +8,8 @@ import pages from './pages'
 import footer from './footer'
 import returnPolicy from './returnPolicy'
 import seoMeta from './seoMeta'
+import productPage from './productPage'
+import collectionPage from './collectionPage'
 
 // Block schemas
 import mainBanner from './blocks/mainBanner'
@@ -20,7 +22,7 @@ import serviceCardSection from './blocks/serviceCardSection'
 
 
 export const schemaTypes = [
-  // Documents
+  // Documents - 主要內容類型
   homePage,
   pages,
   post,
@@ -29,11 +31,15 @@ export const schemaTypes = [
   header,
   footer,
   returnPolicy,
+  
+  // SEO 專用頁面
+  productPage,
+  collectionPage,
 
-  // Objects
+  // Objects - 可重複使用的物件
   seoMeta,
 
-  // Blocks
+  // Blocks - 頁面區塊組件
   mainBanner,
   imageTextBlock,
   featuredProducts,

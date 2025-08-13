@@ -174,6 +174,74 @@ const AffiliateManagement = () => {
     }
   }
 
+  const handleExportPartners = async () => {
+    try {
+      // 調用導出 API
+      const response = await fetch('/admin/affiliate/export/partners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+          to: new Date()
+        })
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.href = url
+        a.download = `partners-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        alert('合作夥伴資料已成功導出')
+      } else {
+        // Fallback to client-side CSV generation
+        const csvContent = generatePartnerCSV(partners)
+        downloadCSV(csvContent, `partners-${new Date().toISOString().split('T')[0]}.csv`)
+        alert('使用本地資料導出 CSV')
+      }
+    } catch (error) {
+      console.error('導出失敗:', error)
+      // Fallback to client-side CSV generation
+      const csvContent = generatePartnerCSV(partners)
+      downloadCSV(csvContent, `partners-${new Date().toISOString().split('T')[0]}.csv`)
+      alert('API 不可用，使用本地資料導出 CSV')
+    }
+  }
+
+  const generatePartnerCSV = (data: AffiliatePartner[]) => {
+    const headers = ['姓名', '電子郵件', '電話', '公司', '推薦碼', '佣金率', '狀態', '創建時間']
+    const csvData = [
+      headers.join(','),
+      ...data.map(partner => [
+        partner.name,
+        partner.email,
+        partner.phone || '',
+        partner.company || '',
+        partner.affiliate_code,
+        partner.commission_rate ? `${(partner.commission_rate * 100).toFixed(1)}%` : '未設定',
+        partner.status === 'pending' ? '待審核' : partner.status === 'approved' ? '已核准' : '已拒絕',
+        new Date(partner.created_at).toLocaleDateString('zh-TW')
+      ].map(field => `"${field}"`).join(','))
+    ]
+    return csvData.join('\n')
+  }
+
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }) // Add BOM for Excel
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   // 篩選夥伴
   const filteredPartners = partners.filter(partner => {
     if (selectedStatus === '') return true // 全部
@@ -216,6 +284,16 @@ const AffiliateManagement = () => {
               <DollarSign className="w-4 h-4" />
               佣金管理
             </button>
+            <button
+              onClick={() => window.location.href = '/app/affiliate/settings'}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              系統設定
+            </button>
           </div>
         </div>
       </div>
@@ -247,6 +325,13 @@ const AffiliateManagement = () => {
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
           >
             重新載入
+          </button>
+          
+          <button
+            onClick={handleExportPartners}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm"
+          >
+            導出 CSV
           </button>
         </div>
 

@@ -9,25 +9,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 這裡應該調用 Medusa Admin API 來獲取庫存信息
-    // 由於需要管理員權限，我們暫時返回模擬數據
+    // TODO: 實作實際的庫存檢查
+    // 目前返回基本的庫存資訊，表示商品可用
     
-    // 模擬庫存數據 - 在實際環境中應該從數據庫獲取
-    const mockInventoryData = {
-      [variantId]: {
-        available_quantity: 100,
-        reserved_quantity: 5,
-        stocked_quantity: 105
-      }
-    }
-
-    const inventoryInfo = mockInventoryData[variantId] || {
-      available_quantity: 0,
+    return NextResponse.json({
+      available_quantity: 0, // TODO: 從 Medusa Admin API 獲取實際庫存
       reserved_quantity: 0,
       stocked_quantity: 0
-    }
-
-    return NextResponse.json(inventoryInfo)
+    })
   } catch (error) {
     console.error('Error fetching inventory:', error)
     return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 })

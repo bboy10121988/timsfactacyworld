@@ -1,6 +1,6 @@
 // 測試完整的前端 affiliate API 流程
 const BACKEND_URL = 'http://localhost:9000'
-const PUBLISHABLE_KEY = 'sk_9fedcb4c350478cacf19a37ca3af9aec'
+const PUBLISHABLE_KEY = 'pk_c515040dd6eb6cb48cbd1bcb052035f8a1c76bc229245392f0e2692b297070af'
 
 // 模擬瀏覽器環境中的 localStorage
 const mockLocalStorage = {
@@ -105,38 +105,34 @@ class TestAffiliateAPI {
     }
   }
 
-  async login(email, password) {
+  async login() {
     console.log('🔐 開始登入流程...')
-    
     try {
-      const response = await this.loginPartner(email, password)
+      const loginResult = await this.loginPartner('ming@example.com', 'password123')
       
-      if (response.success && response.partner) {
-        // 儲存 token 和 partner 資料到 localStorage
-        if (typeof window !== 'undefined') {
-          mockLocalStorage.setItem('affiliate_token', 'token-' + response.partner.id)
-          mockLocalStorage.setItem('affiliate_partner', JSON.stringify(response.partner))
-        }
-        
-        console.log('✅ 登入成功！合作夥伴資料已保存')
-        return { 
-          success: true, 
-          partner: response.partner, 
-          message: response.message || '登入成功！' 
-        }
+      if (loginResult.success) {
+        console.log('✅ 登入成功!')
+        // 儲存認證資訊
+        mockLocalStorage.setItem('affiliate_token', loginResult.token)
+        mockLocalStorage.setItem('affiliate_partner', JSON.stringify({
+          id: loginResult.partner.id,
+          name: loginResult.partner.name,
+          email: loginResult.partner.email,
+          phone: loginResult.partner.phone,
+          website: loginResult.partner.website,
+          referral_link: loginResult.partner.referral_link,
+          status: 'active',
+          commission_rate: loginResult.partner.commission_rate
+        }))
+        return { success: true, data: loginResult }
       } else {
-        console.log('❌ 登入失敗:', response.message)
-        return { 
-          success: false, 
-          message: response.message || '電子郵件或密碼錯誤' 
-        }
+        console.log('❌ 登入失敗:', loginResult.message)
+        return { success: false, error: loginResult.message }
       }
     } catch (error) {
-      console.error('💥 登入錯誤:', error)
-      return { 
-        success: false, 
-        message: error.message || '登入過程中發生錯誤' 
-      }
+      console.error('Login error:', error)
+      console.log('❌ 登入失敗:', error.message)
+      return { success: false, error: error.message }
     }
   }
 

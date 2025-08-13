@@ -2,8 +2,6 @@ import { MedusaService } from "@medusajs/framework/utils"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import PartnerModel, { AffiliatePartnerStatus } from "../models/affiliate-partner"
-import ClickModel from "../models/affiliate-click"
-import ConversionModel, { ConversionStatus } from "../models/affiliate-conversion"
 
 interface CreateAffiliatePartnerData {
   name: string
@@ -29,8 +27,6 @@ interface AffiliateStats {
 
 export default class AffiliateService extends MedusaService({
   AffiliatePartner: PartnerModel,
-  AffiliateClick: ClickModel,
-  AffiliateConversion: ConversionModel,
 }) {
   
   /**
@@ -108,43 +104,36 @@ export default class AffiliateService extends MedusaService({
 
   /**
    * 追蹤點擊
+   * TODO: 實作點擊追蹤模型後啟用
    */
   async trackClick(data: { affiliate_code: string; product_id?: string; ip_address?: string; user_agent?: string; referrer_url?: string; session_id?: string }) {
-    const click = await this.createAffiliateClicks({
-      affiliate_code: data.affiliate_code,
-      product_id: data.product_id ?? null,
-      ip_address: data.ip_address ?? null,
-      user_agent: data.user_agent ?? null,
-      referrer_url: data.referrer_url ?? null,
-      session_id: data.session_id ?? null,
-      converted: false,
-    })
-    return click
+    // TODO: 實作點擊追蹤
+    console.log('Track click:', data)
+    return { id: 'temp-click-id', ...data, converted: false }
   }
 
   /**
    * 記錄轉換（訂單完成時）
+   * TODO: 實作轉換模型後啟用
    */
   async recordConversion(data: { affiliate_code: string; order_id: string; order_total: number; click_id?: string }) {
-    const exist = await this.listAffiliateConversions({ filters: { order_id: data.order_id } })
-    if (exist.length) return exist[0]
+    // TODO: 實作轉換記錄
+    console.log('Record conversion:', data)
     const partners = await this.listAffiliatePartners({ filters: { affiliate_code: data.affiliate_code } })
     if (!partners.length) throw new Error("找不到聯盟夥伴")
     const p: any = partners[0]
     const commission_amount = Math.round(Number(data.order_total) * Number(p.commission_rate) * 100) / 100
-    const conv = await this.createAffiliateConversions({
+    
+    return {
+      id: 'temp-conversion-id',
       affiliate_code: data.affiliate_code,
       order_id: data.order_id,
-      order_total: data.order_total as any,
-      commission_rate: p.commission_rate as any,
-      commission_amount: commission_amount as any,
-      status: ConversionStatus.PENDING,
+      order_total: data.order_total,
+      commission_rate: p.commission_rate,
+      commission_amount: commission_amount,
+      status: 'pending',
       click_id: data.click_id ?? null,
-    })
-    if (data.click_id) {
-      try { await this.updateAffiliateClicks({ id: data.click_id, converted: true }) } catch {}
     }
-    return conv
   }
 
   /**
@@ -154,15 +143,15 @@ export default class AffiliateService extends MedusaService({
     const partner = await this.retrieveAffiliatePartner(partnerId)
     if (!partner) throw new Error('找不到聯盟夥伴')
     
-    // 暫時返回模擬數據，因為 AffiliateClick 和 AffiliateConversion 表還未創建
-    // TODO: 當表創建後，替換為實際的資料庫查詢
+    // TODO: 實作點擊和轉換統計
+    // 目前返回基本的統計資料
     
     return {
-      totalClicks: 0,
-      totalConversions: 0,
-      conversionRate: 0,
-      totalEarnings: 0,
-      pendingEarnings: 0,
+      totalClicks: 0, // TODO: 實作點擊追蹤
+      totalConversions: 0, // TODO: 實作轉換追蹤
+      conversionRate: 0, // TODO: 基於點擊和轉換計算
+      totalEarnings: 0, // TODO: 查詢佣金總額
+      pendingEarnings: 0, // TODO: 查詢待處理佣金
       thisMonthEarnings: 0,
     }
   }
@@ -186,34 +175,17 @@ export default class AffiliateService extends MedusaService({
   } = {}) {
     const { status, limit = 20, offset = 0 } = options
     
-    // TODO: 實作實際的資料庫查詢
-    console.log('Getting all partners:', options)
-
-    // 模擬資料
-    const mockPartners = [
-      {
-        id: "partner_1",
-        name: "王小明",
-        email: "wang@example.com",
-        affiliate_code: "WANG123",
-        status: AffiliatePartnerStatus.PENDING,
-        commission_rate: 0.08,
-        created_at: new Date()
-      },
-      {
-        id: "partner_2", 
-        name: "李小美",
-        email: "lee@example.com",
-        affiliate_code: "LEE456",
-        status: AffiliatePartnerStatus.APPROVED,
-        commission_rate: 0.08,
-        created_at: new Date()
-      }
-    ]
+    // 使用 MedusaService 方式查詢
+    const result = await this.listAffiliatePartners({
+      filters: status ? { status } : {},
+      take: limit,
+      skip: offset,
+      order: { created_at: 'DESC' }
+    })
 
     return {
-      data: mockPartners.slice(offset, offset + limit),
-      total: mockPartners.length
+      data: result,
+      total: result.length // TODO: 實作準確的總數統計
     }
   }
 
@@ -287,31 +259,16 @@ export default class AffiliateService extends MedusaService({
     limit?: number
     offset?: number
   } = {}) {
-    // TODO: 實作實際的資料庫查詢
     console.log('Getting partner referrals:', partnerId, options)
-
-    const mockReferrals = [
-      {
-        id: "conversion_1",
-        order_id: "order_123",
-        order_total: 1200,
-        commission_amount: 96,
-        status: ConversionStatus.CONFIRMED,
-        created_at: new Date()
-      },
-      {
-        id: "conversion_2",
-        order_id: "order_456", 
-        order_total: 800,
-        commission_amount: 64,
-        status: ConversionStatus.PENDING,
-        created_at: new Date()
-      }
-    ]
-
+    
+    const { limit = 20, offset = 0 } = options
+    
+    // TODO: 實作傭金記錄查詢
+    // 目前返回空結果
+    
     return {
-      data: mockReferrals,
-      total: mockReferrals.length
+      data: [],
+      total: 0
     }
   }
 }

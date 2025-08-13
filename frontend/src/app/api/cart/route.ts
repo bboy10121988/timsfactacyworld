@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getRegion } from '@lib/data/regions'
 
 // 輔助函數：創建新購物車
-async function createNewCart(baseUrl: string, publishableKey: string | undefined): Promise<string> {
+async function createNewCart(baseUrl: string, publishableKey: string | undefined, countryCode: string): Promise<string> {
   console.log('🔄 Creating new cart...')
+  
+  // 動態獲取區域 ID
+  const region = await getRegion(countryCode)
+  if (!region) {
+    throw new Error(`No region found for country code: ${countryCode}`)
+  }
+  
+  console.log('📍 Using region:', region.id, 'for country:', countryCode)
+  
   const cartResponse = await fetch(`${baseUrl}/store/carts`, {
     method: 'POST',
     headers: {
@@ -10,7 +20,7 @@ async function createNewCart(baseUrl: string, publishableKey: string | undefined
       'x-publishable-api-key': publishableKey || ''
     },
     body: JSON.stringify({
-      region_id: 'reg_01JW1S1F7GB4ZP322G2DMETETH'
+      region_id: region.id  // 使用動態區域 ID
     })
   })
 
@@ -85,11 +95,11 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.log('⚠️ Error verifying existing cart, creating new one:', error)
         // 如果現有購物車無效，創建新的
-        cartId = await createNewCart(baseUrl, publishableKey)
+        cartId = await createNewCart(baseUrl, publishableKey, countryCode)
       }
     } else {
       console.log('🔄 No existing cart, creating new one...')
-      cartId = await createNewCart(baseUrl, publishableKey)
+      cartId = await createNewCart(baseUrl, publishableKey, countryCode)
     }
 
     // 2. 添加商品到購物車

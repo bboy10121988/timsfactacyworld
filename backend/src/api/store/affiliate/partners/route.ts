@@ -49,9 +49,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     // 生成唯一的夥伴 ID 和代碼
-    const partnerId = `aff_${Date.now().toString().slice(-6)}`
-    const partnerCode = `${name.substring(0, 3).toUpperCase()}${Date.now().toString().slice(-3)}`
-    const affiliateCode = `${name.substring(0, 4).toUpperCase()}2025`
+    const timestamp = Date.now().toString()
+    const partnerId = `aff_${timestamp.slice(-6)}`
+    const partnerCode = `${name.substring(0, 3).toUpperCase()}${timestamp.slice(-3)}`
+    const affiliateCode = `${name.substring(0, 3).toUpperCase()}${timestamp.slice(-6)}`
     const referralLink = `https://timsfantasyworld.com?ref=${affiliateCode}`
     
     // 加密密碼

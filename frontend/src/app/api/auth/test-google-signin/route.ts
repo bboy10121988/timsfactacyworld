@@ -4,9 +4,9 @@ import { revalidateTag } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('測試 Google 登入模擬 API 被調用')
+    console.log('測試 Google 登入 API 被調用')
 
-    // 模擬 Google 用戶資料
+    // 注意：這是測試 API，不應在生產環境中使用
     const googleUserData = {
       google_id: "test_google_id_123",
       email: "test.user@gmail.com",
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       avatar: "https://via.placeholder.com/150"
     }
 
-    console.log('模擬的 Google 用戶資料:', googleUserData)
+    console.log('測試用戶資料:', googleUserData)
 
     // 直接呼叫後端 API
     const medusaResponse = await fetch(`${process.env.MEDUSA_BACKEND_URL}/store/customers/google`, {
