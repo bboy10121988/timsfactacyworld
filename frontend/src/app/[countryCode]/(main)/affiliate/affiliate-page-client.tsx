@@ -35,7 +35,6 @@ export default function AffiliatePageClient({ countryCode }: AffiliatePageClient
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [hint, setHint] = useState("") // 新增提示訊息狀態
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [emailCheckLoading, setEmailCheckLoading] = useState(false)
   const [emailExists, setEmailExists] = useState<boolean | null>(null)
@@ -109,7 +108,6 @@ export default function AffiliatePageClient({ countryCode }: AffiliatePageClient
     e.preventDefault()
     setLoading(true)
     setError("")
-    setHint("")
 
     try {
       const result = await affiliateAPI.login(loginForm.email, loginForm.password)
@@ -124,10 +122,6 @@ export default function AffiliatePageClient({ countryCode }: AffiliatePageClient
         setStats(statsData)
       } else {
         setError(result.message || "登入失敗")
-        // 如果後端回傳了 hint，顯示它
-        if ((result as any).hint) {
-          setHint((result as any).hint)
-        }
       }
     } catch (error: any) {
       setError(error.message || "登入過程中發生錯誤")
@@ -215,13 +209,6 @@ export default function AffiliatePageClient({ countryCode }: AffiliatePageClient
       return () => clearTimeout(timeout)
     }
   }, [error])
-
-  useEffect(() => {
-    if (hint) {
-      const timeout = setTimeout(() => setHint(""), 8000) // hint 顯示時間較長
-      return () => clearTimeout(timeout)
-    }
-  }, [hint])
 
   if (isLoggedIn && partner) {
     return (
@@ -580,30 +567,13 @@ export default function AffiliatePageClient({ countryCode }: AffiliatePageClient
                 </button>
               </div>
 
-              {/* 錯誤訊息 */}
-              {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              )}
-
-              {/* 提示訊息 (包含測試帳號) */}
-              {hint && (
-                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-sm text-blue-800">{hint}</p>
-                </div>
-              )}
-
-              {/* 預設測試帳號資訊 */}
-              {!error && !hint && (
-                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
-                  <p className="text-sm text-gray-700">
-                    <strong>測試帳號：</strong><br/>
-                    電子郵件：ming@example.com<br/>
-                    密碼：password123
-                  </p>
-                </div>
-              )}
+              <div className="mt-4 p-4 bg-blue-50 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>測試帳號：</strong><br/>
+                  電子郵件：affiliate@example.com<br/>
+                  密碼：password
+                </p>
+              </div>
             </div>
           )}
 

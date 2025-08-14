@@ -481,6 +481,8 @@ export async function getAllPages(): Promise<PageData[]> {
 
 
 export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
+  console.log('🔍 Starting getHomepage request to Sanity...')
+  
   const query = `*[_type == "homePage"][0] {
     title,
     "mainSections": mainSections[] {
@@ -593,22 +595,34 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
     }
   }`
 
-  const result = await client.fetch(query, {}, { 
-    next: { revalidate: 300 } // 5 分鐘緩存
-  })
-  
-  // 過濾掉未知類型的 sections 並記錄警告
-  if (result?.mainSections) {
-    result.mainSections = result.mainSections.filter((section: any) => {
-      if (section?.isUnknownType) {
-        console.warn("Unknown section type detected and filtered:", section._type)
-        return false
-      }
-      return section?._type // 只保留有 _type 的 sections
+  try {
+    const result = await client.fetch(query, {}, { 
+      next: { revalidate: 300 } // 5 分鐘緩存
     })
+    
+    console.log('✅ Sanity response received:', {
+      hasResult: !!result,
+      title: result?.title,
+      sectionsCount: result?.mainSections?.length || 0,
+      sections: result?.mainSections?.map((s: any) => ({ type: s._type, isActive: s.isActive })) || []
+    })
+    
+    // 過濾掉未知類型的 sections 並記錄警告
+    if (result?.mainSections) {
+      result.mainSections = result.mainSections.filter((section: any) => {
+        if (section?.isUnknownType) {
+          console.warn("Unknown section type detected and filtered:", section._type)
+          return false
+        }
+        return section?._type // 只保留有 _type 的 sections
+      })
+    }
+    
+    return result as { title: string; mainSections: MainSection[] }
+  } catch (error) {
+    console.error('❌ Error fetching homepage from Sanity:', error)
+    return { title: '', mainSections: [] }
   }
-  
-  return result as { title: string; mainSections: MainSection[] }
 }
 
 

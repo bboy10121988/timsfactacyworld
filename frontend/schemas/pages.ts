@@ -8,8 +8,8 @@ export default {
       name: 'title',
       title: '頁面標題',
       type: 'string',
-      description: '顯示在頁面內容區域的標題',
-      validation: (Rule: any) => Rule.required(),
+      description: '顯示在頁面內容區域的標題，瀏覽器分頁標題將使用SEO設定中的預設網站標題',
+      validation: (Rule) => Rule.required(),
     },
     {
       name: 'slug',
@@ -19,7 +19,7 @@ export default {
         source: 'title',
         maxLength: 96,
       },
-      validation: (Rule: any) => Rule.required(),
+      validation: (Rule) => Rule.required(),
     },
     {
       name: 'isActive',
@@ -29,9 +29,8 @@ export default {
     },
     {
       name: 'seo',
-      title: '🔍 SEO 優化設定',
+      title: 'SEO 設定',
       type: 'seoMeta',
-      description: '此頁面的搜尋引擎優化與社群媒體分享設定',
       options: {
         collapsible: true,
         collapsed: false,
@@ -39,7 +38,7 @@ export default {
     },
     {
       name: 'mainSections',
-      title: '📄 頁面內容區塊',
+      title: '頁面區塊',
       type: 'array',
       of: [
         { type: 'mainBanner' },
@@ -50,7 +49,7 @@ export default {
         { type: 'contentSection' },
         { type: 'serviceCardSection' },
       ],
-      validation: (Rule: any) => Rule.min(1).error('至少需要一個頁面區塊'),
+      validation: (Rule) => Rule.min(1).error('至少需要一個頁面區塊'),
     },
   ],
   preview: {
@@ -58,14 +57,12 @@ export default {
       title: 'title',
       slug: 'slug.current',
       isActive: 'isActive',
-      seoTitle: 'seo.seoTitle'
     },
-    prepare(selection: any) {
-      const { title, slug, isActive, seoTitle } = selection
+    prepare(selection) {
+      const { title, slug, isActive } = selection
       return {
         title: title || '未命名頁面',
         subtitle: `/${slug || 'no-slug'} ${isActive ? '✅' : '❌'}`,
-        description: seoTitle ? `SEO: ${seoTitle}` : '尚未設定 SEO 標題'
       }
     },
   },

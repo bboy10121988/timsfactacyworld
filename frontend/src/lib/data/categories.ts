@@ -6,10 +6,7 @@ type CacheOptions = {
   tags?: string[]
 }
 
-const defaultCacheOptions: CacheOptions = {
-  revalidate: 60, // 快取 60 秒
-  tags: ["categories"],
-}
+
 
 export const listCategories = async (query?: Record<string, any>) => {
   return sdk.client
@@ -25,7 +22,7 @@ export const listCategories = async (query?: Record<string, any>) => {
         headers: {
           "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
         },
-        next: defaultCacheOptions,
+        next: { revalidate: 300 }
       }
     )
     .then(({ product_categories }) => product_categories)
@@ -45,7 +42,7 @@ export const getCategoryByHandle = async (categoryHandle: string[]) => {
         headers: {
           "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY!,
         },
-        next: defaultCacheOptions,
+        next: { revalidate: 300 }
       }
     )
     .then(({ product_categories }) => product_categories[0])

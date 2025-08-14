@@ -104,6 +104,9 @@ const SearchModal = ({
   // 點擊外部處理 - 對於彈出層不需要，但我們仍然使用這個來處理搜尋下拉菜單外的點擊
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // 檢查是否在瀏覽器環境中
+      if (typeof document === 'undefined') return
+      
       // 處理點擊搜尋框外的事件，關閉下拉菜單
       if (
         inputRef.current && 
@@ -115,10 +118,15 @@ const SearchModal = ({
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
+    // 確保在瀏覽器環境中才添加事件監聽器
+    if (typeof document !== 'undefined') {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
     
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
     }
   }, [])
 
@@ -134,10 +142,15 @@ const SearchModal = ({
       }
     }
 
-    document.addEventListener('keydown', handleEsc)
+    // 確保在瀏覽器環境中才添加事件監聽器
+    if (typeof document !== 'undefined') {
+      document.addEventListener('keydown', handleEsc)
+    }
     
     return () => {
-      document.removeEventListener('keydown', handleEsc)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('keydown', handleEsc)
+      }
     }
   }, [onClose, showDropdown])
 

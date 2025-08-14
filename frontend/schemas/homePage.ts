@@ -2,28 +2,22 @@ export default {
   name: 'homePage',
   title: '首頁',
   type: 'document',
-  icon: () => '🏠',
   fields: [
     {
       name: 'title',
-      title: '頁面標題',
+      title: '標題',
       type: 'string',
-      description: '用於 SEO 和管理目的的標題',
-      validation: (Rule: any) => Rule.required()
+      description: '用於SEO和管理目的的標題'
     },
     {
       name: 'seo',
-      title: '🔍 SEO 優化設定',
+      title: 'SEO設定',
       type: 'seoMeta',
-      description: '首頁的搜尋引擎優化與社群媒體分享設定',
-      options: {
-        collapsible: true,
-        collapsed: false,
-      }
+      description: '搜尋引擎優化設定'
     },
     {
       name: 'mainSections',
-      title: '📄 頁面內容區塊',
+      title: '頁面區塊',
       type: 'array',
       of: [
         {type: 'mainBanner'},
@@ -36,19 +30,16 @@ export default {
       ],
       options: {
         sortable: true
-      },
-      validation: (Rule: any) => Rule.min(1).warning('建議至少添加一個內容區塊')
+      }
     }
   ],
   preview: {
     select: {
-      title: 'title',
-      seoTitle: 'seo.seoTitle'
+      title: 'title'
     },
-    prepare({title, seoTitle}: {title?: string, seoTitle?: string}) {
+    prepare({title}: {title?: string}) {
       return {
-        title: title || '首頁',
-        subtitle: seoTitle ? `SEO: ${seoTitle}` : '尚未設定 SEO 標題'
+        title: title || '首頁'
       }
     }
   }
