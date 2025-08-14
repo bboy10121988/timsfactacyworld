@@ -1,77 +1,59 @@
-# Dependencies
+# 添加到現有 .gitignore
+/.medusa/
+ecosystem.config.js
+*.log
+backend/*.log
+backend/backend-server.log
+backend/backend.log
+backend/dev-server.log
+backend/medusa_server.log
+backend/server.log
+frontend/*.log
+frontend/build-clean.log
+frontend/build.log
+frontend/frontend-server.log
+frontend/frontend_server.log
+frontend/start.log
+server.log
+fix-homepage.js
+
+# 備份文件
+*.backup
+*.backup2
+
+# PM2 相關
+.pm2/
+
+# 環境變數
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 構建輸出
+.next/
+dist/
+build/
+
+# 依賴
 node_modules/
-.yarn/cache
-.yarn/install-state.gz
-*/node_modules/
+.pnp
+.pnp.js
+
+# 測試覆蓋
+coverage/
+
+# 調試日誌
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
-.env
-.env.local
-.env.development
-.env.development.local
-.env.test.local
-.env.production.local
-backend/.env
-frontend/.env
-frontend/.env.local
-
-# Build outputs
-.next/
-dist/
-build/
-.nuxt/
-*/dist/
-*/build/
-
-# Package lock files (we use yarn)
-package-lock.json
-*/package-lock.json
-
-# Database
-*.sqlite
-*.db
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE
+# 編輯器
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Temporary files
-temp/
-tmp/
-*.tmp
-*.temp
-
-# Uploads
-uploads/
-static/uploads/
-
-# Cache
-.cache/
-.idea/
-
 # OS
 .DS_Store
 Thumbs.db
-
-# Test directories (not for deployment)
-test_frontend/
-
-# Temporary files
-*.tmp
-*.temp
-.terraform/
-node_modules/

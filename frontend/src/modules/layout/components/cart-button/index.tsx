@@ -30,12 +30,14 @@ export default function CartButton() {
       }
     }
 
-    if (showDropdown) {
+    if (showDropdown && typeof document !== 'undefined') {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
     }
   }, [showDropdown])
 
@@ -43,9 +45,13 @@ export default function CartButton() {
     fetchCart()
 
     // 添加全局事件監聽器來更新購物車
-    window.addEventListener('cartUpdate', fetchCart)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cartUpdate', fetchCart)
+    }
     return () => {
-      window.removeEventListener('cartUpdate', fetchCart)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('cartUpdate', fetchCart)
+      }
     }
   }, [fetchCart])
 

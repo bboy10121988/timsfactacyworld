@@ -73,127 +73,16 @@ function withCache<T>(key: string, fn: () => Promise<T>, ttl: number = CACHE_TTL
   })
 }
 
-export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
-  return withCache('homepage', async () => {
-    const query = `*[_type == "homePage"][0] {
-      title,
-      "mainSections": mainSections[] {
-        ...select(
-          _type == "mainBanner" => {
-            _type,
-            isActive,
-            "slides": slides[] {
-              heading,
-              "backgroundImage": backgroundImage.asset->url,
-              "backgroundImageAlt": backgroundImage.alt,
-              buttonText,
-              buttonLink
-            },
-            "settings": settings {
-              autoplay,
-              autoplaySpeed,
-              showArrows,
-              showDots
-            }
-          },
-      _type == "imageTextBlock" => {
-        _type,
-        isActive,
-        heading,
-        hideTitle,
-        content,
-        "image": image {
-          "url": asset->url,
-          "alt": alt
-        },
-      layout,
-      "leftImage": leftImage {
-        "url": asset->url,
-        "alt": alt
-      },
-      "rightImage": rightImage {
-        "url": asset->url,
-        "alt": alt
-      },
-      leftContent,
-      rightContent
-    },
-        _type == "featuredProducts" => {
-          _type,
-          heading,
-          showHeading,
-          showSubheading,
-          collection_id,
-          isActive
-        },
-        _type == "blogSection" => {
-          _type,
-          isActive,
-          title,
-          "category": category->title,
-          limit,
-          postsPerRow
-        },
-        _type == "youtubeSection" => {
-          _type,
-          isActive,
-          heading,
-          description,
-          videoUrl,
-          fullWidth
-        },
-        _type == "serviceCardSection" => {
-          _type,
-          isActive,
-          heading,
-          cardsPerRow,
-          "cards": cards[] {
-            title,
-            englishTitle,
-            "stylists": stylists[] {
-              levelName,
-              price,
-              priceType,
-              stylistName,
-              isDefault,
-              "cardImage": cardImage {
-                "url": asset->url,
-                "alt": alt
-              }
-            },
-            link
-          }
-        },
-        _type == "contentSection" => {
-          _type,
-          isActive,
-          heading,
-          "content": content[]{
-            ...,
-            markDefs[]{
-              ...,
-              _type == "internalLink" => {
-                "slug": @.reference->slug.current
-              }
-            }
-          }
-        },
-        // Default case - 包含 _type 以便識別未處理的 section 類型
-        {
-          _type,
-          "isUnknownType": true
-        }
-      )
-    }
-  }`
-
-  const result = await client.fetch(query)
+export async function getHomepage_old(): Promise<{ title: string; mainSections: MainSection[] }> {
+  const result = await client.fetch(query, {}, { 
+    next: { revalidate: 300 } // 5 分鐘緩存
+  })
   
   // 過濾掉未知類型的 sections 並記錄警告
   if (result?.mainSections) {
-    result.mainSections = result.mainSections.filter((section: any) => {
+    result.mainSections = result.mainSections.filter((section) => {
       if (section?.isUnknownType) {
-        console.warn('Unknown section type detected and filtered:', section._type)
+        console.warn("Unknown section type detected and filtered:", section._type)
         return false
       }
       return section?._type // 只保留有 _type 的 sections
@@ -201,54 +90,53 @@ export async function getHomepage(): Promise<{ title: string; mainSections: Main
   }
   
   return result as { title: string; mainSections: MainSection[] }
-  })
 }
 
 export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
-  return withCache('featured-products', async () => {
-    const query = `*[_type == "featuredProducts" && isActive == true]{
-      title,
-      handle,
-      collection_id,
-      description,
-      isActive
-    }`
-    return client.fetch(query)
+  const query = `*[_type == "featuredProducts" && isActive == true]{
+    title,
+    handle,
+    collection_id,
+    description,
+    isActive
+  }`
+  return client.fetch(query, {}, { 
+    next: { revalidate: 300 } // 5 分鐘緩存
   })
 }
 
 export async function getHeader() {
-  return withCache('header', async () => {
-    const query = `*[_type == "header"][0]{
-      logo{
-        "url": asset->url,
-        alt
-      },
-      storeName,
-      logoWidth,
-      navigation[]{
-        name,
-        href
-      },
-      marquee {
-        enabled,
-        text1 {
-          enabled,
-          content
-        },
-      text2 {
+  const query = `*[_type == "header"][0]{
+    logo{
+      "url": asset->url,
+      alt
+    },
+    storeName,
+    logoWidth,
+    navigation[]{
+      name,
+      href
+    },
+    marquee {
+      enabled,
+      text1 {
         enabled,
         content
       },
-      text3 {
-        enabled,
-        content
-      },
-      linkUrl,
-      pauseOnHover
-    }
-  }`
-  return client.fetch(query)
+    text2 {
+      enabled,
+      content
+    },
+    text3 {
+      enabled,
+      content
+    },
+    linkUrl,
+    pauseOnHover
+  }
+}`
+  return client.fetch(query, {}, { 
+    next: { revalidate: 300 } // 5 分鐘緩存
   })
 }
 
@@ -590,6 +478,139 @@ export async function getAllPages(): Promise<PageData[]> {
     return []
   }
 }
+
+
+export async function getHomepage(): Promise<{ title: string; mainSections: MainSection[] }> {
+  const query = `*[_type == "homePage"][0] {
+    title,
+    "mainSections": mainSections[] {
+      ...select(
+        _type == "mainBanner" => {
+          _type,
+          isActive,
+          "slides": slides[] {
+            heading,
+            "backgroundImage": backgroundImage.asset->url,
+            "backgroundImageAlt": backgroundImage.alt,
+            buttonText,
+            buttonLink
+          },
+          "settings": settings {
+            autoplay,
+            autoplaySpeed,
+            showArrows,
+            showDots
+          }
+        },
+        _type == "imageTextBlock" => {
+          _type,
+          isActive,
+          heading,
+          hideTitle,
+          content,
+          "image": image {
+            "url": asset->url,
+            "alt": alt
+          },
+          layout,
+          "leftImage": leftImage {
+            "url": asset->url,
+            "alt": alt
+          },
+          "rightImage": rightImage {
+            "url": asset->url,
+            "alt": alt
+          },
+          leftContent,
+          rightContent
+        },
+        _type == "featuredProducts" => {
+          _type,
+          heading,
+          showHeading,
+          showSubheading,
+          collection_id,
+          isActive
+        },
+        _type == "blogSection" => {
+          _type,
+          isActive,
+          title,
+          "category": category->title,
+          limit,
+          postsPerRow
+        },
+        _type == "youtubeSection" => {
+          _type,
+          isActive,
+          heading,
+          description,
+          videoUrl,
+          fullWidth
+        },
+        _type == "serviceCardSection" => {
+          _type,
+          isActive,
+          heading,
+          cardsPerRow,
+          "cards": cards[] {
+            title,
+            englishTitle,
+            "stylists": stylists[] {
+              levelName,
+              price,
+              priceType,
+              stylistName,
+              isDefault,
+              "cardImage": cardImage {
+                "url": asset->url,
+                "alt": alt
+              }
+            },
+            link
+          }
+        },
+        _type == "contentSection" => {
+          _type,
+          isActive,
+          heading,
+          "content": content[]{
+            ...,
+            markDefs[]{
+              ...,
+              _type == "internalLink" => {
+                "slug": @.reference->slug.current
+              }
+            }
+          }
+        },
+        // Default case - 包含 _type 以便識別未處理的 section 類型
+        {
+          _type,
+          "isUnknownType": true
+        }
+      )
+    }
+  }`
+
+  const result = await client.fetch(query, {}, { 
+    next: { revalidate: 300 } // 5 分鐘緩存
+  })
+  
+  // 過濾掉未知類型的 sections 並記錄警告
+  if (result?.mainSections) {
+    result.mainSections = result.mainSections.filter((section: any) => {
+      if (section?.isUnknownType) {
+        console.warn("Unknown section type detected and filtered:", section._type)
+        return false
+      }
+      return section?._type // 只保留有 _type 的 sections
+    })
+  }
+  
+  return result as { title: string; mainSections: MainSection[] }
+}
+
 
 export async function getServiceSection(): Promise<ServiceCards | null> {
   try {

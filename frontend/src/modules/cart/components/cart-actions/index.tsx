@@ -53,28 +53,70 @@ const CartActions = ({ cart }: CartActionsProps) => {
     }
 
     try {
+      // 檢查環境是否支援分享功能
+      if (typeof window === 'undefined') {
+        toast.error("分享功能不可用")
+        return
+      }
+
       // 創建分享內容
       const shareText = `我在 Tim's 購物車中加入了 ${cart.items?.length} 個商品，總計 ${cart.currency_code} ${(cart.total || 0) / 100}`
       const shareUrl = window.location.href
       
-      if (navigator.share) {
-        // 使用原生分享 API
-        await navigator.share({
-          title: "我的購物車 - Tim's Fantasy World",
-          text: shareText,
-          url: shareUrl
-        })
-        toast.success("分享成功！")
-      } else {
+      // 檢查是否支援原生分享 API
+      if (typeof navigator !== 'undefined' && 'share' in navigator && navigator.share) {
+        try {
+          await navigator.share({
+            title: "我的購物車 - Tim's Fantasy World",
+            text: shareText,
+            url: shareUrl
+          })
+          toast.success("分享成功！")
+        } catch (shareError) {
+          if ((shareError as Error).name !== 'AbortError') {
+            throw shareError
+          }
+        }
+      } else if (typeof navigator !== 'undefined' && 'clipboard' in navigator && navigator.clipboard) {
         // 備用：複製到剪貼板
-        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
-        toast.success("分享連結已複製到剪貼板！")
+        try {
+          await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+          toast.success("分享連結已複製到剪貼板！")
+        } catch (clipboardError) {
+          // 再次備用：使用傳統方式複製
+          fallbackCopyToClipboard(`${shareText}\n${shareUrl}`)
+        }
+      } else {
+        // 最終備用：使用傳統方式複製
+        fallbackCopyToClipboard(`${shareText}\n${shareUrl}`)
       }
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error("分享失敗:", error)
-        toast.error("分享失敗，請重試")
+      console.error("分享失敗:", error)
+      toast.error("分享失敗，請重試")
+    }
+  }
+
+  const fallbackCopyToClipboard = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea")
+      textArea.value = text
+      textArea.style.position = "fixed"
+      textArea.style.left = "-999999px"
+      textArea.style.top = "-999999px"
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      const successful = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      
+      if (successful) {
+        toast.success("分享連結已複製到剪貼板！")
+      } else {
+        toast.error("複製失敗，請手動複製連結")
       }
+    } catch (error) {
+      console.error("備用複製方法失敗:", error)
+      toast.error("複製功能不可用，請手動分享")
     }
   }
 

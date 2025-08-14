@@ -1,6 +1,5 @@
 "use client"
 
-import { retrieveCustomer } from "@lib/data/customer"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { StoreCustomer } from "@medusajs/types"
 import { useEffect, useState } from "react"
@@ -10,8 +9,16 @@ export default function AccountButton() {
 
   useEffect(() => {
     const fetchCustomer = async () => {
-      const customerData = await retrieveCustomer().catch(() => null)
-      setCustomer(customerData)
+      try {
+        const response = await fetch("/api/customer")
+        if (response.ok) {
+          const data = await response.json()
+          setCustomer(data.customer)
+        }
+      } catch (error) {
+        console.log("Customer not logged in")
+        setCustomer(null)
+      }
     }
     fetchCustomer()
   }, [])
