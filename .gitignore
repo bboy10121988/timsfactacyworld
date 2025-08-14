@@ -54,6 +54,10 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Railway 相關 (已不使用)
+railway_vars.env
+.railway/
+
 # OS
 .DS_Store
 Thumbs.db
