@@ -173,6 +173,8 @@ export default async function Home({
             .map((section: any, index: number) => {
               const sectionType = section._type;
               try {
+                console.log(`🎯 Rendering section ${index}: ${sectionType}`, { isActive: section.isActive })
+                
                 switch (sectionType) {
                   case "serviceCardSection": {
                     const serviceSection = section as ServiceCards;
@@ -223,20 +225,34 @@ export default async function Home({
                       return null
                     }
 
-                    const featuredCollections = collectionsData.collections.filter((c: any) =>
-                      featuredBlock.collection_id === c.id
-                    )
+                    // 安全檢查 collectionsData
+                    if (!collectionsData || !collectionsData.collections || !Array.isArray(collectionsData.collections)) {
+                      console.warn("Featured products skipped - backend unavailable")
+                      return null  // 安靜地跳過，不阻塞其他區塊
+                    }
 
-                    if (featuredCollections.length === 0) return null
+                    try {
+                      const featuredCollections = collectionsData.collections.filter((c: any) =>
+                        featuredBlock.collection_id === c.id
+                      )
 
-                    return (
-                      <FeaturedProducts
-                        key={index}
-                        collections={featuredCollections}
-                        region={region}
-                        settings={featuredBlock}
-                      />
-                    )
+                      if (featuredCollections.length === 0) {
+                        console.log("No matching collection found for featured products")
+                        return null
+                      }
+
+                      return (
+                        <FeaturedProducts
+                          key={index}
+                          collections={featuredCollections}
+                          region={region}
+                          settings={featuredBlock}
+                        />
+                      )
+                    } catch (error) {
+                      console.error("Featured products rendering error:", error)
+                      return null  // 安靜地跳過，不阻塞其他區塊
+                    }
                   }
                   case "blogSection": {
                     const blogSection = section as BlogSection
