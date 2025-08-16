@@ -51,7 +51,7 @@ export const getRegion = async (countryCode: string) => {
 
     // 建立硬編碼的 countryCode -> region 映射
     const hardcodedMapping: Record<string, string> = {
-      "tw": "台灣",
+      "tw": "Taiwan",  // 更新為正確的地區名稱
       "us": "United States", 
       "eu": "Europe"
     }
@@ -63,8 +63,8 @@ export const getRegion = async (countryCode: string) => {
       })
     })
 
-    // 如果 countries 為空，使用硬編碼映射
-    if (regionMap.size === 0) {
+    // 如果 countries 為空或找不到對應的地區，使用硬編碼映射
+    if (regionMap.size === 0 || !regionMap.has(countryCode)) {
       regions.forEach((region) => {
         const regionName = region.name
         for (const [code, name] of Object.entries(hardcodedMapping)) {
@@ -76,8 +76,8 @@ export const getRegion = async (countryCode: string) => {
     }
 
     const region = countryCode
-      ? regionMap.get(countryCode)
-      : regionMap.get("us")
+      ? regionMap.get(countryCode) || regionMap.get("tw")  // 預設使用台灣而不是美國
+      : regionMap.get("tw")
 
     return region
   } catch (e: any) {

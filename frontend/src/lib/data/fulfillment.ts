@@ -8,15 +8,29 @@ export const listCartShippingMethods = async (cartId: string) => {
   console.log("📞 listCartShippingMethods 被呼叫，cartId:", cartId)
   
   try {
-    // 使用官方推薦的 SDK 方法
-    const response = await sdk.store.fulfillment.listCartOptions({ 
-      cart_id: cartId 
-    })
+    const headers = {
+      ...(await getAuthHeaders()),
+    }
+
+    const next = {
+      ...(await getCacheOptions("fulfillment")),
+    }
+
+    // 直接使用原生 Medusa API
+    const response = await sdk.client.fetch<{ shipping_options: HttpTypes.StoreCartShippingOption[] }>(
+      `/store/shipping-options`,
+      {
+        method: "GET",
+        headers,
+        next,
+        query: { cart_id: cartId }
+      }
+    )
     
-    console.log("✅ SDK 回應:", response)
+    console.log("✅ 原生 API 回應:", response)
     
     if (response && response.shipping_options) {
-      console.log("✅ listCartShippingMethods 成功，收到 shipping_options:", response.shipping_options)
+      console.log("✅ listCartShippingMethods 成功，收到 shipping_options:", response.shipping_options.length, "個選項")
       return response.shipping_options
     } else {
       console.log("⚠️ 沒有 shipping_options 在回應中")
@@ -24,7 +38,7 @@ export const listCartShippingMethods = async (cartId: string) => {
     }
   } catch (error) {
     console.error("❌ listCartShippingMethods 失敗:", error)
-    return null
+    return []
   }
 }
 
