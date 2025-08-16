@@ -127,26 +127,20 @@ export async function POST(
           
           // 更新購物車 metadata 包含 ECPay 支付資訊和訂單ID
           try {
-            const query = req.scope.resolve("query")
-            await query.graph({
-              entity: "cart",
-              fields: ["id", "metadata"],
-              filters: { id: cart.id },
-              action: "update",
-              data: [{
-                metadata: {
-                  ...cart.metadata,
-                  ecpay_trade_no: MerchantTradeNo,
-                  ecpay_transaction_id: TradeNo,
-                  payment_method: "ecpay",
-                  payment_amount: TradeAmt,
-                  payment_date: PaymentDate,
-                  payment_status: "captured",
-                  payment_confirmed_at: new Date().toISOString(),
-                  order_id: orderResult.order?.id,
-                  order_completed: true
-                }
-              }]
+            const cartModuleService = req.scope.resolve("cart")
+            await cartModuleService.updateCarts(cart.id, {
+              metadata: {
+                ...cart.metadata,
+                ecpay_trade_no: MerchantTradeNo,
+                ecpay_transaction_id: TradeNo,
+                payment_method: "ecpay",
+                payment_amount: TradeAmt,
+                payment_date: PaymentDate,
+                payment_status: "captured",
+                payment_confirmed_at: new Date().toISOString(),
+                order_id: orderResult.order?.id,
+                order_completed: true
+              }
             })
             
             console.log('✅ Cart metadata updated with ECPay payment info')
@@ -170,26 +164,20 @@ export async function POST(
         // 最終方案：只記錄付款資訊到購物車 metadata
         console.log('💰 Recording payment information to cart metadata only')
         try {
-          const query = req.scope.resolve("query")
-          await query.graph({
-            entity: "cart",
-            fields: ["id"],
-            filters: { id: cart.id },
-            action: "update", 
-            data: [{
-              metadata: {
-                ...cart.metadata,
-                ecpay_trade_no: MerchantTradeNo,
-                ecpay_transaction_id: TradeNo,
-                payment_method: "ecpay",
-                payment_amount: TradeAmt,
-                payment_date: PaymentDate,
-                payment_status: "paid_pending_order",
-                payment_confirmed_at: new Date().toISOString(),
-                order_ready_for_creation: true,
-                manual_processing_required: true
-              }
-            }]
+          const cartModuleService = req.scope.resolve("cart")
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...cart.metadata,
+              ecpay_trade_no: MerchantTradeNo,
+              ecpay_transaction_id: TradeNo,
+              payment_method: "ecpay",
+              payment_amount: TradeAmt,
+              payment_date: PaymentDate,
+              payment_status: "paid_pending_order",
+              payment_confirmed_at: new Date().toISOString(),
+              order_ready_for_creation: true,
+              manual_processing_required: true
+            }
           })
           
           console.log(`📝 Payment info recorded to cart metadata`)

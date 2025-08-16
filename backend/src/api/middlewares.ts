@@ -1,9 +1,7 @@
 import { 
   defineMiddlewares,
-  MedusaNextFunction,
-  MedusaRequest,
-  MedusaResponse,
 } from "@medusajs/medusa"
+import type { Request, Response, NextFunction } from "express"
 import cors from "cors"
 
 console.log('🔧 Middlewares.ts loaded')
@@ -27,9 +25,9 @@ export default defineMiddlewares({
       matcher: "/store/ecpay/callback*",
       middlewares: [
         (
-          req: MedusaRequest,
-          res: MedusaResponse,
-          next: MedusaNextFunction
+          req: Request,
+          res: Response,
+          next: NextFunction
         ) => {
           console.log(`🔍 ECPay callback middleware hit for: ${req.path} ${req.method}`)
           console.log('🔓 Bypassing API key requirement for ECPay callback')
@@ -47,9 +45,9 @@ export default defineMiddlewares({
       matcher: "/store/carts/*/complete",
       middlewares: [
         (
-          req: MedusaRequest,
-          res: MedusaResponse,
-          next: MedusaNextFunction
+          req: Request,
+          res: Response,
+          next: NextFunction
         ) => {
           // 檢查是否來自 ECPay callback 內部呼叫
           const isInternalEcpayCall = req.headers['x-internal-ecpay-call'] === 'true'
@@ -70,9 +68,9 @@ export default defineMiddlewares({
       matcher: "/store/ecpay/*",
       middlewares: [
         (
-          req: MedusaRequest,
-          res: MedusaResponse,
-          next: MedusaNextFunction
+          req: Request,
+          res: Response,
+          next: NextFunction
         ) => {
           console.log(`🔍 ECPay middleware hit for: ${req.path}`)
           

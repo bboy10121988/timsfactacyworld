@@ -20,7 +20,7 @@ export default async function createShippingOptionsFromDB({ container }: ExecArg
     console.log(`✓ 找到履約提供者: ${manualProvider.id}`)
 
     // 檢查庫存位置
-    const stockLocations = await stockLocationModuleService.listStockLocations()
+    const stockLocations = await stockLocationModuleService.listStockLocations({})
     if (stockLocations.length === 0) {
       console.log("❌ 找不到庫存位置")
       return
@@ -30,7 +30,7 @@ export default async function createShippingOptionsFromDB({ container }: ExecArg
     console.log(`✓ 使用庫存位置: ${mainLocation.name} (${mainLocation.id})`)
 
     // 使用 Medusa SDK 來創建運輸選項
-    const sdk = container.resolve("medusaSDK")
+    const sdk = container.resolve("medusaSDK") as any
     
     // 創建標準宅配
     const standardDelivery = await sdk.admin.shippingOption.create({

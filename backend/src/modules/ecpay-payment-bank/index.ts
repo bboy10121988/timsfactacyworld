@@ -10,7 +10,7 @@ class EcpayBankTransferProvider extends EcpayPaymentProvider {
   async initiatePayment(input) {
     console.log("🏦 使用銀行轉帳方式支付")
     // 在這裡可以為 ATM 支付添加特殊邏輯
-    return super.createPayment(input)
+    return super.capturePayment(input)
   }
 
   // 覆寫生成 ECPay 表單的方法，將支付方式改為 ATM
@@ -43,7 +43,7 @@ class EcpayBankTransferProvider extends EcpayPaymentProvider {
 
   // 覆寫創建支付方法，確保支付類型為 ATM
   async createPayment(context) {
-    const paymentData = await super.createPayment(context);
+    const paymentData = await super.capturePayment(context);
     paymentData.data.payment_type = "ATM";
     return paymentData;
   }

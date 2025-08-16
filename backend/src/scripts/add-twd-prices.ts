@@ -59,7 +59,7 @@ export default async function addTWDPrices({ container }: ExecArgs) {
     `
   ];
 
-  const dbConnection = container.resolve('dbConnection');
+  const dbConnection = container.resolve('dbConnection') as any;
   
   for (const query of queries) {
     try {
