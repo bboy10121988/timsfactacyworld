@@ -110,7 +110,10 @@ class EcpayService {
     const filteredTrade = Object.fromEntries(Object.entries(trade).filter(([_, v]) => v !== undefined && v !== null))
     
     // 新增 log
-    console.log('🔧 ECPay Service - 送給 ECPay 的參數:', filteredTrade)
+    // 生產環境簡化日誌
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 ECPay Service - 送給 ECPay 的參數:', filteredTrade)
+    }
     
     // 驗證必要參數
     if (!filteredTrade.MerchantTradeNo) {
@@ -135,24 +138,23 @@ class EcpayService {
       IsProjectContractor: false,
     }
     
-    console.log('🔧 ECPay SDK Options:', {
-      OperationMode: options.OperationMode,
-      MerchantID: options.MercProfile.MerchantID,
-      HashKey: options.MercProfile.HashKey ? '***' + options.MercProfile.HashKey.slice(-4) : 'NOT_SET',
-      HashIV: options.MercProfile.HashIV ? '***' + options.MercProfile.HashIV.slice(-4) : 'NOT_SET'
-    })
-    
-    const ecpay = new ECPayAIO(options)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔧 ECPay SDK Options: [DEBUG MODE ONLY]')
+    }    const ecpay = new ECPayAIO(options)
     // 產生付款表單 HTML
     try {
-      console.log('⚡ ECPay Service - 呼叫 aio_check_out_all...')
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('⚡ ECPay Service - 呼叫 aio_check_out_all...')
+      }
       const html = ecpay.payment_client.aio_check_out_all(filteredTrade)
       
-      console.log('📄 ECPay Service - HTML 生成結果:')
-      console.log('- HTML type:', typeof html)
-      console.log('- HTML length:', html?.length || 0)
-      console.log('- Contains <form>:', html?.includes('<form') || false)
-      console.log('- HTML preview:', html?.substring(0, 300) + '...')
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('📄 ECPay Service - HTML 生成結果:')
+        console.log('- HTML type:', typeof html)
+        console.log('- HTML length:', html?.length || 0)
+        console.log('- Contains <form>:', html?.includes('<form') || false)
+        console.log('- HTML preview:', html?.substring(0, 300) + '...')
+      }
       
       if (!html) {
         throw new Error("ECPay 回傳空的 HTML")

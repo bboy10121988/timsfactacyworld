@@ -29,14 +29,17 @@ export default defineMiddlewares({
           res: Response,
           next: NextFunction
         ) => {
-          console.log(`🔍 ECPay callback middleware hit for: ${req.path} ${req.method}`)
-          console.log('🔓 Bypassing API key requirement for ECPay callback')
-          console.log('📋 Request headers:', Object.keys(req.headers))
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`🔍 ECPay callback middleware hit for: ${req.path} ${req.method}`)
+            console.log('🔓 Bypassing API key requirement for ECPay callback')
+          }
           
           // 設定有效的 publishable API key
           req.headers['x-publishable-api-key'] = 'pk_12345678901234567890123456789012'
           
-          console.log('✅ API key set, proceeding to next middleware')
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('✅ API key set, proceeding to next middleware')
+          }
           next()
         }
       ]
