@@ -5,12 +5,18 @@ export async function POST(
   res: MedusaResponse
 ): Promise<any> {
   const timestamp = new Date().toISOString()
-  console.log('🔔 ========== ECPay Webhook Callback Received ==========')
-  console.log(`⏰ Timestamp: ${timestamp}`)
-  console.log(`🌐 Request URL: ${req.url}`)
-  console.log(`📡 Request Method: ${req.method}`)
-  console.log(`🔗 Request Headers:`, JSON.stringify(req.headers, null, 2))
-  console.log(`📦 Raw Callback Data:`, JSON.stringify(req.body, null, 2))
+  const isProduction = process.env.NODE_ENV === 'production'
+  
+  if (!isProduction) {
+    console.log('🔔 ========== ECPay Webhook Callback Received ==========')
+    console.log(`⏰ Timestamp: ${timestamp}`)
+    console.log(`🌐 Request URL: ${req.url}`)
+    console.log(`📡 Request Method: ${req.method}`)
+    console.log(`🔗 Request Headers:`, JSON.stringify(req.headers, null, 2))
+    console.log(`📦 Raw Callback Data:`, JSON.stringify(req.body, null, 2))
+  } else {
+    console.log(`ECPay callback received at ${timestamp}`)
+  }
   
   try {
     const callbackData = req.body as any
@@ -24,19 +30,22 @@ export async function POST(
       PaymentType
     } = callbackData
 
-    console.log(`💳 ECPay Transaction Details:`)
-    console.log(`   - MerchantTradeNo: ${MerchantTradeNo}`)
-    console.log(`   - RtnCode: ${RtnCode}`)
-    console.log(`   - RtnMsg: ${RtnMsg}`)
-    console.log(`   - TradeNo: ${TradeNo}`)
-    console.log(`   - TradeAmt: ${TradeAmt}`)
-    console.log(`   - PaymentDate: ${PaymentDate}`)
-    console.log(`   - PaymentType: ${PaymentType}`)
-
     // 檢查支付是否成功
     if (RtnCode !== '1') {
       console.log(`❌ Payment failed with code ${RtnCode}: ${RtnMsg}`)
       return res.status(200).send('0|Payment failed')
+    }
+
+    if (!isProduction) {
+      console.log(`💳 ECPay Transaction Details:`)
+      console.log(`   📋 Trade No: ${MerchantTradeNo}`)
+      console.log(`   💰 Amount: ${TradeAmt}`)
+      console.log(`   🎯 Status: Payment Successful`)
+      console.log(`   🆔 ECPay ID: ${TradeNo}`)
+      console.log(`   📅 Date: ${PaymentDate}`)
+      console.log(`   💳 Method: ${PaymentType}`)
+    } else {
+      console.log(`ECPay payment success: ${MerchantTradeNo} - ${TradeAmt}`)
     }
 
     console.log('✅ Payment successful, processing order...')
