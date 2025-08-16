@@ -58,13 +58,14 @@ async function getLatestPosts(excludeSlug?: string) {
 export default async function BlogPost({ 
   params 
 }: { 
-  params: { slug: string; countryCode: string } 
+  params: Promise<{ slug: string; countryCode: string }> 
 }) {
   try {
+    const { slug, countryCode } = await params
     const [post, categories, latestPosts] = await Promise.all([
-      getPostBySlug(params.slug),
+      getPostBySlug(slug),
       getCategories(),
-      getLatestPosts(params.slug)
+      getLatestPosts(slug)
     ])
 
     if (!post) {
@@ -84,7 +85,7 @@ export default async function BlogPost({
               <ul className="space-y-2">
                 <li>
                   <Link 
-                    href={`/${params.countryCode}/blog`}
+                    href={`/${countryCode}/blog`}
                     className="text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 block w-full py-2 px-3 rounded-lg transition-all duration-200"
                   >
                     ← 返回部落格
@@ -92,7 +93,7 @@ export default async function BlogPost({
                 </li>
                 <li className="border-t border-gray-100 pt-2 mt-3">
                   <Link 
-                    href={`/${params.countryCode}/blog`}
+                    href={`/${countryCode}/blog`}
                     className="text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 block w-full py-2 px-3 rounded-lg transition-all duration-200"
                   >
                     全部文章
@@ -101,7 +102,7 @@ export default async function BlogPost({
                 {categories.map((cat: Category) => (
                   <li key={cat._id}>
                     <Link 
-                      href={`/${params.countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
+                      href={`/${countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
                       className="text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 block w-full py-2 px-3 rounded-lg transition-all duration-200"
                     >
                       {cat.title}
@@ -120,7 +121,7 @@ export default async function BlogPost({
                     {post.categories.map((cat: any) => (
                       <Link
                         key={cat.title}
-                        href={`/${params.countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
+                        href={`/${countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
                         className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full hover:bg-blue-200 transition-colors duration-200"
                       >
                         {cat.title}
@@ -140,7 +141,7 @@ export default async function BlogPost({
                     {latestPosts.map((article: any) => (
                       <Link
                         key={article._id}
-                        href={`/${params.countryCode}/blog/${article.slug?.current}`}
+                        href={`/${countryCode}/blog/${article.slug?.current}`}
                         className="block group hover:bg-gray-50 p-2 rounded-lg transition-all duration-200"
                       >
                         <div className="flex space-x-4">

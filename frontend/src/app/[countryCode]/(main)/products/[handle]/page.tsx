@@ -7,7 +7,7 @@ import ProductTemplate from "@modules/products/templates"
 import { getStoreName } from "@lib/store-name"
 
 type Props = {
-  params: { countryCode: string; handle: string }
+  params: Promise<{ countryCode: string; handle: string }>
 }
 
 export async function generateStaticParams() {
@@ -25,7 +25,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const { handle, countryCode } = params
+    const { handle, countryCode } = await params
     const region = await getRegion(countryCode)
     const storeName = await getStoreName()
 
@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   try {
-    const { countryCode, handle } = params
+    const { countryCode, handle } = await params
     const region = await getRegion(countryCode)
 
     if (!region) {

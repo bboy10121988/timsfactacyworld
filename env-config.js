@@ -4,10 +4,10 @@
 // ========================================
 
 const ENV_CONFIG = {
-  SERVER_IP: '104.155.208.30',
-  BACKEND_URL: 'http://104.155.208.30:9000',
-  FRONTEND_URL: 'http://104.155.208.30:8000',
-  ADMIN_URL: 'http://104.155.208.30:9001',
+  SERVER_IP: '34.81.21.61',
+  BACKEND_URL: 'http://34.81.21.61:9000',
+  FRONTEND_URL: 'http://34.81.21.61:8000',
+  ADMIN_URL: 'http://34.81.21.61:9001',
   
   // 端口
   BACKEND_PORT: 9000,
@@ -27,17 +27,17 @@ const ENV_CONFIG = {
   getBackendUrl: () => {
     if (typeof window !== 'undefined') {
       // 瀏覽器環境
-      return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://104.155.208.30:9000';
+      return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://34.81.21.61:9000';
     }
     // Node.js 環境
-    return process.env.NODE_ENV === 'production' ? 'http://104.155.208.30:9000' : 'http://localhost:9000';
+    return process.env.NODE_ENV === 'production' ? 'http://34.81.21.61:9000' : 'http://localhost:9000';
   },
   
   getFrontendUrl: () => {
     if (typeof window !== 'undefined') {
-      return process.env.NEXT_PUBLIC_BASE_URL || 'http://104.155.208.30:8000';
+      return process.env.NEXT_PUBLIC_BASE_URL || 'http://34.81.21.61:8000';
     }
-    return process.env.NODE_ENV === 'production' ? 'http://104.155.208.30:8000' : 'http://localhost:8000';
+    return process.env.NODE_ENV === 'production' ? 'http://34.81.21.61:8000' : 'http://localhost:8000';
   }
 };
 

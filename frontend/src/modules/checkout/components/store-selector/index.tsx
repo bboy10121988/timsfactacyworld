@@ -81,7 +81,7 @@ const StoreSelector: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-publishable-api-key': 'pk_878a01cbc11b1ed2acfb97a538e26610e073ced57ed8ad18f72677e836190adb'
+          'x-publishable-api-key': process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ''
         },
         body: JSON.stringify({
           goodsAmount: 500,

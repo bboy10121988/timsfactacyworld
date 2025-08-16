@@ -1,0 +1,39 @@
+# 在 VM 上依序執行這些命令來安裝和配置 Redis
+
+# 1. 更新套件列表
+sudo apt update
+
+# 2. 安裝 Redis
+sudo apt install -y redis-server
+
+# 3. 停止 Redis 服務以便修改配置
+sudo systemctl stop redis-server
+
+# 4. 備份原始配置
+sudo cp /etc/redis/redis.conf /etc/redis/redis.conf.backup
+
+# 5. 修改配置允許外部連接
+sudo sed -i 's/^bind 127.0.0.1/#bind 127.0.0.1/' /etc/redis/redis.conf
+
+# 6. 添加綁定到所有介面
+echo "bind 0.0.0.0" | sudo tee -a /etc/redis/redis.conf
+
+# 7. 關閉保護模式
+sudo sed -i 's/protected-mode yes/protected-mode no/' /etc/redis/redis.conf
+
+# 8. 啟動 Redis 服務
+sudo systemctl start redis-server
+
+# 9. 設定開機自啟
+sudo systemctl enable redis-server
+
+# 10. 開放防火牆端口
+sudo ufw allow 6379
+
+# 11. 測試 Redis
+redis-cli ping
+
+# 12. 檢查監聽狀態
+sudo netstat -tlnp | grep :6379
+
+echo "Redis 安裝完成！"

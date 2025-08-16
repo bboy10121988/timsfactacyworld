@@ -35,10 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home({
-  params: { countryCode },
+  params,
 }: {
   params: { countryCode: string }
 }) {
+  const { countryCode } = await params
   const collectionsData = await listCollections({})
   const region = await getRegion(countryCode)
 
@@ -220,6 +221,8 @@ export default async function Home({
                   }
                   case "featuredProducts": {
                     const featuredBlock = section as FeaturedProductsSection
+                    console.log("🎯 Processing featuredProducts section:", featuredBlock)
+                    
                     if (!featuredBlock.collection_id) {
                       console.error("Invalid featuredProducts section:", featuredBlock)
                       return null
@@ -231,16 +234,21 @@ export default async function Home({
                       return null  // 安靜地跳過，不阻塞其他區塊
                     }
 
+                    console.log("🔍 Looking for collection:", featuredBlock.collection_id, "in collections:", collectionsData.collections.map(c => c.id))
+
                     try {
                       const featuredCollections = collectionsData.collections.filter((c: any) =>
                         featuredBlock.collection_id === c.id
                       )
+
+                      console.log("📦 Filtered collections:", featuredCollections.length, featuredCollections.map(c => c.id))
 
                       if (featuredCollections.length === 0) {
                         console.log("No matching collection found for featured products")
                         return null
                       }
 
+                      console.log("✅ Rendering FeaturedProducts with collections:", featuredCollections.length)
                       return (
                         <FeaturedProducts
                           key={index}

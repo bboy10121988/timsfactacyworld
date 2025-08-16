@@ -163,12 +163,14 @@ export default async function BlogListPage({
   params,
   searchParams,
 }: {
-  params: { countryCode: string }
-  searchParams: { category?: string }
+  params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ category?: string }>
 }) {
   try {
+    const { countryCode } = await params
+    const { category } = await searchParams
     const [posts, categories, siteInfo, latestPosts] = await Promise.all([
-      getAllPosts(searchParams.category),
+      getAllPosts(category),
       getCategories(),
       getSiteInfo(),
       getLatestPosts()
@@ -185,9 +187,9 @@ export default async function BlogListPage({
                 <ul className="space-y-3 mt-4">
                   <li>
                     <a 
-                      href={`/${params.countryCode}/blog`}
+                      href={`/${countryCode}/blog`}
                       className={`text-body-small hover:text-primary-600 block w-full py-1 transition-colors duration-200 ${
-                        !searchParams.category ? 'text-primary-600 font-medium' : 'text-gray-500'
+                        !category ? 'text-primary-600 font-medium' : 'text-gray-500'
                       }`}
                     >
                       全部文章
@@ -196,9 +198,9 @@ export default async function BlogListPage({
                   {categories.map((cat) => (
                     <li key={cat._id}>
                       <a 
-                        href={`/${params.countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
+                        href={`/${countryCode}/blog?category=${encodeURIComponent(cat.title)}`}
                         className={`text-body-small hover:text-primary-600 block w-full py-1 transition-colors duration-200 ${
-                          searchParams.category === cat.title ? 'text-primary-600 font-medium' : 'text-gray-500'
+                          category === cat.title ? 'text-primary-600 font-medium' : 'text-gray-500'
                         }`}
                       >
                         {cat.title}
@@ -217,7 +219,7 @@ export default async function BlogListPage({
                       {latestPosts.map((article: any) => (
                         <Link
                           key={article._id}
-                          href={`/${params.countryCode}/blog/${article.slug?.current}`}
+                          href={`/${countryCode}/blog/${article.slug?.current}`}
                           className="block group hover:bg-gray-50 p-2 rounded-lg transition-all duration-200"
                         >
                           <div className="flex space-x-4">
@@ -261,8 +263,8 @@ export default async function BlogListPage({
               {/* 頁面標題 */}
               <header className="bg-white p-8">
                 <h1 className="h1">
-                  {searchParams.category 
-                    ? `${searchParams.category}`
+                  {category 
+                    ? `${category}`
                     : '部落格文章'}
                 </h1>
                 <p className="text-content text-gray-500 mt-2">探索我們的最新消息與文章</p>
@@ -274,13 +276,13 @@ export default async function BlogListPage({
                   <BlogList 
                     initialPosts={posts} 
                     categories={categories}
-                    countryCode={params.countryCode}
+                    countryCode={countryCode}
                   />
                 ) : (
                   <div className="text-center py-12 bg-white">
                     <p className="text-content text-gray-500">
-                      {searchParams.category 
-                        ? `在 "${searchParams.category}" 分類中還沒有文章`
+                      {category 
+                        ? `在 "${category}" 分類中還沒有文章`
                         : '目前還沒有任何文章'}
                     </p>
                   </div>

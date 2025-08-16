@@ -13,11 +13,22 @@ export default async function InfiniteScrollProducts({
   sortBy: SortOptions
   countryCode: string
 }) {
+  console.log("🏪 InfiniteScrollProducts called with:", {
+    sortBy,
+    countryCode
+  })
+
   const region = await getRegion(countryCode)
 
   if (!region) {
+    console.log("🏪 InfiniteScrollProducts - No region found for:", countryCode)
     return null
   }
+
+  console.log("🏪 InfiniteScrollProducts - Region found:", {
+    id: region.id,
+    name: region.name
+  })
 
   const {
     response: { products, count },
@@ -29,7 +40,18 @@ export default async function InfiniteScrollProducts({
     countryCode,
   })
 
+  console.log("🏪 InfiniteScrollProducts - Products loaded:", {
+    count: products?.length,
+    totalCount: count,
+    productIds: products?.map(p => p.id)
+  })
+
   const sortedProducts = sortProducts(products, sortBy)
+
+  console.log("🏪 InfiniteScrollProducts - Products sorted:", {
+    sortBy,
+    sortedCount: sortedProducts?.length
+  })
 
   return (
     <InfiniteProducts

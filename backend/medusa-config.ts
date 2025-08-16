@@ -64,6 +64,7 @@ const corsConfig = isDevelopment ? developmentCors : productionCors
 const config = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
+    redisUrl: process.env.REDIS_URL,
     http: {
       storeCors: corsConfig.storeCors.join(','),
       adminCors: corsConfig.adminCors.join(','),
@@ -168,11 +169,11 @@ const config = defineConfig({
         ]
       }
     },
-    // 自定義聯盟模組
-    {
-      resolve: "./src/modules/affiliate",
-      key: "affiliate"
-    }
+    // 自定義聯盟模組 (暫時禁用)
+    // {
+    //   resolve: "./src/modules/affiliate",
+    //   key: "affiliate"
+    // }
   ],
   admin: {
     disable: false,

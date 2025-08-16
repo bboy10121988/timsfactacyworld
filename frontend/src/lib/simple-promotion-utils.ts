@@ -62,7 +62,7 @@ export async function getActivePromotionLabels(
 ): Promise<PromotionLabel[]> {
   const labels: PromotionLabel[] = []
   const baseUrl = 'http://localhost:9000' // 直接使用後端地址
-  const publishableKey = 'pk_6a5b6f62e29baea8089628c7713ce56a388c5944011f43fcf15b8837b00464b7'
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ''
 
   try {
     if (process.env.NODE_ENV === 'development') {

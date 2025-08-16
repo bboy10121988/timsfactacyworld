@@ -14,6 +14,12 @@ const StoreTemplate = ({
   page?: string
   countryCode: string
 }) => {
+  console.log("🏪 StoreTemplate rendered with:", {
+    sortBy,
+    page,
+    countryCode
+  })
+  
   const sort = sortBy || "created_at"
 
   return (

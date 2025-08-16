@@ -18,7 +18,7 @@ type ReturnPolicy = {
 }
 
 type Props = {
-  params: { countryCode: string }
+  params: Promise<{ countryCode: string }>
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,7 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ReturnPolicyPage({ params }: Props) {
-  const region = await getRegion(params.countryCode)
+  const { countryCode } = await params
+  const region = await getRegion(countryCode)
 
   if (!region) {
     notFound()
