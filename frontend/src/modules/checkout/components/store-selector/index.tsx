@@ -77,7 +77,8 @@ const StoreSelector: React.FC = () => {
       console.log('� 開啟物流選擇頁面:', selectedLogistics);
 
       // 呼叫後端物流選擇 API
-      const response = await fetch('http://localhost:9000/store/ecpay/logistics-selection', {
+      const baseUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000'
+      const response = await fetch(`${baseUrl}/store/ecpay/logistics-selection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
